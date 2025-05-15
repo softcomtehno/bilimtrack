@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: 'Jost';
+}
+
+.default-slider .swiper-pagination-bullet {
+  width: 50px;
+  height: 6px;
+  display: inline-block;
+  background: black;
+  margin: 0 5px;
+  border-radius: 20px;
+  transition:
+    opacity 0.5s,
+    background-color 0.5s,
+    width 0.5s;
+}
+
+.default-slider .swiper-pagination-bullet {
+  width: 10px;
+  height: 6px;
+  display: inline-block;
+  background: black;
+  margin: 0 5px;
+  border-radius: 20px;
+  transition:
+    opacity 0.5s,
+    background-color 0.5s,
+    width 0.5s;
+}
+.dedault-slider .swiper-pagination-bullet.swiper-pagination-bullet-active {
+  width: 50px !important;
+}
