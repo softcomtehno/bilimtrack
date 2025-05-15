@@ -1,26 +1,27 @@
-import CourseCard from '@/entities/course/ui/card';
-import { Card, CardHeader, CardBody, CardFooter, Divider, Avatar } from '@heroui/react';
+import CourseCard from '@/entities/course/ui/card'
+import { Card, CardBody } from '@heroui/react'
 import {
   Album,
   BookImage,
   CalendarCheck2,
   ChartNoAxesCombined,
   Newspaper,
-} from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Title } from '@/shared/ui/title';
-import { Schedule } from '@/widgets/schedule';
-import { Dashboard } from '@/widgets/dashboard';
-import { EventCard } from '@/entities/event/ui/card';
-import { TopBar } from '@/widgets/top-bar';
+} from 'lucide-react'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination } from 'swiper/modules'
+import { Title } from '@/shared/ui/title'
+import { Schedule } from '@/widgets/schedule'
+import { Dashboard } from '@/widgets/dashboard'
+import { EventCard } from '@/entities/event/ui/card'
+// import { TopBar } from '@/widgets/top-bar'
+import GradeTable from '@/widgets/test.ui'
+import 'swiper/css'
+import 'swiper/css/pagination'
 
-
-export const HomePage = () => {
+export const MentorHomePage = () => {
   return (
     <>
+      <Card>
         <CardBody>
           <Title title="Предметы" Icon={Album} />
           <Swiper
@@ -44,12 +45,14 @@ export const HomePage = () => {
           <Title title="Лидерборд" Icon={ChartNoAxesCombined} />
           <Dashboard />
           <Title title="Мероприятия" Icon={BookImage} />
-          <EventCard/>
+          <EventCard />
           <Title title="Тематические статьи" Icon={Newspaper} />
-          <EventCard/>
+          <EventCard />
           <Title title="Новости" Icon={Newspaper} />
-          <EventCard/>
+          <EventCard />
+          <GradeTable />
         </CardBody>
+      </Card>
     </>
-  );
-};
+  )
+}
