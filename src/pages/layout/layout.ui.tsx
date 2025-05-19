@@ -1,3 +1,4 @@
+import { Navigation } from '@/widgets/navigation';
 import { TopBar } from '@/widgets/top-bar';
 import { Card } from '@heroui/card';
 import { Navigate, Outlet } from 'react-router-dom';
@@ -8,6 +9,7 @@ export function GenericLayout() {
       <Card className="max-w-[400px] mx-auto border rounded-md">
         <TopBar/>
         <Outlet />
+        <Navigation/>
       </Card>
     </div>
   );

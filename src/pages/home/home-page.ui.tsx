@@ -22,12 +22,10 @@ import { Title } from '@/shared/ui/title';
 import { Schedule } from '@/widgets/schedule';
 import { Dashboard } from '@/widgets/dashboard';
 import { EventCard } from '@/entities/event/ui/card';
-import { TopBar } from '@/widgets/top-bar';
-import { useState } from 'react';
-import { Scanner } from '@yudiel/react-qr-scanner';
+
+
 
 export const HomePage = () => {
-  const [data, setData] = useState('No result');
   return (
     <>
       <CardBody>
