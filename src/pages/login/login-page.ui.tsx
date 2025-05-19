@@ -31,7 +31,6 @@ export function LoginPage() {
               onValueChange={setValue}
             />
           </div>
-
           <Button className="bg-sky-500 font-medium text-white  w-full mb-4">
             Войти в систему
           </Button>

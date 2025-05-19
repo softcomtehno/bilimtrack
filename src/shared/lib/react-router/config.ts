@@ -12,6 +12,9 @@ export const pathKeys = {
   about() {
     return pathKeys.root.concat('about/')
   },
+  scanner() {
+    return pathKeys.root.concat('scanner/')
+  },
   terms() {
     return pathKeys.root.concat('terms-of-use/')
   },
