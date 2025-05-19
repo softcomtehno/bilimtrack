@@ -17,6 +17,7 @@ import { EventCard } from '@/entities/event/ui/card'
 import GradeTable from '@/widgets/test.ui'
 import 'swiper/css'
 import 'swiper/css/pagination'
+import { GradeBook } from '@/widgets/grade-book'
 
 export const MentorHomePage = () => {
   return (
@@ -50,7 +51,7 @@ export const MentorHomePage = () => {
           <EventCard />
           <Title title="Новости" Icon={Newspaper} />
           <EventCard />
-          <GradeTable />
+          <GradeBook />
         </CardBody>
       </Card>
     </>
