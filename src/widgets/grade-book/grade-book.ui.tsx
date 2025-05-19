@@ -127,7 +127,7 @@ export function GradeBook() {
         domLayout="autoHeight"
         pagination={true}
         paginationPageSize={30}
-        paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40, 50]}
+        paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
       />
     </div>
   )
