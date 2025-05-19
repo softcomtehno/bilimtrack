@@ -2,6 +2,7 @@ import { homePageRoute } from '@/pages/home';
 import { GenericLayout, IntroLayout } from '@/pages/layout/layout.ui';
 import { loginPageRoute } from '@/pages/login';
 import { profilePageRoute } from '@/pages/profile';
+import { scannerPageRoute } from '@/pages/scanner/scanner-page.route';
 import {
   RouterProvider,
   createBrowserRouter,
@@ -23,7 +24,7 @@ const router = createBrowserRouter([
     children: [
       {
         element: <GenericLayout />,
-        children: [homePageRoute, profilePageRoute],
+        children: [homePageRoute, profilePageRoute, scannerPageRoute],
       },
       { element: <IntroLayout />, children: [loginPageRoute] },
     ],

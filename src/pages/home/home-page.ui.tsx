@@ -48,7 +48,6 @@ export const HomePage = () => {
             <CourseCard />
           </SwiperSlide>
         </Swiper>
-        <Scanner onScan={(result) => console.log(result)} />
         <Title title="Расписание" Icon={CalendarCheck2} />
         <Schedule />
         <Title title="Лидерборд" Icon={ChartNoAxesCombined} />
