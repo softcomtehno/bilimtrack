@@ -9,7 +9,7 @@ export function TopBar() {
         <div className="flex flex-col">
           <p className="text-md">BilimTrack LMS</p>
           <p className="text-small text-default-500">
-            Образовательнпя экосистема УК МУИТ
+            Образовательная экосистема УК МУИТ
           </p>
         </div>
         <Link to="/profile" className="cursor-pointer">

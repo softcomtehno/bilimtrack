@@ -8,8 +8,9 @@ import {
   Avatar,
   Button,
   Chip,
+  user,
 } from '@heroui/react';
-import { Album, CheckIcon } from 'lucide-react';
+import { Album, CheckIcon, CircleEllipsis, Star, Trophy, UserRound, UsersRound } from 'lucide-react';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -18,45 +19,88 @@ import { Title } from '@/shared/ui/title';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Chart } from '@/widgets/chart';
+import { userQueries } from '@/entities/user';
 
 export const ProfilePage = () => {
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = userQueries.useLoginUserQuery();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error fetching user data.</div>;
+  }
+
   return (
     <>
       <Card className="w-full rounded-none p-3">
         <div className="flex gap-3 items-center">
-          <Avatar
-            src="/path-to-photo.jpg"
-            alt="User Photo"
-            size="lg"
-            className=""
-          />
           <div>
-            <h3>Максат Жусупов</h3>
-            <h6>@maksat-povt1</h6>
+            <h3 className="flex gap-2 ">
+              {' '}
+              <span>{userData?.data.firstName}</span>
+              {userData?.data.lastName}
+            </h3>
+            <h6>@{userData?.data.username}</h6>
           </div>
         </div>
 
-        <CardBody className="p-0 mt-4">
-          <span className="text-gray-600">Группа: IT-23</span>
-          <div className="mb-2">
+        <div className="p-0 my -4 flex flex-wrap gap-2">
+          <div className="">
             <Chip
               color="success"
-              startContent={<CheckIcon className='bg-success/40 rounded-full' size={18} />}
-              variant="faded" 
+              startContent={
+
+                <UserRound className="bg-success/40 rounded-full" size={18}/>
+           
+              }
+              variant="faded"
+            >
+              Группа: IT-23
+            </Chip>
+          </div>
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+                <Star className="bg-success/40 rounded-full" size={18} />
+              }
+              variant="faded"
             >
               Рейтинг: 85
             </Chip>
           </div>
-          <div className="mb-2">
-            <strong>Баллы:</strong> 1200
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+                <CircleEllipsis  className="bg-success/40 rounded-full" size={18} />
+              }
+              variant="faded"
+            >
+              Баллы: 85
+            </Chip>
           </div>
-          <div className="mb-2">
-            <strong>Количество достижений:</strong> 15
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+                <Trophy className="bg-success/40 p-[3px] rounded-full" size={18}  />
+              }
+              variant="faded"
+              className=''
+            >
+              Достижения: 15
+            </Chip>
           </div>
-        </CardBody>
+        </div>
         <Chart />
       </Card>
     </>
   );
 };
-('');

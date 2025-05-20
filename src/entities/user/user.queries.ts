@@ -3,11 +3,8 @@ import {
   emailActivationMutation,
   getPerfomanceChart,
   getTokenMutation,
-  getUserByUsername,
   loginUserQuery,
   registerUserMutation,
-  resetPasswordConfirm,
-  resetPasswordEmail,
 } from './user.api';
 import {
   useMutation,
@@ -15,12 +12,15 @@ import {
   queryOptions as tsqQueryOptions,
   useQueryClient,
 } from '@tanstack/react-query';
-import { pathKeys } from '~shared/lib/react-router';
 import { useNavigate } from 'react-router-dom';
 import { setCookie } from 'typescript-cookie';
 import { toast } from 'react-toastify';
-import { queryClient } from '~shared/lib/react-query/react-query.lib';
 import { UserDtoSchema } from './user.types';
+import { queryClient } from '@/shared/lib/react-query/react-query.lib';
+import { pathKeys } from '@/shared/lib/react-router';
+
+const ACCESS_TOKEN_KEY = 'access';
+const REFRESH_TOKEN_KEY = 'refresh';
 
 const keys = {
   root: () => ['user'],
@@ -81,21 +81,24 @@ export function useLoginUserQuery() {
 
 export function useGetTokenMutation() {
   const navigate = useNavigate();
+
   return useMutation({
     mutationKey: keys.getToken(),
     mutationFn: getTokenMutation,
-    onSuccess: async (response) => {
-      setCookie('access', response.data.access);
-      localStorage.setItem('refresh', response.data.refresh);
-      localStorage.removeItem('username');
-      localStorage.removeItem('password');
+    onSuccess: (response:any) => {
+      const { access, refresh } = response.data;
+      setCookie(ACCESS_TOKEN_KEY, access, {
+        sameSite: 'Strict',
+        secure: true,
+      });
+      localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+
       toast.success('Вы успешно авторизовались!', { autoClose: 500 });
       navigate(pathKeys.profile.root());
     },
     onError: (error: AxiosErrorType) => {
-      const errorMessage = error.response
-        ? error.response.data.detail
-        : 'Ошибка при выполнении запроса';
+      const errorMessage =
+        error.response?.data?.detail || 'Ошибка авторизации';
       toast.error(errorMessage);
     },
   });
@@ -164,55 +167,6 @@ export function useActivationMutation() {
     },
   });
 }
-
-export function useResetPaswordSendEmail() {
-  return useMutation({
-    mutationKey: keys.root(),
-    mutationFn: resetPasswordEmail,
-    onSuccess: async () => {
-      await toast.success('На вашу почту отправлено сообщение для сброса пароля');
-    },
-    onError: (error: AxiosErrorType) => {
-      if (error.response && error.response.data) {
-        const errors = error.response.data;
-        Object.keys(errors).forEach((field) => {
-          toast.error(`${field}: ${errors[field][0]}`);
-        });
-      } else {
-        toast.error('Ошибка при выполнении запроса');
-      }
-    },
-  });
-}
-
-export function useResetPasword() {
-  return useMutation({
-    mutationKey: keys.root(),
-    mutationFn: resetPasswordConfirm,
-    onSuccess: async () => {
-      await toast.success('Пароль успешно изменен!');
-    },
-    onError: (error: AxiosErrorType) => {
-      if (error.response && error.response.data) {
-        const errors = error.response.data;
-        Object.keys(errors).forEach((field) => {
-          toast.error(`${field}: ${errors[field][0]}`);
-        });
-      } else {
-        toast.error('Ошибка при выполнении запроса');
-      }
-    },
-  });
-}
-
-export function useGetUserByUsername(username: string) {
-  return useQuery({
-    queryKey: keys.user(username),
-    queryFn: () => getUserByUsername(username),
-  });
-}
-
-
 
 export function useGetUserPerfomanceChart() {
   return useQuery({
