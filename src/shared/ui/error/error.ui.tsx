@@ -1,4 +1,4 @@
-import styles from './error.module.css';
+import styles from "./error.module.css";
 
 type Json =
   | null
@@ -14,7 +14,7 @@ type GenericError<T extends string> = {
   explanation: string;
 };
 
-const HTTP = 'HTTP';
+const HTTP = "HTTP";
 
 interface HttpError<Status extends number = number>
   extends GenericError<typeof HTTP> {
@@ -23,14 +23,13 @@ interface HttpError<Status extends number = number>
   response: string | Json | null;
 }
 
-
 function isHttpError(error: GenericError<any>): error is HttpError {
   return error?.errorType === HTTP;
 }
 
 function isHttpErrorCode<Code extends number>(code: Code | Code[]) {
   return function isExactHttpError(
-    error: GenericError<any>
+    error: GenericError<any>,
   ): error is HttpError<Code> {
     if (!isHttpError(error)) {
       return false;
@@ -44,7 +43,7 @@ function isHttpErrorCode<Code extends number>(code: Code | Code[]) {
 
 type ErrorHandlerProps = {
   error: GenericError<any>;
-  size?: 'small' | 'medium' | 'large' | 'full';
+  size?: "small" | "medium" | "large" | "full";
 };
 
 type UnexpectedErrorDto = {
@@ -54,7 +53,7 @@ type UnexpectedErrorDto = {
 };
 
 export function ErrorHandler(props: ErrorHandlerProps) {
-  const { error, size = 'medium' } = props;
+  const { error, size = "medium" } = props;
   const className = `${styles.wrapper} ${styles[`loader-${size}`]}`;
 
   if (isHttpErrorCode(422)(error)) {
@@ -63,7 +62,7 @@ export function ErrorHandler(props: ErrorHandlerProps) {
 
     Object.entries(data.errors).forEach(([key, explanations]) => {
       explanations.forEach((explanation) => {
-        errors.push(key.concat(' ', explanation));
+        errors.push(key.concat(" ", explanation));
       });
     });
 

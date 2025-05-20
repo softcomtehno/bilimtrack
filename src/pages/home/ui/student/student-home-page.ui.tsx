@@ -1,26 +1,27 @@
-import CourseCard from '@/entities/course/ui/card'
-import { CardBody } from '@heroui/react'
+import { CardBody } from "@heroui/react";
 import {
   Album,
   BookImage,
   CalendarCheck2,
   ChartNoAxesCombined,
   Newspaper,
-} from 'lucide-react'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Title } from '@/shared/ui/title'
-import { Schedule } from '@/widgets/schedule'
-import { Dashboard } from '@/widgets/dashboard'
-import { EventCard } from '@/entities/event/ui/card'
+} from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+
+import CourseCard from "@/entities/course/ui/card";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Title } from "@/shared/ui/title";
+import { Schedule } from "@/widgets/schedule";
+import { Dashboard } from "@/widgets/dashboard";
+import { EventCard } from "@/entities/event/ui/card";
 
 export const StudentHomePage = () => {
   return (
     <>
       <CardBody>
-        <Title title="Предметы" Icon={Album} />
+        <Title Icon={Album} title="Предметы" />
         <Swiper
           className="w-[100%] pb-[40px] default-slider"
           modules={[Pagination]}
@@ -37,17 +38,17 @@ export const StudentHomePage = () => {
             <CourseCard />
           </SwiperSlide>
         </Swiper>
-        <Title title="Расписание" Icon={CalendarCheck2} />
+        <Title Icon={CalendarCheck2} title="Расписание" />
         <Schedule />
-        <Title title="Лидерборд" Icon={ChartNoAxesCombined} />
+        <Title Icon={ChartNoAxesCombined} title="Лидерборд" />
         <Dashboard />
-        <Title title="Мероприятия" Icon={BookImage} />
+        <Title Icon={BookImage} title="Мероприятия" />
         <EventCard />
-        <Title title="Тематические статьи" Icon={Newspaper} />
+        <Title Icon={Newspaper} title="Тематические статьи" />
         <EventCard />
-        <Title title="Новости" Icon={Newspaper} />
+        <Title Icon={Newspaper} title="Новости" />
         <EventCard />
       </CardBody>
     </>
-  )
-}
+  );
+};

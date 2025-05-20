@@ -1,4 +1,4 @@
-import { FC, SuspenseProps, Suspense } from 'react';
+import { FC, SuspenseProps, Suspense } from "react";
 
 export function withSuspense<WrappedProps extends Object>(
   WrappedComponent: FC<WrappedProps>,
@@ -11,5 +11,6 @@ export function withSuspense<WrappedProps extends Object>(
       </Suspense>
     );
   }
+
   return WrapperComponent;
 }

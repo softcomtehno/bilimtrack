@@ -6,14 +6,14 @@ import {
   Tab,
   Tabs,
   cn,
-} from '@heroui/react';
-import { Link } from 'react-router-dom';
+} from "@heroui/react";
+import { Link } from "react-router-dom";
 
 export const IconWrapper = ({ children, className }) => (
   <div
     className={cn(
       className,
-      'flex items-center rounded-small justify-center w-7 h-7'
+      "flex items-center rounded-small justify-center w-7 h-7",
     )}
   >
     {children}
@@ -28,22 +28,22 @@ export const ItemCounter = ({ number }) => (
 
 export function Schedule() {
   return (
-    <div className='flex flex-col'>
+    <div className="flex flex-col">
       <Tabs aria-label="Options" className="w-full shadow-none">
-        <Tab className="w-full" key="today" title="Сегодня">
+        <Tab key="today" className="w-full" title="Сегодня">
           <Card className="w-full shadow-none border">
             <CardBody className="p-0">
               <Listbox
                 aria-label="User Menu"
                 className="p-0 gap-0 border max-w-full overflow-visible shadow-none rounded-medium"
                 itemClasses={{
-                  base: 'px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80',
+                  base: "px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80",
                 }}
                 onAction={(key) => alert(key)}
               >
                 <ListboxItem
                   key="issues"
-                  endContent={<ItemCounter number={'07:30-08:40'} />}
+                  endContent={<ItemCounter number={"07:30-08:40"} />}
                   startContent={
                     <IconWrapper className="!w-[50px] !h-[30px] bg-success/10 text-success">
                       <p className="text-sm">406</p>
@@ -54,7 +54,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="discussions"
-                  endContent={<ItemCounter number={'08:50-10:00'} />}
+                  endContent={<ItemCounter number={"08:50-10:00"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-secondary/10 text-secondary">
                       <p className="text-sm">406</p>
@@ -65,7 +65,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="contributors"
-                  endContent={<ItemCounter number={'10:10-11:20'} />}
+                  endContent={<ItemCounter number={"10:10-11:20"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-warning/10 text-warning">
                       <p className="text-sm">406</p>
@@ -76,7 +76,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="license"
-                  endContent={<ItemCounter number={'11:30-12:40'} />}
+                  endContent={<ItemCounter number={"11:30-12:40"} />}
                   startContent={
                     <IconWrapper className="bg-danger/10 !w-[50px] !h-[30px] text-danger dark:text-danger-500">
                       <p className="text-sm">202/2</p>
@@ -89,20 +89,20 @@ export function Schedule() {
             </CardBody>
           </Card>
         </Tab>
-        <Tab className="w-full" key="tomorrow" title="На завтра">
+        <Tab key="tomorrow" className="w-full" title="На завтра">
           <Card className="w-full shadow-none border">
             <CardBody className="p-0">
-            <Listbox
+              <Listbox
                 aria-label="User Menu"
                 className="p-0 gap-0 border max-w-full overflow-visible shadow-none rounded-medium"
                 itemClasses={{
-                  base: 'px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80',
+                  base: "px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80",
                 }}
                 onAction={(key) => alert(key)}
               >
                 <ListboxItem
                   key="issues"
-                  endContent={<ItemCounter number={'07:30-08:40'} />}
+                  endContent={<ItemCounter number={"07:30-08:40"} />}
                   startContent={
                     <IconWrapper className="!w-[50px] !h-[30px] bg-success/10 text-success">
                       <p className="text-sm">402</p>
@@ -113,7 +113,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="discussions"
-                  endContent={<ItemCounter number={'08:50-10:00'} />}
+                  endContent={<ItemCounter number={"08:50-10:00"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-secondary/10 text-secondary">
                       <p className="text-sm">413</p>
@@ -124,7 +124,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="contributors"
-                  endContent={<ItemCounter number={'10:10-11:20'} />}
+                  endContent={<ItemCounter number={"10:10-11:20"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-warning/10 text-warning">
                       <p className="text-sm">411</p>
@@ -135,7 +135,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="license"
-                  endContent={<ItemCounter number={'11:30-12:40'} />}
+                  endContent={<ItemCounter number={"11:30-12:40"} />}
                   startContent={
                     <IconWrapper className="bg-danger/10 !w-[50px] !h-[30px] text-danger dark:text-danger-500">
                       <p className="text-sm">407</p>
@@ -148,20 +148,20 @@ export function Schedule() {
             </CardBody>
           </Card>
         </Tab>
-        <Tab className="w-full" key="week" title="Послезавтра">
+        <Tab key="week" className="w-full" title="Послезавтра">
           <Card className="w-full shadow-none border">
             <CardBody className="p-0">
-            <Listbox
+              <Listbox
                 aria-label="User Menu"
                 className="p-0 gap-0 border max-w-full overflow-visible shadow-none rounded-medium"
                 itemClasses={{
-                  base: 'px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80',
+                  base: "px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80",
                 }}
                 onAction={(key) => alert(key)}
               >
                 <ListboxItem
                   key="issues"
-                  endContent={<ItemCounter number={'07:30-08:40'} />}
+                  endContent={<ItemCounter number={"07:30-08:40"} />}
                   startContent={
                     <IconWrapper className="!w-[50px] !h-[30px] bg-success/10 text-success">
                       <p className="text-sm">406</p>
@@ -173,7 +173,7 @@ export function Schedule() {
 
                 <ListboxItem
                   key="contributors"
-                  endContent={<ItemCounter number={'10:10-11:20'} />}
+                  endContent={<ItemCounter number={"10:10-11:20"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-warning/10 text-warning">
                       <p className="text-sm">406</p>
@@ -184,7 +184,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="license"
-                  endContent={<ItemCounter number={'11:30-12:40'} />}
+                  endContent={<ItemCounter number={"11:30-12:40"} />}
                   startContent={
                     <IconWrapper className="bg-danger/10 !w-[50px] !h-[30px] text-danger dark:text-danger-500">
                       <p className="text-sm">202/2</p>
@@ -197,20 +197,20 @@ export function Schedule() {
             </CardBody>
           </Card>
         </Tab>
-        <Tab className="w-full" key="all" title="Полное Расписание">
+        <Tab key="all" className="w-full" title="Полное Расписание">
           <Card className="w-full shadow-none border">
             <CardBody className="p-0">
               <Listbox
                 aria-label="User Menu"
                 className="p-0 gap-0 border max-w-full overflow-visible shadow-none rounded-medium"
                 itemClasses={{
-                  base: 'px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80',
+                  base: "px-3 first:rounded-t-medium last:rounded-b-medium rounded-none gap-3 h-12 data-[hover=true]:bg-default-100/80",
                 }}
                 onAction={(key) => alert(key)}
               >
                 <ListboxItem
                   key="issues"
-                  endContent={<ItemCounter number={'07:30-08:40'} />}
+                  endContent={<ItemCounter number={"07:30-08:40"} />}
                   startContent={
                     <IconWrapper className="!w-[50px] !h-[30px] bg-success/10 text-success">
                       <p className="text-sm">406</p>
@@ -221,7 +221,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="discussions"
-                  endContent={<ItemCounter number={'08:50-10:00'} />}
+                  endContent={<ItemCounter number={"08:50-10:00"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-secondary/10 text-secondary">
                       <p className="text-sm">406</p>
@@ -232,7 +232,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="contributors"
-                  endContent={<ItemCounter number={'10:10-11:20'} />}
+                  endContent={<ItemCounter number={"10:10-11:20"} />}
                   startContent={
                     <IconWrapper className=" !w-[50px] !h-[30px] bg-warning/10 text-warning">
                       <p className="text-sm">406</p>
@@ -243,7 +243,7 @@ export function Schedule() {
                 </ListboxItem>
                 <ListboxItem
                   key="license"
-                  endContent={<ItemCounter number={'11:30-12:40'} />}
+                  endContent={<ItemCounter number={"11:30-12:40"} />}
                   startContent={
                     <IconWrapper className="bg-danger/10 !w-[50px] !h-[30px] text-danger dark:text-danger-500">
                       <p className="text-sm">202/2</p>
@@ -257,7 +257,12 @@ export function Schedule() {
           </Card>
         </Tab>
       </Tabs>
-      <Link className='self-end mt-[-10px] underline text-sky-700' to="/schedule">Полное расписание</Link>
+      <Link
+        className="self-end mt-[-10px] underline text-sky-700"
+        to="/schedule"
+      >
+        Полное расписание
+      </Link>
     </div>
   );
 }

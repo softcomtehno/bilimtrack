@@ -1,23 +1,12 @@
-import CourseCard from '@/entities/course/ui/card';
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Divider,
-  Avatar,
-  Button,
-  Chip,
-} from '@heroui/react';
-import { Album, CheckIcon } from 'lucide-react';
+import { Card, CardBody, Avatar, Chip } from "@heroui/react";
+import { CheckIcon } from "lucide-react";
 
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Title } from '@/shared/ui/title';
+import "swiper/css";
+import "swiper/css/pagination";
 
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Chart } from '@/widgets/chart';
+import "swiper/css";
+import "swiper/css/pagination";
+import { Chart } from "@/widgets/chart";
 
 export const ProfilePage = () => {
   return (
@@ -25,10 +14,10 @@ export const ProfilePage = () => {
       <Card className="w-full rounded-none p-3">
         <div className="flex gap-3 items-center">
           <Avatar
-            src="/path-to-photo.jpg"
             alt="User Photo"
-            size="lg"
             className=""
+            size="lg"
+            src="/path-to-photo.jpg"
           />
           <div>
             <h3>Максат Жусупов</h3>
@@ -41,8 +30,10 @@ export const ProfilePage = () => {
           <div className="mb-2">
             <Chip
               color="success"
-              startContent={<CheckIcon className='bg-success/40 rounded-full' size={18} />}
-              variant="faded" 
+              startContent={
+                <CheckIcon className="bg-success/40 rounded-full" size={18} />
+              }
+              variant="faded"
             >
               Рейтинг: 85
             </Chip>
@@ -59,4 +50,4 @@ export const ProfilePage = () => {
     </>
   );
 };
-('');
+("");

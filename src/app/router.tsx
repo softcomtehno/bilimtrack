@@ -1,30 +1,33 @@
 import {
+  RouterProvider,
+  createBrowserRouter,
+  useRouteError,
+} from "react-router-dom";
+import { getCookie } from "typescript-cookie";
+
+import {
   mentorHomePageRoute,
   rootHomePageRoute,
   studentHomePageRoute,
-} from '@/pages/home'
+} from "@/pages/home";
 import {
   GenericLayout,
   IntroLayout,
   MentorLayout,
-} from '@/pages/layout/layout.ui'
-import { loginPageRoute } from '@/pages/login'
-import { profilePageRoute } from '@/pages/profile'
-import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
-import {
-  RouterProvider,
-  createBrowserRouter,
-  useRouteError,
-} from 'react-router-dom'
-import { getCookie } from 'typescript-cookie'
+} from "@/pages/layout/layout.ui";
+import { loginPageRoute } from "@/pages/login";
+import { profilePageRoute } from "@/pages/profile";
+import { scannerPageRoute } from "@/pages/scanner/scanner-page.route";
 
 function BubbleError() {
-  const error = useRouteError()
-  if (error) throw error
-  return null
+  const error = useRouteError();
+
+  if (error) throw error;
+
+  return null;
 }
 
-const isAuth = !!getCookie('access')
+const isAuth = !!getCookie("access");
 
 const router = createBrowserRouter([
   {
@@ -46,8 +49,8 @@ const router = createBrowserRouter([
       { element: <IntroLayout />, children: [loginPageRoute] },
     ],
   },
-])
+]);
 
 export function BrowserRouter() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }

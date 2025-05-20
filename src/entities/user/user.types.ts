@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { z } from "zod";
+
 import {
   ActivationData,
   LoginUserDtoSchema,
@@ -8,7 +9,7 @@ import {
   UserDtoSchema,
   createUserSchema,
   editUserSchema,
-} from './user.contracts';
+} from "./user.contracts";
 
 export type UserDtoSchema = z.infer<typeof UserDtoSchema>;
 export type LoginUserDto = z.infer<typeof LoginUserDtoSchema>;

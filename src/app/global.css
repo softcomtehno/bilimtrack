@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 * {
-  font-family: 'Jost';
+  font-family: "Jost";
 }
 
 .default-slider .swiper-pagination-bullet {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Table,
   TableHeader,
@@ -10,52 +10,50 @@ import {
   Card,
   CardBody,
   TableCell,
-  User,
   Chip,
-  Tooltip,
-} from '@heroui/react';
+} from "@heroui/react";
 
 export const columns = [
-  { name: 'Рейтинг', uid: 'rating' },
-  { name: 'ФИО', uid: 'fio' },
-  { name: 'Баллы', uid: 'points' },
+  { name: "Рейтинг", uid: "rating" },
+  { name: "ФИО", uid: "fio" },
+  { name: "Баллы", uid: "points" },
 ];
 
 export const users = [
   {
     id: 1,
     rating: 1,
-    fio: 'Tony Reichert',
+    fio: "Tony Reichert",
     points: 95,
-    nickname: '@tony_r',
+    nickname: "@tony_r",
   },
   {
     id: 2,
     rating: 2,
-    fio: 'Zoey Lang',
+    fio: "Zoey Lang",
     points: 89,
-    nickname: '@zoey_lang',
+    nickname: "@zoey_lang",
   },
   {
     id: 3,
     rating: 3,
-    fio: 'Jane Fisher',
+    fio: "Jane Fisher",
     points: 82,
-    nickname: '@jane_f',
+    nickname: "@jane_f",
   },
   {
     id: 4,
     rating: 4,
-    fio: 'William Howard',
+    fio: "William Howard",
     points: 78,
-    nickname: '@will_howard',
+    nickname: "@will_howard",
   },
   {
     id: 5,
     rating: 5,
-    fio: 'Kristen Copper',
+    fio: "Kristen Copper",
     points: 75,
-    nickname: '@kristen_c',
+    nickname: "@kristen_c",
   },
 ];
 
@@ -64,20 +62,20 @@ export function Groups() {
     const cellValue = user[columnKey];
 
     switch (columnKey) {
-      case 'fio':
+      case "fio":
         return (
           <div className="flex flex-col">
             <p className="text-bold text-sm">{cellValue}</p>
             <p className="text-sm text-blue-500">{user.nickname}</p>
           </div>
         );
-      case 'rating':
+      case "rating":
         return (
           <Chip className="capitalize" color="primary" size="sm" variant="flat">
             {cellValue}
           </Chip>
         );
-      case 'points':
+      case "points":
         return (
           <div className="flex flex-col">
             <p className="text-bold text-sm">{cellValue}</p>
@@ -99,7 +97,7 @@ export function Groups() {
       </TableHeader>
       <TableBody items={users}>
         {(item) => (
-          <TableRow className="cursor-pointer" key={item.id}>
+          <TableRow key={item.id} className="cursor-pointer">
             {(columnKey) => (
               <TableCell>{renderCell(item, columnKey)}</TableCell>
             )}
@@ -114,14 +112,14 @@ export function Dashboard() {
   return (
     <div className="flex w-[300p] flex-col">
       <Tabs aria-label="Options" className="w-full">
-        <Tab className="w-[100]" key="photos" title="В группе">
+        <Tab key="photos" className="w-[100]" title="В группе">
           <Card className="w-full shadow-none border">
             <CardBody className="p-0">
               <Groups />
             </CardBody>
           </Card>
         </Tab>
-        <Tab className="w-full" key="music" title="Среди групп">
+        <Tab key="music" className="w-full" title="Среди групп">
           <Card className="w-full shadow-none border">
             <CardBody className="p-0">
               <Groups />

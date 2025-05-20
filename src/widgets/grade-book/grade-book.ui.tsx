@@ -1,10 +1,13 @@
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
-ModuleRegistry.registerModules([AllCommunityModule])
+import { Pagination } from '@heroui/react'
+import { useEffect, useMemo, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { useMemo, useState } from 'react'
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
+
+ModuleRegistry.registerModules([AllCommunityModule])
 
 export function GradeBook() {
-  // Исходные данные без сегодняшней даты
   const generateRandomScore = () => Math.floor(Math.random() * 11)
 
   const dates = [
@@ -48,66 +51,70 @@ export function GradeBook() {
     'Щербакова Мария',
   ]
 
+  const todayDate = new Date().toLocaleDateString('ru-RU') // dd.mm.yyyy
+  const todaySafe = todayDate.replace(/\./g, '_') // dd_mm_yyyy
+
   const initialRowData = users.map((fullName) => {
-    const scores = {}
+    const scores: Record<string, number> = {}
     dates.forEach((date) => {
       scores[date] = generateRandomScore()
     })
+    if (!scores[todaySafe]) {
+      scores[todaySafe] = 0
+    }
     return { fullName, ...scores }
   })
 
-  // Сегодняшняя дата
-  const todayDate = new Date().toLocaleDateString('ru-RU')
-  const todaySafe = todayDate.replace(/\./g, '_') // 'dd_mm_yyyy'
+  const [rowData, setRowData] = useState(initialRowData)
 
-  // Состояние с данными, чтобы можно было менять оценки по сегодняшней дате
-  const [rowData, setRowData] = useState(() => {
-    // Добавляем сегодня в данные, если нет
-    return initialRowData.map((row) => {
-      if (!(todaySafe in row)) {
-        return { ...row, [todaySafe]: 0 } // можно 0 или null по умолчанию
-      }
-      return row
-    })
-  })
+  const allDates = Array.from(
+    new Set(
+      rowData.flatMap((row) => Object.keys(row).filter((k) => k !== 'fullName'))
+    )
+  ).sort((a, b) => a.localeCompare(b))
 
-  // Формируем колонки с учётом сегодняшней даты
+  const paginatedDates = allDates.filter((d) => d !== todaySafe)
+
+  const columnsPerPage = 6
+  const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
+
+  // Ставим страницу по умолчанию на последнюю
+  const [currentPage, setCurrentPage] = useState(totalPages)
+
+  const currentDateFields = paginatedDates.slice(
+    (currentPage - 1) * columnsPerPage,
+    currentPage * columnsPerPage
+  )
+
   const columnDefs = useMemo(() => {
-    const baseFields = ['fullName']
-    // Собираем все даты из данных, включая сегодняшнюю
-    const allDateFieldsSet = new Set<string>()
-
-    rowData.forEach((row) => {
-      Object.keys(row).forEach((key) => {
-        if (!baseFields.includes(key)) {
-          allDateFieldsSet.add(key)
-        }
-      })
-    })
-
-    // Преобразуем в массив и сортируем даты так, чтобы сегодняшняя была первой
-    let allDateFields = Array.from(allDateFieldsSet)
-    allDateFields = allDateFields.sort((a, b) => {
-      if (a === todaySafe) return -1
-      if (b === todaySafe) return 1
-      // сортируем остальные по убыванию (от новых к старым)
-      return b.localeCompare(a)
-    })
-
     return [
-      { field: 'fullName', headerName: 'ФИО', filter: true },
-      ...allDateFields.map((field) => ({
+      {
+        field: 'fullName',
+        headerName: 'ФИО',
+        pinned: 'left',
+        filter: true,
+        cellClass: 'hover:bg-blue-100',
+      },
+      ...currentDateFields.map((field) => ({
         field,
-        width: 110,
         headerName: field.replace(/_/g, '.'),
-        editable: field === todaySafe,
+        width: 110,
+        editable: false,
+        cellClass: 'hover:bg-blue-100',
+      })),
+      {
+        field: todaySafe,
+        headerName: todaySafe.replace(/_/g, '.'),
+        width: 110,
+        editable: true,
+        pinned: 'right',
+        cellClass: 'hover:bg-blue-100',
         valueSetter: (params: any) => {
           let value = Number(params.newValue)
           if (isNaN(value)) return false
           if (value < 0) value = 0
           if (value > 10) value = 10
-          params.data[field] = value
-          // Обновляем rowData, чтобы React обновил компонент
+          params.data[todaySafe] = value
           setRowData((prev) =>
             prev.map((r) =>
               r.fullName === params.data.fullName ? params.data : r
@@ -115,20 +122,34 @@ export function GradeBook() {
           )
           return true
         },
-      })),
+      },
     ]
-  }, [rowData, todaySafe])
+  }, [rowData, currentDateFields, todaySafe])
 
   return (
     <div>
-      <AgGridReact
-        rowData={rowData}
-        columnDefs={columnDefs}
-        domLayout="autoHeight"
-        pagination={true}
-        paginationPageSize={30}
-        paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
-      />
+      <div className="flex justify-center mb-4">
+        <Pagination
+          isCompact
+          showControls
+          total={totalPages}
+          page={currentPage}
+          onChange={(page) => setCurrentPage(page)}
+        />
+      </div>
+      <div
+        className="ag-theme-alpine"
+        style={{ width: '100%', overflowX: 'auto' }}
+      >
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columnDefs}
+          domLayout="autoHeight"
+          pagination={true}
+          paginationPageSize={30}
+          paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
+        />
+      </div>
     </div>
   )
 }

@@ -1,1 +1,1 @@
-export {Chart} from "./chart.ui.tsx";
+export { Chart } from "./chart.ui.tsx";

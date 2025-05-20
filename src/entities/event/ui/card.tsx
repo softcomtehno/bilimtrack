@@ -1,4 +1,4 @@
-import { Image } from '@heroui/react';
+import { Image } from "@heroui/react";
 
 export function EventCard() {
   return (
@@ -8,11 +8,11 @@ export function EventCard() {
         <h4 className="font-bold text-large">Frontend Radio</h4>
         <small className="text-default-500">12 Tracks</small>
       </div>
-        <Image
-          alt="Card background"
-          className="object-cover rounded-xl w-[150px] h-[100px]"
-          src="https://heroui.com/images/hero-card-complete.jpeg"
-        />
+      <Image
+        alt="Card background"
+        className="object-cover rounded-xl w-[150px] h-[100px]"
+        src="https://heroui.com/images/hero-card-complete.jpeg"
+      />
     </div>
   );
 }

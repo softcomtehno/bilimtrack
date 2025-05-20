@@ -1,1 +1,1 @@
-export * from './react.hoc';
+export * from "./react.hoc";
