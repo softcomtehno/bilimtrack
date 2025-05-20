@@ -11,6 +11,7 @@ import {
 import { loginPageRoute } from '@/pages/login'
 import { profilePageRoute } from '@/pages/profile'
 import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
+import { timetablePageRoute } from '@/pages/timetable'
 import {
   RouterProvider,
   createBrowserRouter,
@@ -41,7 +42,7 @@ const router = createBrowserRouter([
       },
       {
         element: <MentorLayout />,
-        children: [mentorHomePageRoute],
+        children: [mentorHomePageRoute, timetablePageRoute],
       },
       { element: <IntroLayout />, children: [loginPageRoute] },
     ],

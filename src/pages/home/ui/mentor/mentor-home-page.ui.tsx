@@ -13,7 +13,6 @@ import { Title } from '@/shared/ui/title';
 import { Schedule } from '@/widgets/schedule';
 import { Dashboard } from '@/widgets/dashboard';
 import { EventCard } from '@/entities/event/ui/card';
-// import { TopBar } from '@/widgets/top-bar'
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { GradeBook } from '@/widgets/grade-book';
@@ -21,7 +20,7 @@ import { GradeBook } from '@/widgets/grade-book';
 export const MentorHomePage = () => {
   return (
     <>
-      <Card>
+      <Card className='shadow-none border rounded-md'>
         <CardBody>
           <Title title="Предметы" Icon={Album} />
           <Swiper
