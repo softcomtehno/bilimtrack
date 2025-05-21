@@ -75,7 +75,7 @@ export function GradeBook() {
 
   const paginatedDates = allDates.filter((d) => d !== todaySafe)
 
-  const columnsPerPage = 6
+  const columnsPerPage = 9
   const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
 
   // Ставим страницу по умолчанию на последнюю
@@ -94,6 +94,7 @@ export function GradeBook() {
         pinned: 'left',
         filter: true,
         cellClass: 'hover:bg-blue-100',
+        flex: 2,
       },
       ...currentDateFields.map((field) => ({
         field,
@@ -105,7 +106,8 @@ export function GradeBook() {
       {
         field: todaySafe,
         headerName: todaySafe.replace(/_/g, '.'),
-        width: 110,
+        // width: 110,
+        flex: 2,
         editable: true,
         pinned: 'right',
         cellClass: 'hover:bg-blue-100',
@@ -128,7 +130,7 @@ export function GradeBook() {
 
   return (
     <div>
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-left my-4 ">
         <Pagination
           isCompact
           showControls
@@ -137,10 +139,7 @@ export function GradeBook() {
           onChange={(page) => setCurrentPage(page)}
         />
       </div>
-      <div
-        className="ag-theme-alpine"
-        style={{ width: '100%', overflowX: 'auto' }}
-      >
+      <div className="ag-theme-alpine" style={{ width: '100%' }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columnDefs}
@@ -148,10 +147,21 @@ export function GradeBook() {
           pagination={true}
           paginationPageSize={30}
           paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
-          // rowClassRules={{
-          //   'ag-row-hover': () => true,
-          // }}
           rowHoverHighlight={true} // 👈 встроенный флаг
+          tabToNextCell={(params) => {
+            const { previousCellPosition, api } = params
+            const nextRowIndex = previousCellPosition.rowIndex + 1
+
+            if (nextRowIndex >= api.getDisplayedRowCount()) {
+              return null // выход за пределы таблицы
+            }
+
+            return {
+              rowIndex: nextRowIndex,
+              column: previousCellPosition.column,
+              floating: null,
+            }
+          }}
         />
       </div>
     </div>
