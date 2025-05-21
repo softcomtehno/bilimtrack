@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 * {
-  font-family: "Jost";
+  font-family: 'Jost';
 }
 
 .default-slider .swiper-pagination-bullet {
@@ -33,4 +33,9 @@
 }
 .dedault-slider .swiper-pagination-bullet.swiper-pagination-bullet-active {
   width: 50px !important;
+}
+/* AG GRID */
+
+.ag-theme-alpine .ag-row-hover {
+  background-color: #ebf8ff !important; /* Tailwind: blue-100 */
 }

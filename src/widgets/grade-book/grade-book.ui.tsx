@@ -1,5 +1,5 @@
 import { Pagination } from '@heroui/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
@@ -98,7 +98,7 @@ export function GradeBook() {
       ...currentDateFields.map((field) => ({
         field,
         headerName: field.replace(/_/g, '.'),
-        width: 110,
+        flex: 1,
         editable: false,
         cellClass: 'hover:bg-blue-100',
       })),
@@ -148,6 +148,10 @@ export function GradeBook() {
           pagination={true}
           paginationPageSize={30}
           paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
+          // rowClassRules={{
+          //   'ag-row-hover': () => true,
+          // }}
+          rowHoverHighlight={true} // 👈 встроенный флаг
         />
       </div>
     </div>
