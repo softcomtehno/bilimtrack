@@ -1,8 +1,9 @@
-import { Card } from "@heroui/card";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigation } from '@/widgets/navigation'
+import { SidebarNav } from '@/widgets/sidebar'
+import { TopBar } from '@/widgets/top-bar'
+import { Card } from '@heroui/card'
 
-import { Navigation } from "@/widgets/navigation";
-import { TopBar } from "@/widgets/top-bar";
+import { Navigate, Outlet } from 'react-router-dom'
 
 export function GenericLayout() {
   return (
@@ -25,8 +26,11 @@ export function IntroLayout() {
 }
 export function MentorLayout() {
   return (
-    <div className="p-10">
-      <Outlet />
+    <div className="flex h-screen">
+      <SidebarNav />
+      <main className="flex-1 p-10 overflow-y-auto">
+        <Outlet />
+      </main>
     </div>
   );
 }

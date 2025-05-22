@@ -1,6 +1,4 @@
-import { z } from "zod";
-
-import { AchievementSchema } from "../entities/achievements/achievements.contracts";
+import { z } from 'zod';
 
 export const LoginUserDtoSchema = z.object({
   username: z.string(),
@@ -58,9 +56,9 @@ export const UserDtoSchema = z.object({
   lastName: z.string(),
   role: z.string(),
   photo: z.string(),
-  group: z.string(),
-  rating: z.number(),
-  points: z.number(),
-  achiviementsCount: z.number(),
-  achievements: z.array(AchievementSchema),
+  group:z.string(),
+  rating:z.number(),
+  points:z.number(),
+  achiviementsCount:z.number(),
+
 });

@@ -23,7 +23,7 @@ import { FullSchedule } from '@/widgets/full-schedule'
 export const MentorHomePage = () => {
   return (
     <>
-      <Card>
+      <Card className='shadow-none border rounded-md'>
         <CardBody>
           <Title Icon={Album} title="Предметы" />
           <Swiper
@@ -31,7 +31,26 @@ export const MentorHomePage = () => {
             modules={[Pagination]}
             pagination={{ clickable: true }}
             spaceBetween={20}
+            slidesPerView={4}
           >
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
             <SwiperSlide>
               <CourseCard />
             </SwiperSlide>
@@ -58,5 +77,5 @@ export const MentorHomePage = () => {
         </CardBody>
       </Card>
     </>
-  )
-}
+  );
+};
