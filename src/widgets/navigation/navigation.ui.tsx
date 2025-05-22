@@ -1,21 +1,30 @@
-import { CardFooter } from '@heroui/card';
-import { Home, ScanBarcode, User } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import { CardFooter } from "@heroui/card";
+import { Home, ScanBarcode, User } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function Navigation() {
-  const [active, setActive] = useState('home');
+  const [active, setActive] = useState("home");
 
   const items = [
-    { id: 'home', icon: <Home className="h-6 w-6" />, label: 'Home',  path: '/' },
     {
-      id: 'settings',
-      icon: <ScanBarcode className="h-6 w-6" />, 
-      label: 'Scanner',
-      path: '/scanner'
+      id: "home",
+      icon: <Home className="h-6 w-6" />,
+      label: "Home",
+      path: "/",
     },
-    { id: 'profile', icon: <User className="h-6 w-6" />, label: 'Profile',  path: '/profile' },
+    {
+      id: "settings",
+      icon: <ScanBarcode className="h-6 w-6" />,
+      label: "Scanner",
+      path: "/scanner",
+    },
+    {
+      id: "profile",
+      icon: <User className="h-6 w-6" />,
+      label: "Profile",
+      path: "/profile",
+    },
   ];
 
   return (

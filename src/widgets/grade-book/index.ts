@@ -1,1 +1,1 @@
-export { GradeBook } from './grade-book.ui'
+export { GradeBook } from "./grade-book.ui";

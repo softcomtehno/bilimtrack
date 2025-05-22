@@ -1,16 +1,9 @@
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Divider,
-  Avatar,
-} from '@heroui/react';
+import { Card, CardHeader, CardBody, Divider } from "@heroui/react";
+import { useState } from "react";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { ScanQrCode } from "lucide-react";
 
-import { Title } from '@/shared/ui/title';
-import { useState } from 'react';
-import { Scanner } from '@yudiel/react-qr-scanner';
-import { ScanQrCode } from 'lucide-react';
+import { Title } from "@/shared/ui/title";
 
 export const ScannerPage = () => {
   const [scannedData, setScannedData] = useState([]);
@@ -22,6 +15,7 @@ export const ScannerPage = () => {
         value: result.rawValue,
         coordinates: result.boundingBox,
       }));
+
       setScannedData(filteredResults);
     }
   };
@@ -30,10 +24,10 @@ export const ScannerPage = () => {
     <div className="p-4 flex flex-col items-center gap-4">
       <Card className="w-full max-w-md">
         <CardBody>
-          <Title title="Сканер" Icon={ScanQrCode} />
+          <Title Icon={ScanQrCode} title="Сканер" />
           <Scanner
-            onScan={handleScan}
             onError={(error) => console.error(error)}
+            onScan={handleScan}
           />
         </CardBody>
       </Card>
@@ -53,7 +47,9 @@ export const ScannerPage = () => {
                 <strong>Значение:</strong> {data.value}
               </p>
               <p className="text-gray-600">
-                <strong>Координаты:</strong> X: {data.coordinates.x}, Y: {data.coordinates.y}, Width: {data.coordinates.width}, Height: {data.coordinates.height}
+                <strong>Координаты:</strong> X: {data.coordinates.x}, Y:{" "}
+                {data.coordinates.y}, Width: {data.coordinates.width}, Height:{" "}
+                {data.coordinates.height}
               </p>
             </CardBody>
           </Card>

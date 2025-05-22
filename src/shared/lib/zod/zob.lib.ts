@@ -1,4 +1,4 @@
-import { ZodType } from 'zod';
+import { ZodType } from "zod";
 
 export function formikContract<D>(data: ZodType<D>) {
   return <V>(values: V) => {
@@ -34,13 +34,15 @@ export function zodContract<D>(data: ZodType<D>): Contract<unknown, D> {
     isData,
     getErrorMessages(raw) {
       const validation = data.safeParse(raw);
+
       if (validation.success) {
         return [];
       }
 
       return validation.error.errors.map((e) => {
-        const path = e.path.join('.');
-        return path !== '' ? `${e.message}, path: ${path}` : e.message;
+        const path = e.path.join(".");
+
+        return path !== "" ? `${e.message}, path: ${path}` : e.message;
       });
     },
   };

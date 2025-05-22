@@ -57,3 +57,8 @@
 .scroll-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+/* AG GRID */
+
+.ag-theme-alpine .ag-row-hover {
+  background-color: #ebf8ff !important; /* Tailwind: blue-100 */
+}

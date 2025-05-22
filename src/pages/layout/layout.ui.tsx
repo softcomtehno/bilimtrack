@@ -14,7 +14,7 @@ export function GenericLayout() {
         <Navigation />
       </Card>
     </div>
-  )
+  );
 }
 
 export function IntroLayout() {
@@ -22,7 +22,7 @@ export function IntroLayout() {
     <div className="flex flex-col justify-center items-center min-h-screen min-w-screen bg-no-repeat bg-cover mx-auto bg-[url('/images/bg.png')]">
       <Outlet />
     </div>
-  )
+  );
 }
 export function MentorLayout() {
   return (
@@ -36,13 +36,13 @@ export function MentorLayout() {
 }
 
 interface ProtectedRouteProps {
-  isAuthenticated: boolean
-  redirectPath?: string
+  isAuthenticated: boolean;
+  redirectPath?: string;
 }
 
 export function ProtectedRoute({
   isAuthenticated,
-  redirectPath = '/auth',
+  redirectPath = "/auth",
 }: ProtectedRouteProps) {
-  return isAuthenticated ? <Outlet /> : <Navigate to={redirectPath} replace />
+  return isAuthenticated ? <Outlet /> : <Navigate replace to={redirectPath} />;
 }

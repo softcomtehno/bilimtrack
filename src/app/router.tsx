@@ -1,4 +1,10 @@
 import {
+  RouterProvider,
+  createBrowserRouter,
+  useRouteError,
+} from 'react-router-dom'
+import { getCookie } from 'typescript-cookie'
+import {
   mentorHomePageRoute,
   rootHomePageRoute,
   studentHomePageRoute,
@@ -12,16 +18,12 @@ import { loginPageRoute } from '@/pages/login'
 import { profilePageRoute } from '@/pages/profile'
 import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
 import { timetablePageRoute } from '@/pages/timetable'
-import {
-  RouterProvider,
-  createBrowserRouter,
-  useRouteError,
-} from 'react-router-dom'
-import { getCookie } from 'typescript-cookie'
 
 function BubbleError() {
   const error = useRouteError()
+
   if (error) throw error
+
   return null
 }
 

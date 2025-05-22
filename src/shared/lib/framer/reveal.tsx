@@ -31,8 +31,8 @@ export const Reveal: React.FC<RevealProps> = ({
   return (
     <motion.div
       ref={ref}
-      initial="hidden"
       animate={inView ? "visible" : "hidden"}
+      initial="hidden"
       variants={variants}
     >
       {children}

@@ -1,28 +1,31 @@
-import CourseCard from '@/entities/course/ui/card';
-import { Card, CardBody } from '@heroui/react';
+import { Card, CardBody } from '@heroui/react'
 import {
   Album,
   BookImage,
   CalendarCheck2,
   ChartNoAxesCombined,
   Newspaper,
-} from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
-import { Title } from '@/shared/ui/title';
-import { Schedule } from '@/widgets/schedule';
-import { Dashboard } from '@/widgets/dashboard';
-import { EventCard } from '@/entities/event/ui/card';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { GradeBook } from '@/widgets/grade-book';
+} from 'lucide-react'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination } from 'swiper/modules'
+
+import CourseCard from '@/entities/course/ui/card'
+import { Title } from '@/shared/ui/title'
+import { Schedule } from '@/widgets/schedule'
+import { Dashboard } from '@/widgets/dashboard'
+import { EventCard } from '@/entities/event/ui/card'
+// import { TopBar } from '@/widgets/top-bar'
+import 'swiper/css'
+import 'swiper/css/pagination'
+import { GradeBook } from '@/widgets/grade-book'
+import { FullSchedule } from '@/widgets/full-schedule'
 
 export const MentorHomePage = () => {
   return (
     <>
       <Card className='shadow-none border rounded-md'>
         <CardBody>
-          <Title title="Предметы" Icon={Album} />
+          <Title Icon={Album} title="Предметы" />
           <Swiper
             className="w-[100%] pb-[40px] default-slider"
             modules={[Pagination]}
@@ -58,17 +61,19 @@ export const MentorHomePage = () => {
               <CourseCard />
             </SwiperSlide>
           </Swiper>
-          <Title title="Расписание" Icon={CalendarCheck2} />
+          <Title Icon={CalendarCheck2} title="Расписание" />
           <Schedule />
-          <Title title="Лидерборд" Icon={ChartNoAxesCombined} />
+          <Title Icon={ChartNoAxesCombined} title="Лидерборд" />
           <Dashboard />
-          <Title title="Мероприятия" Icon={BookImage} />
+          <Title Icon={BookImage} title="Мероприятия" />
           <EventCard />
-          <Title title="Тематические статьи" Icon={Newspaper} />
+          <Title Icon={Newspaper} title="Тематические статьи" />
           <EventCard />
-          <Title title="Новости" Icon={Newspaper} />
+          <Title Icon={Newspaper} title="Новости" />
           <EventCard />
           <GradeBook />
+          <FullSchedule />
+          {/* <GradeBook2 /> */}
         </CardBody>
       </Card>
     </>

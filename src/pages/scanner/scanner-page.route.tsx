@@ -1,7 +1,9 @@
-import { RouteObject } from 'react-router-dom';
-import { createElement } from 'react';
-import { ScannerPage } from './scanner-page.ui';
-import { pathKeys } from '../../shared/lib/react-router';
+import { RouteObject } from "react-router-dom";
+import { createElement } from "react";
+
+import { pathKeys } from "../../shared/lib/react-router";
+
+import { ScannerPage } from "./scanner-page.ui";
 
 export const scannerPageRoute: RouteObject = {
   path: pathKeys.scanner(),

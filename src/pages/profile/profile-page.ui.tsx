@@ -12,9 +12,8 @@ import {
 } from '@heroui/react';
 import { Album, CheckIcon, CircleEllipsis, Star, Trophy, UserRound, UsersRound } from 'lucide-react';
 
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Title } from '@/shared/ui/title';
+import "swiper/css";
+import "swiper/css/pagination";
 
 import 'swiper/css';
 import 'swiper/css/pagination';

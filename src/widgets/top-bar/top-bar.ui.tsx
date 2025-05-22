@@ -1,6 +1,6 @@
-import { CardHeader } from '@heroui/card';
-import { Avatar, Divider } from '@heroui/react';
-import { Link } from 'react-router-dom';
+import { CardHeader } from "@heroui/card";
+import { Avatar, Divider } from "@heroui/react";
+import { Link } from "react-router-dom";
 
 export function TopBar() {
   return (
@@ -12,7 +12,7 @@ export function TopBar() {
             Образовательная экосистема УК МУИТ
           </p>
         </div>
-        <Link to="/profile" className="cursor-pointer">
+        <Link className="cursor-pointer" to="/profile">
           <Avatar
             size="md"
             src="https://i.pravatar.cc/150?u=a04258a2462d826712d"

@@ -1,4 +1,14 @@
 import {
+  useMutation,
+  useQuery,
+  queryOptions as tsqQueryOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { setCookie } from "typescript-cookie";
+import { toast } from "react-toastify";
+
+import {
   editUserProfile,
   emailActivationMutation,
   getPerfomanceChart,
@@ -23,12 +33,12 @@ const ACCESS_TOKEN_KEY = 'access';
 const REFRESH_TOKEN_KEY = 'refresh';
 
 const keys = {
-  root: () => ['user'],
-  getToken: () => [...keys.root(), 'getToken'] as const,
-  loginUser: () => [...keys.root(), 'loginUser'] as const,
-  chart:() => [...keys.root(), "chart"] as const,
-  registerUser: () => [...keys.root(), 'registerUser'] as const,
-  user: (username: string) => [...keys.root(), 'username', username] as const,
+  root: () => ["user"],
+  getToken: () => [...keys.root(), "getToken"] as const,
+  loginUser: () => [...keys.root(), "loginUser"] as const,
+  chart: () => [...keys.root(), "chart"] as const,
+  registerUser: () => [...keys.root(), "registerUser"] as const,
+  user: (username: string) => [...keys.root(), "username", username] as const,
 };
 
 export const userService = {
@@ -43,6 +53,7 @@ export const userService = {
 
   queryOptions: () => {
     const userKey = userService.queryKey();
+
     return tsqQueryOptions({
       queryKey: userKey,
       queryFn: async () => loginUserQuery,
@@ -110,17 +121,18 @@ export function useRegisterMutation() {
     mutationFn: registerUserMutation,
     onSuccess: async () => {
       await toast.success(
-        'На вашу почту отправлено письмо для подтверждения вашей почты.'
+        "На вашу почту отправлено письмо для подтверждения вашей почты.",
       );
     },
     onError: (error: AxiosErrorType) => {
       if (error.response && error.response.data) {
         const errors = error.response.data;
+
         Object.keys(errors).forEach((field) => {
           toast.error(`${field}: ${errors[field][0]}`);
         });
       } else {
-        toast.error('Ошибка при выполнении запроса');
+        toast.error("Ошибка при выполнении запроса");
       }
     },
   });
@@ -128,21 +140,23 @@ export function useRegisterMutation() {
 
 export function useEditUserProfile() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: keys.root(),
     mutationFn: editUserProfile,
     onSuccess: async () => {
-      await toast.success('Ваш профиль успешно изменен!');
+      await toast.success("Ваш профиль успешно изменен!");
       await queryClient.invalidateQueries({ queryKey: keys.root() });
     },
     onError: (error: AxiosErrorType) => {
       if (error.response && error.response.data) {
         const errors = error.response.data;
+
         Object.keys(errors).forEach((field) => {
           toast.error(`${field}: ${errors[field][0]}`);
         });
       } else {
-        toast.error('Ошибка при выполнении запроса');
+        toast.error("Ошибка при выполнении запроса");
       }
     },
   });
@@ -153,16 +167,17 @@ export function useActivationMutation() {
     mutationKey: keys.registerUser(),
     mutationFn: emailActivationMutation,
     onSuccess: async () => {
-      await toast.success('Success');
+      await toast.success("Success");
     },
     onError: (error: AxiosErrorType) => {
       if (error.response && error.response.data) {
         const errors = error.response.data;
+
         Object.keys(errors).forEach((field) => {
           toast.error(`${field}: ${errors[field][0]}`);
         });
       } else {
-        toast.error('Ошибка при выполнении запроса');
+        toast.error("Ошибка при выполнении запроса");
       }
     },
   });
@@ -174,5 +189,3 @@ export function useGetUserPerfomanceChart() {
     queryFn: () => getPerfomanceChart(),
   });
 }
-
-

@@ -2,17 +2,17 @@ import { z } from 'zod';
 
 export const LoginUserDtoSchema = z.object({
   username: z.string(),
-  password: z.string().min(6, 'Пароль должен состоять минимум из 6 символов'),
+  password: z.string().min(6, "Пароль должен состоять минимум из 6 символов"),
 });
 
 export const createUserSchema = z.object({
   email: z.string().email(),
   username: z
     .string()
-    .min(3, 'Псевдоним должен состоять минимум из 6 символов'),
+    .min(3, "Псевдоним должен состоять минимум из 6 символов"),
   firstName: z.string(),
   lastName: z.string(),
-  password: z.string().min(6, 'Пароль должен состоять минимум из 6 символов'),
+  password: z.string().min(6, "Пароль должен состоять минимум из 6 символов"),
 });
 
 export const editUserSchema = z.object({
@@ -32,7 +32,7 @@ export const UpdatePassword = z.object({
   token: z.string(),
   newPassword: z
     .string()
-    .min(6, 'Пароль должен состоять минимум из 6 символов'),
+    .min(6, "Пароль должен состоять минимум из 6 символов"),
   confirmPassword: z.string(),
 });
 
@@ -44,11 +44,9 @@ export const TokensDtoSchema = z.object({
 export const SendEmail = z.object({
   email: z
     .string()
-    .email('Введите действительный  email')
-    .min(1, 'Введите ваш  email'),
+    .email("Введите действительный  email")
+    .min(1, "Введите ваш  email"),
 });
-
-
 
 export const UserDtoSchema = z.object({
   id: z.number(),
