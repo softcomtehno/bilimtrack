@@ -1,8 +1,9 @@
-import type { NavigateOptions } from "react-router-dom";
-import { HeroUIProvider } from "@heroui/system";
-import { useHref } from "react-router-dom";
-
-declare module "@react-types/shared" {
+import type { NavigateOptions } from 'react-router-dom';
+import { HeroUIProvider } from '@heroui/system';
+import { useHref } from 'react-router-dom';
+import { QueryClientProvider as TanStackQueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/shared/lib/react-query/react-query.lib';
+declare module '@react-types/shared' {
   interface RouterConfig {
     routerOptions: NavigateOptions;
   }
@@ -10,8 +11,8 @@ declare module "@react-types/shared" {
 
 export function Provider({ children }: { children: React.ReactNode }) {
   return (
-    <HeroUIProvider useHref={useHref}>
-      {children}
-    </HeroUIProvider>
+    <TanStackQueryClientProvider client={queryClient}>
+      <HeroUIProvider useHref={useHref}>{children}</HeroUIProvider>
+    </TanStackQueryClientProvider>
   );
 }

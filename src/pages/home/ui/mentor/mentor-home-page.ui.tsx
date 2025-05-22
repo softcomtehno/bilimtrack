@@ -1,27 +1,26 @@
-import CourseCard from '@/entities/course/ui/card'
-import { Card, CardBody } from '@heroui/react'
+import CourseCard from '@/entities/course/ui/card';
+import { Card, CardBody } from '@heroui/react';
 import {
   Album,
   BookImage,
   CalendarCheck2,
   ChartNoAxesCombined,
   Newspaper,
-} from 'lucide-react'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination } from 'swiper/modules'
-import { Title } from '@/shared/ui/title'
-import { Schedule } from '@/widgets/schedule'
-import { Dashboard } from '@/widgets/dashboard'
-import { EventCard } from '@/entities/event/ui/card'
-// import { TopBar } from '@/widgets/top-bar'
-import GradeTable from '@/widgets/test.ui'
-import 'swiper/css'
-import 'swiper/css/pagination'
+} from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination } from 'swiper/modules';
+import { Title } from '@/shared/ui/title';
+import { Schedule } from '@/widgets/schedule';
+import { Dashboard } from '@/widgets/dashboard';
+import { EventCard } from '@/entities/event/ui/card';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { GradeBook } from '@/widgets/grade-book';
 
 export const MentorHomePage = () => {
   return (
     <>
-      <Card>
+      <Card className='shadow-none border rounded-md'>
         <CardBody>
           <Title title="Предметы" Icon={Album} />
           <Swiper
@@ -29,7 +28,26 @@ export const MentorHomePage = () => {
             modules={[Pagination]}
             pagination={{ clickable: true }}
             spaceBetween={20}
+            slidesPerView={4}
           >
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
+            <SwiperSlide>
+              <CourseCard />
+            </SwiperSlide>
             <SwiperSlide>
               <CourseCard />
             </SwiperSlide>
@@ -50,9 +68,9 @@ export const MentorHomePage = () => {
           <EventCard />
           <Title title="Новости" Icon={Newspaper} />
           <EventCard />
-          <GradeTable />
+          <GradeBook />
         </CardBody>
       </Card>
     </>
-  )
-}
+  );
+};

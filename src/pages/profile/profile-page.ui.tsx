@@ -1,46 +1,106 @@
 import CourseCard from '@/entities/course/ui/card';
-import { Card, CardHeader, CardBody, CardFooter, Divider, Avatar } from '@heroui/react';
 import {
-  Album,
-  Book,
-  BookImage,
-  CalendarCheck2,
-  Captions,
-  ChartNoAxesCombined,
-  List,
-  Newspaper,
-} from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Divider,
+  Avatar,
+  Button,
+  Chip,
+  user,
+} from '@heroui/react';
+import { Album, CheckIcon, CircleEllipsis, Star, Trophy, UserRound, UsersRound } from 'lucide-react';
+
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Title } from '@/shared/ui/title';
-import { Schedule } from '@/widgets/schedule';
-import { Dashboard } from '@/widgets/dashboard';
-import { EventCard } from '@/entities/event/ui/card';
-import { Link } from 'react-router-dom';
+
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Chart } from '@/widgets/chart';
+import { userQueries } from '@/entities/user';
 
 export const ProfilePage = () => {
-  return (
-    <div className="my-5">
-      <Card className="max-w-[400px] border rounded-md">
-        <CardHeader className="flex justify-between items-center"> 
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = userQueries.useLoginUserQuery();
 
-          <div className="flex flex-col">
-            <p className="text-md">BilimTech LMS</p>
-            <p className="text-small text-default-500">
-              Образовательнпя экосистема УК МУИТ
-            </p>
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error fetching user data.</div>;
+  }
+
+  return (
+    <>
+      <Card className="w-full rounded-none p-3">
+        <div className="flex gap-3 items-center">
+          <div>
+            <h3 className="flex gap-2 ">
+              {' '}
+              <span>{userData?.data.firstName}</span>
+              {userData?.data.lastName}
+            </h3>
+            <h6>@{userData?.data.username}</h6>
           </div>
-          <Link to="/profile" className='cursor-pointer'>
-          <Avatar  size="md" src="https://i.pravatar.cc/150?u=a04258a2462d826712d" />
-          </Link>
-        </CardHeader>
-        <Divider />
-        <CardBody>
-          <Title title="Профиль" Icon={Album} />
-        </CardBody>
+        </div>
+
+        <div className="p-0 my -4 flex flex-wrap gap-2">
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+
+                <UserRound className="bg-success/40 rounded-full" size={18}/>
+           
+              }
+              variant="faded"
+            >
+              Группа: IT-23
+            </Chip>
+          </div>
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+                <Star className="bg-success/40 rounded-full" size={18} />
+              }
+              variant="faded"
+            >
+              Рейтинг: 85
+            </Chip>
+          </div>
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+                <CircleEllipsis  className="bg-success/40 rounded-full" size={18} />
+              }
+              variant="faded"
+            >
+              Баллы: 85
+            </Chip>
+          </div>
+          <div className="">
+            <Chip
+              color="success"
+              startContent={
+                <Trophy className="bg-success/40 p-[3px] rounded-full" size={18}  />
+              }
+              variant="faded"
+              className=''
+            >
+              Достижения: 15
+            </Chip>
+          </div>
+        </div>
+        <Chart />
       </Card>
-    </div>
+    </>
   );
 };

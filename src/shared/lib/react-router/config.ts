@@ -6,11 +6,17 @@ export const pathKeys = {
   mentor() {
     return pathKeys.root.concat('mentor/')
   },
+  timetable(){
+    return pathKeys.root.concat('timetable/')
+  },
   student() {
     return pathKeys.root.concat('student/')
   },
   about() {
     return pathKeys.root.concat('about/')
+  },
+  scanner() {
+    return pathKeys.root.concat('scanner/')
   },
   terms() {
     return pathKeys.root.concat('terms-of-use/')

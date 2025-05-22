@@ -11,7 +11,7 @@ import { ChartArea } from 'lucide-react';
 
 export default function CourseCard() {
   return (
-    <Card className="max-w-[100%] shadow-none border rounded-md">
+    <Card className="max-w-[350px] shadow-none border rounded-md">
       <CardHeader className="flex gap-3 items-start">
       <ChartArea />
         <div className="flex flex-col">

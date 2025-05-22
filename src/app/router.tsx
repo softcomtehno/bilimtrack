@@ -10,6 +10,8 @@ import {
 } from '@/pages/layout/layout.ui'
 import { loginPageRoute } from '@/pages/login'
 import { profilePageRoute } from '@/pages/profile'
+import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
+import { timetablePageRoute } from '@/pages/timetable'
 import {
   RouterProvider,
   createBrowserRouter,
@@ -31,11 +33,16 @@ const router = createBrowserRouter([
     children: [
       {
         element: <GenericLayout />,
-        children: [studentHomePageRoute, profilePageRoute, rootHomePageRoute],
+        children: [
+          studentHomePageRoute,
+          profilePageRoute,
+          scannerPageRoute,
+          rootHomePageRoute,
+        ],
       },
       {
         element: <MentorLayout />,
-        children: [mentorHomePageRoute],
+        children: [mentorHomePageRoute, timetablePageRoute],
       },
       { element: <IntroLayout />, children: [loginPageRoute] },
     ],
