@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 
 export const QrCreate = () => {
-  const [url, setUrl] = useState<string>("");
-  const [showQR, setShowQR] = useState(false);
+  const [qrValue, setQrValue] = useState<string>("");
 
-  const generateQR = () => {
-    setUrl(window.location.href);
-    setShowQR(true);
-  };
+  useEffect(() => {
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
+    const slug = pathSegments[pathSegments.length - 1]; // последний сегмент URL
+    const fullValue = `check/${slug}`;
+    setQrValue(fullValue);
+  }, []);
 
   return (
-    <div className="p-4">
-      <button onClick={generateQR}>Сгенерировать QR</button>
-      {showQR && <QRCode size={320} value={url} />}
+    <div className="p-4 flex flex-col items-center">
+      {qrValue && <QRCode size={320} value={qrValue} />}
     </div>
   );
 };

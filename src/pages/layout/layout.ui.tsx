@@ -29,7 +29,9 @@ export function MentorLayout() {
     <div className="flex h-screen">
       <SidebarNav />
       <main className="flex-1 p-10 overflow-y-auto">
+        <Card className='shadow-none border rounded-md'>
         <Outlet />
+        </Card>
       </main>
     </div>
   );

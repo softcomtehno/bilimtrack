@@ -60,8 +60,9 @@ export function SidebarNav() {
                 <div className="max-h-[370px] overflow-y-auto scroll-container">
                   <div className="w-[100%] pl-[40px] font-medium my-2   text-xs whitespace-normal break-words leading-snug">
                     1 курс
+                   
                   </div>
-                  <MenuItem>
+                  <MenuItem component={<Link to="/subject"/>} >
                     <div className="w-[100%]  text-xs whitespace-normal break-words leading-snug">
                       Основы экономики, менеджмента и маркетинга в IT
                     </div>

@@ -132,6 +132,7 @@ export function GradeBook() {
     <div>
       <div className="flex justify-left my-4 ">
         <Pagination
+        size='sm'
           isCompact
           showControls
           total={totalPages}
@@ -140,8 +141,8 @@ export function GradeBook() {
         />
       </div>
       <div className="ag-theme-alpine" style={{ width: '100%' }}>
-        <AgGridReact
-          rowData={rowData}
+        <AgGridReact 
+                  rowData={rowData}
           columnDefs={columnDefs}
           domLayout="autoHeight"
           pagination={true}

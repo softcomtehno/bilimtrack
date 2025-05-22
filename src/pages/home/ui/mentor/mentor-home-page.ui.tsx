@@ -23,7 +23,7 @@ import { FullSchedule } from '@/widgets/full-schedule'
 export const MentorHomePage = () => {
   return (
     <>
-      <Card className='shadow-none border rounded-md'>
+      
         <CardBody>
           <Title Icon={Album} title="Предметы" />
           <Swiper
@@ -75,7 +75,7 @@ export const MentorHomePage = () => {
           <FullSchedule />
           {/* <GradeBook2 /> */}
         </CardBody>
-      </Card>
+   
     </>
   );
 };
