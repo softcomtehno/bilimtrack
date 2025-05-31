@@ -2,32 +2,38 @@ import {
   RouterProvider,
   createBrowserRouter,
   useRouteError,
-} from 'react-router-dom'
-import { getCookie } from 'typescript-cookie'
+} from "react-router-dom";
+import { getCookie } from "typescript-cookie";
 import {
   mentorHomePageRoute,
   rootHomePageRoute,
   studentHomePageRoute,
-} from '@/pages/home'
+} from "@/pages/home";
 import {
   GenericLayout,
   IntroLayout,
   MentorLayout,
-} from '@/pages/layout/layout.ui'
-import { loginPageRoute } from '@/pages/login'
-import { profilePageRoute } from '@/pages/profile'
-import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
-import { timetablePageRoute } from '@/pages/timetable'
+  SchaduleLayout,
+} from "@/pages/layout/layout.ui";
+import { loginPageRoute } from "@/pages/login";
+import { profilePageRoute } from "@/pages/profile";
+import { scannerPageRoute } from "@/pages/scanner/scanner-page.route";
+import { timetablePageRoute } from "@/pages/timetable";
+import { schedulePageRoute } from "@/pages";
 
 function BubbleError() {
-  const error = useRouteError()
+  const error = useRouteError();
+  if (!error) return null;
 
-  if (error) throw error
-
-  return null
+  return (
+    <div>
+      <h1>Произошла ошибка!</h1>
+      <pre>{JSON.stringify(error)}</pre>
+    </div>
+  );
 }
 
-const isAuth = !!getCookie('access')
+const isAuth = !!getCookie("access");
 
 const router = createBrowserRouter([
   {
@@ -47,10 +53,14 @@ const router = createBrowserRouter([
         children: [mentorHomePageRoute, timetablePageRoute],
       },
       { element: <IntroLayout />, children: [loginPageRoute] },
+      {
+        element: <SchaduleLayout />,
+        children: [schedulePageRoute],
+      },
     ],
   },
-])
+]);
 
 export function BrowserRouter() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }

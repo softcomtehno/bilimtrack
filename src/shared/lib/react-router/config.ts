@@ -3,11 +3,14 @@ export const pathKeys = {
   home() {
     return pathKeys.root;
   },
+  schedule() {
+    return pathKeys.root.concat("schedule/");
+  },
   mentor() {
     return pathKeys.root.concat("mentor/");
   },
-  timetable(){
-    return pathKeys.root.concat('timetable/')
+  timetable() {
+    return pathKeys.root.concat("timetable/");
   },
   student() {
     return pathKeys.root.concat("student/");
