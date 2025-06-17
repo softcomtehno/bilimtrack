@@ -1,74 +1,79 @@
 export const pathKeys = {
-  root: "/",
+  root: '/',
   home() {
-    return pathKeys.root;
+    return pathKeys.root
   },
   schedule() {
-    return pathKeys.root.concat("schedule/");
+    return pathKeys.root.concat('schedule/')
   },
   mentor() {
-    return pathKeys.root.concat("mentor/");
+    return pathKeys.root.concat('mentor/')
   },
   timetable() {
-    return pathKeys.root.concat("timetable/");
+    return pathKeys.root.concat('timetable/')
   },
   student() {
-    return pathKeys.root.concat("student/");
+    return pathKeys.root.concat('student/')
   },
   about() {
-    return pathKeys.root.concat("about/");
+    return pathKeys.root.concat('about/')
   },
   scanner() {
-    return pathKeys.root.concat("scanner/");
+    return pathKeys.root.concat('scanner/')
   },
   terms() {
-    return pathKeys.root.concat("terms-of-use/");
+    return pathKeys.root.concat('terms-of-use/')
   },
   policy() {
-    return pathKeys.root.concat("privacy-policy/");
+    return pathKeys.root.concat('privacy-policy/')
   },
   tv() {
-    return pathKeys.root.concat("tv/");
+    return pathKeys.root.concat('tv/')
   },
   login() {
-    return pathKeys.root.concat("auth/");
+    return pathKeys.root.concat('auth/')
   },
   program() {
-    return pathKeys.root.concat("course/");
+    return pathKeys.root.concat('course/')
   },
   ranking() {
-    return pathKeys.root.concat("ranking/");
+    return pathKeys.root.concat('ranking/')
   },
 
   tanda() {
-    return pathKeys.root.concat("tanda/");
+    return pathKeys.root.concat('tanda/')
   },
   tandaTest() {
-    return pathKeys.root.concat("tanda/test/");
+    return pathKeys.root.concat('tanda/test/')
   },
   tandaLogin() {
-    return pathKeys.root.concat("tanda/login/");
+    return pathKeys.root.concat('tanda/login/')
   },
   tandaResult() {
-    return pathKeys.root.concat("tanda/result/");
+    return pathKeys.root.concat('tanda/result/')
   },
   // group({ params }: { params: { slug: string } }) {
   //   return pathKeys.root.concat(`group/${params.slug}/`);
   // },
   course: {
     root() {
-      return pathKeys.root.concat("courses/");
+      return pathKeys.root.concat('courses/')
     },
     bySlug(slug: string) {
-      return pathKeys.course.root().concat(`${slug}/`);
+      return pathKeys.course.root().concat(`${slug}/`)
     },
   },
   profile: {
     root() {
-      return pathKeys.root.concat("profile/");
+      return pathKeys.root.concat('profile/')
     },
     badges() {
-      return pathKeys.profile.root().concat("badges/");
+      return pathKeys.profile.root().concat('badges/')
     },
   },
-};
+  lessonId: {
+    byId(id: string) {
+      return `attend/${id}/`
+    },
+  },
+}

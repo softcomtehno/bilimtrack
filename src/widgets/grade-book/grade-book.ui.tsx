@@ -1,85 +1,59 @@
 import { Pagination } from '@heroui/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
+import { gradeApi } from '@/entities/grade'
+import { QRGenerator } from '@/features/lesson/qr-generator'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
 export function GradeBook() {
-  const generateRandomScore = () => Math.floor(Math.random() * 11)
-
-  const dates = [
-    '05_05_2025',
-    '06_05_2025',
-    '07_05_2025',
-    '08_05_2025',
-    '09_05_2025',
-    '10_05_2025',
-    '11_05_2025',
-    '12_05_2025',
-    '13_05_2025',
-    '14_05_2025',
-    '15_05_2025',
-    '16_05_2025',
-    '17_05_2025',
-    '18_05_2025',
-    '19_05_2025',
-  ]
-
-  const users = [
-    'Асанов Курманбек',
-    'Малабакиев Рамзан',
-    'Жумагулов Талгат',
-    'Исаков Руслан',
-    'Кадыров Эльдар',
-    'Лазарев Максим',
-    'Мирзоев Бахтиёр',
-    'Нурматов Азат',
-    'Орлов Илья',
-    'Петров Сергей',
-    'Рахимов Шахриёр',
-    'Смирнова Ольга',
-    'Тимофеев Андрей',
-    'Умаров Заур',
-    'Федоров Константин',
-    'Хабибуллин Ринат',
-    'Цой Виктор',
-    'Чистяков Артём',
-    'Шарипов Арслан',
-    'Щербакова Мария',
-  ]
+  const [rowData, setRowData] = useState<any[]>([])
+  const [allDates, setAllDates] = useState<string[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
 
   const todayDate = new Date().toLocaleDateString('ru-RU') // dd.mm.yyyy
   const todaySafe = todayDate.replace(/\./g, '_') // dd_mm_yyyy
 
-  const initialRowData = users.map((fullName) => {
-    const scores: Record<string, number> = {}
-    dates.forEach((date) => {
-      scores[date] = generateRandomScore()
-    })
-    if (!scores[todaySafe]) {
-      scores[todaySafe] = 0
+  useEffect(() => {
+    async function fetchGrades() {
+      try {
+        const res = await gradeApi.getGrades(1, 1)
+        const { sessions, grades } = res.data
+
+        // Получаем все даты из сессий
+        const dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
+
+        const transformedData = grades.map((g: any) => {
+          const scores: Record<string, number> = {}
+          dates.forEach((date) => {
+            const score = g.scores.find(
+              (s: any) => s.date.replace(/-/g, '_') === date
+            )
+            scores[date] = score ? score.grade : 0
+          })
+          return {
+            fullName: g.user.fullName,
+            ...scores,
+          }
+        })
+
+        setAllDates(dates)
+        setRowData(transformedData)
+        setCurrentPage(Math.ceil(dates.length / columnsPerPage))
+      } catch (error) {
+        console.error('Ошибка при загрузке оценок:', error)
+      }
     }
-    return { fullName, ...scores }
-  })
 
-  const [rowData, setRowData] = useState(initialRowData)
-
-  const allDates = Array.from(
-    new Set(
-      rowData.flatMap((row) => Object.keys(row).filter((k) => k !== 'fullName'))
-    )
-  ).sort((a, b) => a.localeCompare(b))
-
-  const paginatedDates = allDates.filter((d) => d !== todaySafe)
+    fetchGrades()
+  }, [])
 
   const columnsPerPage = 9
+  const paginatedDates = allDates.filter((d) => d !== todaySafe)
   const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
-
-  // Ставим страницу по умолчанию на последнюю
-  const [currentPage, setCurrentPage] = useState(totalPages)
 
   const currentDateFields = paginatedDates.slice(
     (currentPage - 1) * columnsPerPage,
@@ -106,7 +80,6 @@ export function GradeBook() {
       {
         field: todaySafe,
         headerName: todaySafe.replace(/_/g, '.'),
-        // width: 110,
         flex: 2,
         editable: true,
         pinned: 'right',
@@ -119,7 +92,9 @@ export function GradeBook() {
           params.data[todaySafe] = value
           setRowData((prev) =>
             prev.map((r) =>
-              r.fullName === params.data.fullName ? params.data : r
+              r.fullName === params.data.fullName
+                ? { ...r, [todaySafe]: value }
+                : r
             )
           )
           return true
@@ -130,7 +105,7 @@ export function GradeBook() {
 
   return (
     <div>
-      <div className="flex justify-left my-4 ">
+      <div className="flex justify-left my-4">
         <Pagination
           isCompact
           showControls
@@ -147,13 +122,13 @@ export function GradeBook() {
           pagination={true}
           paginationPageSize={30}
           paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
-          rowHoverHighlight={true} // 👈 встроенный флаг
+          rowHoverHighlight={true}
           tabToNextCell={(params) => {
             const { previousCellPosition, api } = params
             const nextRowIndex = previousCellPosition.rowIndex + 1
 
             if (nextRowIndex >= api.getDisplayedRowCount()) {
-              return null // выход за пределы таблицы
+              return null
             }
 
             return {
@@ -163,6 +138,7 @@ export function GradeBook() {
             }
           }}
         />
+        <QRGenerator />
       </div>
     </div>
   )

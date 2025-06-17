@@ -2,38 +2,38 @@ import {
   RouterProvider,
   createBrowserRouter,
   useRouteError,
-} from "react-router-dom";
-import { getCookie } from "typescript-cookie";
+} from 'react-router-dom'
+// import { getCookie } from 'typescript-cookie'
 import {
   mentorHomePageRoute,
   rootHomePageRoute,
   studentHomePageRoute,
-} from "@/pages/home";
+} from '@/pages/home'
 import {
   GenericLayout,
   IntroLayout,
   MentorLayout,
-  SchaduleLayout,
-} from "@/pages/layout/layout.ui";
-import { loginPageRoute } from "@/pages/login";
-import { profilePageRoute } from "@/pages/profile";
-import { scannerPageRoute } from "@/pages/scanner/scanner-page.route";
-import { timetablePageRoute } from "@/pages/timetable";
-import { schedulePageRoute } from "@/pages";
+} from '@/pages/layout/layout.ui'
+import { loginPageRoute } from '@/pages/login'
+import { profilePageRoute } from '@/pages/profile'
+import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
+import { timetablePageRoute } from '@/pages/timetable'
+import { schedulePageRoute } from '@/pages'
+import { lessonIDPageRoute } from '@/pages/lesson-id'
 
 function BubbleError() {
-  const error = useRouteError();
-  if (!error) return null;
+  const error = useRouteError()
+  if (!error) return null
 
   return (
     <div>
       <h1>Произошла ошибка!</h1>
       <pre>{JSON.stringify(error)}</pre>
     </div>
-  );
+  )
 }
 
-const isAuth = !!getCookie("access");
+// const isAuth = !!getCookie('access')
 
 const router = createBrowserRouter([
   {
@@ -46,21 +46,18 @@ const router = createBrowserRouter([
           profilePageRoute,
           scannerPageRoute,
           rootHomePageRoute,
+          lessonIDPageRoute,
         ],
       },
       {
         element: <MentorLayout />,
-        children: [mentorHomePageRoute, timetablePageRoute],
+        children: [mentorHomePageRoute, timetablePageRoute, schedulePageRoute],
       },
       { element: <IntroLayout />, children: [loginPageRoute] },
-      {
-        element: <SchaduleLayout />,
-        children: [schedulePageRoute],
-      },
     ],
   },
-]);
+])
 
 export function BrowserRouter() {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />
 }
