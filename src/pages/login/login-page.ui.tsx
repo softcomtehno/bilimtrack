@@ -70,9 +70,9 @@ export function LoginPage() {
               </Button>
 
               <div className="text-center">
-                <a href="#" className="text-sm text-blue-600 hover:underline">
+                {/* <a href="#" className="text-sm text-blue-600 hover:underline">
                   Забыли пароль?
-                </a>
+                </a> */}
               </div>
 
               {isError && (
