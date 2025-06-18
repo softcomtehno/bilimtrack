@@ -1,12 +1,13 @@
-import { Card, CardHeader, CardBody, Divider } from "@heroui/react";
-import { useState } from "react";
-import { Scanner } from "@yudiel/react-qr-scanner";
-import { ScanQrCode } from "lucide-react";
+import { Card, CardHeader, CardBody, Divider } from '@heroui/react'
+import { useState } from 'react'
+import { Scanner } from '@yudiel/react-qr-scanner'
+import { ScanQrCode } from 'lucide-react'
 
-import { Title } from "@/shared/ui/title";
+import { Title } from '@/shared/ui/title'
 
 export const ScannerPage = () => {
-  const [scannedData, setScannedData] = useState([]);
+  const [scannedData, setScannedData] = useState([])
+  const [hasRedirected, setHasRedirected] = useState(false)
 
   const handleScan = (results) => {
     if (results && Array.isArray(results)) {
@@ -14,11 +15,26 @@ export const ScannerPage = () => {
         format: result.format,
         value: result.rawValue,
         coordinates: result.boundingBox,
-      }));
+      }))
 
-      setScannedData(filteredResults);
+      setScannedData(filteredResults)
+
+      const first = filteredResults[0]?.value
+      if (first && !hasRedirected && isValidUrl(first)) {
+        setHasRedirected(true)
+        window.location.href = first
+      }
     }
-  };
+  }
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url)
+      return true
+    } catch (_) {
+      return false
+    }
+  }
 
   return (
     <div className="p-4 flex flex-col items-center gap-4">
@@ -47,8 +63,8 @@ export const ScannerPage = () => {
                 <strong>Значение:</strong> {data.value}
               </p>
               <p className="text-gray-600">
-                <strong>Координаты:</strong> X: {data.coordinates.x}, Y:{" "}
-                {data.coordinates.y}, Width: {data.coordinates.width}, Height:{" "}
+                <strong>Координаты:</strong> X: {data.coordinates.x}, Y:{' '}
+                {data.coordinates.y}, Width: {data.coordinates.width}, Height:{' '}
                 {data.coordinates.height}
               </p>
             </CardBody>
@@ -62,5 +78,5 @@ export const ScannerPage = () => {
         </Card>
       )}
     </div>
-  );
-};
+  )
+}

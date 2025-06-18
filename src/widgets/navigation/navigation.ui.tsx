@@ -28,7 +28,7 @@ export function Navigation() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0">
+    <div className="fixed z-50 bottom-0 left-0 right-0">
     <CardFooter className=" bg-white border-t shadow-md flex justify-around py-2">
       {items.map((item) => (
       <Link
