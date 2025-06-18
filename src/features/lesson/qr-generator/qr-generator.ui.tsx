@@ -79,7 +79,9 @@ export function QRGenerator() {
                   <Dialog.Title className="text-2xl font-bold mb-4">
                     QR-код для отметки
                   </Dialog.Title>
-                  <Button onClick={() => setIsOpen(false)}>Закрыть</Button>
+                  <Button color="primary" onClick={() => setIsOpen(false)}>
+                    Закрыть
+                  </Button>
                 </div>
 
                 {sessionId ? (
