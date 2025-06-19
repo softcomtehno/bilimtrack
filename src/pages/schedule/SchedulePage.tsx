@@ -11,10 +11,10 @@ import {
   ScheduleGrid,
 } from "@/shared/ui/schedule";
 import { useAppStore } from "@/app/store";
+import { schedulesQueries } from "@/entities/schedules";
 
 export const SchedulePage: React.FC = () => {
   const {
-    schedule,
     teachers,
     groups,
     classrooms,
@@ -26,6 +26,12 @@ export const SchedulePage: React.FC = () => {
     setActiveFilters,
     resetFilters,
   } = useAppStore();
+
+  const {
+    data: schedulesData,
+    isError: schedulesError,
+    isLoading: schedulesLoading,
+  } = schedulesQueries.useGetSchedules();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | undefined>(undefined);
@@ -60,7 +66,32 @@ export const SchedulePage: React.FC = () => {
     setActiveFilters,
   ]);
 
-  // Обработчики действий
+  // Преобразование данных
+  const transformedSchedule: ScheduleItem[] = (schedulesData || []).map(
+    (item) => ({
+      id: String(item.id),
+      dayOfWeek: item.dayOfWeek,
+      weekType: item.weekType === "weekly" ? "Обе" : item.weekType, // если нужно перевести
+      groupIds: [String(item.group.id)],
+      teacherId: String(item.teacher.id),
+      classroomId: String(item.room.id),
+      subjectId: String(item.subject.id),
+      lessonTime: {
+        id: item.lessonTime.id,
+        startTime: item.lessonTime.startTime,
+        endTime: item.lessonTime.endTime,
+      },
+      lessonType: item.lessonType?.name ?? "",
+
+      // 👇 поля для отображения (в ScheduleCell)
+      subjectName: item.subject.name,
+      teacherName: item.teacher.fullName,
+      groupNames: [item.group.name],
+      classroomName: `${item.room.number} (${item.room.building})`,
+    })
+  );
+
+  // Обработчики
   const handleAddItem = () => {
     setEditItem(undefined);
     setIsFormOpen(true);
@@ -102,6 +133,18 @@ export const SchedulePage: React.FC = () => {
     resetFilters();
   };
 
+  if (schedulesLoading) {
+    return <div className="text-center py-10 text-gray-500">Загрузка...</div>;
+  }
+
+  if (schedulesError) {
+    return (
+      <div className="text-center py-10 text-red-600">
+        Ошибка при загрузке расписания
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -112,7 +155,7 @@ export const SchedulePage: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <ScheduleExport schedule={schedule} />
+          <ScheduleExport schedule={transformedSchedule} />
           <Button onClick={handleAddItem} icon={<Plus size={16} />}>
             Добавить занятие
           </Button>
@@ -134,13 +177,12 @@ export const SchedulePage: React.FC = () => {
         resetFilters={handleResetFilters}
       />
 
-      {schedule.length === 0 ? (
+      {transformedSchedule.length === 0 ? (
         <Card className="text-center py-12">
           <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-semibold mb-2">Расписание пока пусто</h2>
           <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            Добавьте занятия вручную или воспользуйтесь автоматическим
-            генератором расписания
+            Добавьте занятия вручную или с помощью автоматического генератора.
           </p>
           <Button onClick={handleAddItem} icon={<Plus size={16} />}>
             Добавить занятие
@@ -149,7 +191,7 @@ export const SchedulePage: React.FC = () => {
       ) : (
         <Card>
           <ScheduleGrid
-            schedule={schedule}
+            schedule={transformedSchedule}
             weekType={weekType}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
@@ -160,7 +202,6 @@ export const SchedulePage: React.FC = () => {
         </Card>
       )}
 
-      {/* Форма добавления/редактирования занятия */}
       <ScheduleForm
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -170,10 +211,9 @@ export const SchedulePage: React.FC = () => {
         groups={groups}
         classrooms={classrooms}
         subjects={subjects}
-        schedule={schedule}
+        schedule={transformedSchedule}
       />
 
-      {/* Диалог подтверждения удаления */}
       <Dialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
@@ -187,8 +227,8 @@ export const SchedulePage: React.FC = () => {
             </p>
           </div>
           <p className="text-gray-600 text-sm">
-            Это действие нельзя будет отменить. Занятие будет полностью удалено
-            из расписания.
+            Это действие нельзя будет отменить. Занятие будет удалено из
+            расписания.
           </p>
         </div>
         <div className="flex justify-end space-x-3">
