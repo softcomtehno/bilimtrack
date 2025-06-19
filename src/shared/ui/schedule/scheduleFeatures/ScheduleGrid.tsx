@@ -1,7 +1,25 @@
 import React from "react";
 import { ScheduleItem, WeekType } from "@/shared/types";
 import { ScheduleCell } from "./ScheduleCell";
-import { DAYS_OF_WEEK, DEFAULT_TIME_SLOTS } from "@/shared/lib/utils";
+
+// Предположим, у тебя заранее определены эти массивы:
+export const DAYS_OF_WEEK = [
+  { index: 0, label: "Понедельник" },
+  { index: 1, label: "Вторник" },
+  { index: 2, label: "Среда" },
+  { index: 3, label: "Четверг" },
+  { index: 4, label: "Пятница" },
+  // { index: 5, label: "Суббота" },
+];
+
+export const DEFAULT_TIME_SLOTS = [
+  { id: 1, label: "07:30 - 08:50" },
+  { id: 2, label: "09:00 - 10:00" },
+  { id: 3, label: "11:00 - 12:20" },
+  { id: 4, label: "13:00 - 14:20" },
+  { id: 5, label: "14:30 - 15:50" },
+  // { id: 5, label: "16:00 - 17:20" },
+];
 
 interface ScheduleGridProps {
   schedule: ScheduleItem[];
@@ -22,7 +40,6 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   filteredTeacherId,
   filteredClassroomId,
 }) => {
-  // Фильтруем расписание по типу недели и другим фильтрам
   const filteredSchedule = schedule.filter((item) => {
     if (
       weekType !== "Обе" &&
@@ -47,22 +64,24 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
     return true;
   });
 
-  // Группируем занятия по дням и временным слотам
-  const scheduleMap: Record<string, Record<string, ScheduleItem[]>> = {};
+  // Строим карту расписания: dayIndex -> lessonTimeId -> ScheduleItem[]
+  const scheduleMap: Record<number, Record<number, ScheduleItem[]>> = {};
 
-  DAYS_OF_WEEK.forEach((day) => {
-    scheduleMap[day] = {};
-    DEFAULT_TIME_SLOTS.forEach((timeSlot) => {
-      scheduleMap[day][timeSlot] = [];
-    });
-  });
-
-  filteredSchedule.forEach((item) => {
-    if (!scheduleMap[item.day][item.timeSlot]) {
-      scheduleMap[item.day][item.timeSlot] = [];
+  for (const day of DAYS_OF_WEEK) {
+    scheduleMap[day.index] = {};
+    for (const slot of DEFAULT_TIME_SLOTS) {
+      scheduleMap[day.index][slot.id] = [];
     }
-    scheduleMap[item.day][item.timeSlot].push(item);
-  });
+  }
+
+  for (const item of filteredSchedule) {
+    const dayIndex = item.dayOfWeek;
+    const lessonId = item.lessonTime.id;
+    if (!scheduleMap[dayIndex][lessonId]) {
+      scheduleMap[dayIndex][lessonId] = [];
+    }
+    scheduleMap[dayIndex][lessonId].push(item);
+  }
 
   return (
     <div className="overflow-x-auto" id="schedule-grid">
@@ -74,25 +93,28 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             </th>
             {DAYS_OF_WEEK.map((day) => (
               <th
-                key={day}
+                key={day.index}
                 className="p-2 border bg-gray-50 text-sm font-medium text-gray-700"
               >
-                {day}
+                {day.label}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {DEFAULT_TIME_SLOTS.map((timeSlot) => (
-            <tr key={timeSlot}>
+          {DEFAULT_TIME_SLOTS.map((slot) => (
+            <tr key={slot.id}>
               <td className="p-2 border bg-gray-50 text-xs text-gray-600 font-medium text-center">
-                {timeSlot}
+                {slot.label}
               </td>
               {DAYS_OF_WEEK.map((day) => (
-                <td key={`${day}-${timeSlot}`} className="p-2 w-[200px] border">
-                  {scheduleMap[day][timeSlot].length > 0 ? (
+                <td
+                  key={`${day.index}-${slot.id}`}
+                  className="p-2 w-[200px] border"
+                >
+                  {scheduleMap[day.index][slot.id].length > 0 ? (
                     <div className="flex flex-col gap-2">
-                      {scheduleMap[day][timeSlot].map((item) => (
+                      {scheduleMap[day.index][slot.id].map((item) => (
                         <ScheduleCell
                           key={item.id}
                           item={item}
