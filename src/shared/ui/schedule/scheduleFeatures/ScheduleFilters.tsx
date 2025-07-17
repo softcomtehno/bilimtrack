@@ -1,12 +1,12 @@
-import React from 'react';
-import { WeekType, Teacher, Group, Classroom } from '../../types';
-import { Select } from '../ui/Select';
-import { Button } from '../ui/Button';
-import { FilterX } from 'lucide-react';
+import React from "react";
+import { WeekType, Teacher, Group, Classroom } from "@/shared/types";
+import { Select } from "../ui/Select";
+import { Button } from "../ui/Button";
+import { FilterX } from "lucide-react";
 
 interface ScheduleFiltersProps {
-  weekType: WeekType | 'Обе';
-  setWeekType: (weekType: WeekType | 'Обе') => void;
+  weekType: WeekType | "Обе";
+  setWeekType: (weekType: WeekType | "Обе") => void;
   teachers: Teacher[];
   groups: Group[];
   classrooms: Classroom[];
@@ -33,7 +33,11 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
   setSelectedClassroomId,
   resetFilters,
 }) => {
-  const hasActiveFilters = selectedTeacherId || selectedGroupId || selectedClassroomId || weekType !== 'Обе';
+  const hasActiveFilters =
+    selectedTeacherId ||
+    selectedGroupId ||
+    selectedClassroomId ||
+    weekType !== "Обе";
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-card mb-6">
@@ -42,15 +46,16 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
           <Select
             label="Тип недели"
             options={[
-              { value: 'Обе', label: 'Все недели' },
-              { value: 'Числитель', label: 'Числитель' },
-              { value: 'Знаменатель', label: 'Знаменатель' },
+              { value: "Обе", label: "Все недели" },
+              { value: "Числитель", label: "Числитель" },
+              { value: "Знаменатель", label: "Знаменатель" },
             ]}
             value={weekType}
-            onChange={(value) => setWeekType(value as WeekType | 'Обе')}
+            onChange={(value) => setWeekType((value as WeekType) || "Обе")}
+            hideEmptyOption
           />
         </div>
-        
+
         <div className="w-64">
           <Select
             label="Преподаватель"
@@ -58,11 +63,11 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
               value: teacher.id,
               label: teacher.name,
             }))}
-            value={selectedTeacherId || ''}
+            value={selectedTeacherId || ""}
             onChange={(value) => setSelectedTeacherId(value || undefined)}
           />
         </div>
-        
+
         <div className="w-48">
           <Select
             label="Группа"
@@ -70,11 +75,12 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
               value: group.id,
               label: group.name,
             }))}
-            value={selectedGroupId || ''}
+            value={selectedGroupId || groups[0]?.id || ""}
             onChange={(value) => setSelectedGroupId(value || undefined)}
+            hideEmptyOption
           />
         </div>
-        
+
         <div className="w-48">
           <Select
             label="Аудитория"
@@ -82,15 +88,15 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
               value: classroom.id,
               label: classroom.name,
             }))}
-            value={selectedClassroomId || ''}
+            value={selectedClassroomId || ""}
             onChange={(value) => setSelectedClassroomId(value || undefined)}
           />
         </div>
-        
+
         {hasActiveFilters && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={resetFilters}
             icon={<FilterX size={16} />}
           >

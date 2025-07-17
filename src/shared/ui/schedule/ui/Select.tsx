@@ -12,10 +12,14 @@ interface SelectProps
   label?: string;
   error?: string;
   onChange?: (value: string) => void;
+  hideEmptyOption?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, options, onChange, ...props }, ref) => {
+  (
+    { className, label, error, options, onChange, hideEmptyOption, ...props },
+    ref
+  ) => {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (onChange) {
         onChange(e.target.value);
@@ -43,7 +47,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           {...props}
         >
-          <option value="">Выберите...</option>
+          {!hideEmptyOption && <option value="">Выберите...</option>}
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

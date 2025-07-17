@@ -13,12 +13,13 @@ export const DAYS_OF_WEEK = [
 ];
 
 export const DEFAULT_TIME_SLOTS = [
-  { id: 1, label: "07:30 - 08:50" },
-  { id: 2, label: "09:00 - 10:00" },
-  { id: 3, label: "11:00 - 12:20" },
-  { id: 4, label: "13:00 - 14:20" },
-  { id: 5, label: "14:30 - 15:50" },
-  // { id: 5, label: "16:00 - 17:20" },
+  { id: 0, label: "07:30 - 08:50" },
+  { id: 1, label: "09:00 - 10:20" },
+  { id: 2, label: "10:30 - 11:50" },
+  { id: 3, label: "12:10 - 13:30" },
+  { id: 4, label: "13:40 - 15:00" },
+  { id: 5, label: "15:10 - 16:30" },
+  { id: 6, label: "16:40 - 18:00" },
 ];
 
 interface ScheduleGridProps {
@@ -75,12 +76,18 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   }
 
   for (const item of filteredSchedule) {
-    const dayIndex = item.dayOfWeek;
-    const lessonId = item.lessonTime.id;
-    if (!scheduleMap[dayIndex][lessonId]) {
-      scheduleMap[dayIndex][lessonId] = [];
+    // Получаем индекс дня недели по строке
+    const dayIndex = DAYS_OF_WEEK.find((d) => d.label === item.day)?.index;
+    // Получаем id временного слота по строке
+    const slotId = DEFAULT_TIME_SLOTS.find(
+      (s) => s.label === item.timeSlot
+    )?.id;
+    if (dayIndex !== undefined && slotId !== undefined) {
+      if (!scheduleMap[dayIndex][slotId]) {
+        scheduleMap[dayIndex][slotId] = [];
+      }
+      scheduleMap[dayIndex][slotId].push(item);
     }
-    scheduleMap[dayIndex][lessonId].push(item);
   }
 
   return (
