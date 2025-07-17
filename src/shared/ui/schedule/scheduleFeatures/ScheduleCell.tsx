@@ -24,7 +24,13 @@ export const ScheduleCell: React.FC<ScheduleCellProps> = ({
     <div
       className={cn(
         "rounded-md border p-2 text-xs",
-        lessonTypeColors[item.lessonType]
+        item.weekType === "Обе"
+          ? lessonTypeColors[item.lessonType]
+          : item.weekType === "Числитель"
+            ? "bg-gray-200 " +
+              (lessonTypeColors[item.lessonType]?.replace(/bg-[^ ]+/, "") || "")
+            : "bg-white " +
+              (lessonTypeColors[item.lessonType]?.replace(/bg-[^ ]+/, "") || "")
       )}
     >
       <div className="font-semibold">{item.subjectName}</div>

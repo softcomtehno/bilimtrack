@@ -14,11 +14,13 @@ import {
   DEFAULT_TIME_SLOTS,
   checkScheduleConflicts,
 } from "@/shared/lib/utils";
-import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Button } from "../ui/Button";
 import { Dialog } from "../ui/Dialog";
-import { Badge } from "../ui/Badge";
+import {
+  useGetSubjects,
+  useGetLessonTypes,
+} from "@/entities/schedule/schedules/schedules.queries";
 
 interface ScheduleFormProps {
   isOpen: boolean;
@@ -70,29 +72,17 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   });
 
   const [conflicts, setConflicts] = useState<string[]>([]);
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [availableLessonTypes, setAvailableLessonTypes] = useState<
-    LessonType[]
-  >([]);
-
+  // Используем данные с API
+  const availableSubjects: Subject[] = useGetSubjects()?.data || [];
+  const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || [];
   const watchedValues = watch();
 
   // Обработка изменения преподавателя
   useEffect(() => {
     if (watchedValues.teacherId) {
       const teacher = teachers.find((t) => t.id === watchedValues.teacherId);
-      setSelectedTeacher(teacher || null);
-
       if (teacher) {
         setValue("teacherName", teacher.name);
-
-        // Обновляем доступные предметы для выбранного преподавателя
-        const teacherSubjects = subjects.filter((s) =>
-          teacher.subjects.includes(s.id)
-        );
-        setAvailableSubjects(teacherSubjects);
 
         // Сбрасываем выбранный предмет, если он недоступен для преподавателя
         if (
@@ -102,12 +92,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           setValue("subjectId", "");
           setValue("subjectName", "");
         }
-      } else {
-        setAvailableSubjects([]);
       }
-    } else {
-      setSelectedTeacher(null);
-      setAvailableSubjects([]);
     }
   }, [watchedValues.teacherId, teachers, subjects, setValue]);
 
@@ -115,25 +100,13 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   useEffect(() => {
     if (watchedValues.subjectId) {
       const subject = subjects.find((s) => s.id === watchedValues.subjectId);
-      setSelectedSubject(subject || null);
-
       if (subject) {
         setValue("subjectName", subject.name);
-        setAvailableLessonTypes(subject.lessonTypes);
-
-        // Сбрасываем тип занятия, если он недоступен для предмета
-        if (
-          watchedValues.lessonType &&
-          !subject.lessonTypes.includes(watchedValues.lessonType as LessonType)
-        ) {
-          setValue("lessonType", subject.lessonTypes[0]);
-        }
       } else {
-        setAvailableLessonTypes([]);
+        setValue("subjectName", "");
       }
     } else {
-      setSelectedSubject(null);
-      setAvailableLessonTypes([]);
+      setValue("subjectName", "");
     }
   }, [watchedValues.subjectId, subjects, setValue]);
 
@@ -221,6 +194,19 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     }
   }, [isOpen, editItem, reset]);
 
+  useEffect(() => {
+    if (
+      isOpen &&
+      editItem &&
+      availableSubjects.length > 0 &&
+      editItem.subjectId
+    ) {
+      setValue("subjectId", editItem.subjectId);
+      const subj = availableSubjects.find((s) => s.id === editItem.subjectId);
+      if (subj) setValue("subjectName", subj.name);
+    }
+  }, [isOpen, editItem, availableSubjects, setValue]);
+
   const onFormSubmit = (data: ScheduleItem) => {
     // Если это новый элемент, генерируем ID
     if (!data.id) {
@@ -269,12 +255,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               render={({ field }) => (
                 <Select
                   label="Предмет"
-                  options={availableSubjects.map((subject) => ({
+                  options={availableSubjects.map((subject, idx) => ({
                     value: subject.id,
                     label: subject.name,
+                    key: subject.id || String(idx),
                   }))}
                   error={errors.subjectId?.message}
-                  disabled={!selectedTeacher}
                   {...field}
                 />
               )}
@@ -290,12 +276,18 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               render={({ field }) => (
                 <Select
                   label="Тип занятия"
-                  options={availableLessonTypes.map((type) => ({
-                    value: type,
-                    label: type,
-                  }))}
+                  options={availableLessonTypes.map((type, idx) => {
+                    if (typeof type === "string") {
+                      return { value: type, label: type, key: type };
+                    } else {
+                      return {
+                        value: type.value || type.name || String(idx),
+                        label: type.label || type.name || String(idx),
+                        key: type.value || type.name || String(idx),
+                      };
+                    }
+                  })}
                   error={errors.lessonType?.message}
-                  disabled={!selectedSubject}
                   {...field}
                 />
               )}
