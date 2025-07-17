@@ -71,6 +71,18 @@ export const pathKeys = {
       return pathKeys.profile.root().concat('badges/')
     },
   },
+  subject: {
+    root() {
+      return pathKeys.root.concat('subjects/')
+    },
+    byId(id: number | string) {
+      return pathKeys.subject.root().concat(`${id}/`)
+    },
+    groupById(subjectId: number | string, groupId: number | string) {
+      return pathKeys.subject.byId(subjectId).concat(`groups/${groupId}/`)
+    },
+  },
+
   lessonId: {
     byId(id: string) {
       return `attend/${id}/`

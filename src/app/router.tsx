@@ -20,6 +20,8 @@ import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
 import { timetablePageRoute } from '@/pages/timetable'
 import { schedulePageRoute } from '@/pages'
 import { lessonIDPageRoute } from '@/pages/lesson-id'
+import { subjectPageRoute } from '@/pages/subject'
+import { groupPageRoute } from '@/pages/group'
 
 function BubbleError() {
   const error = useRouteError()
@@ -51,7 +53,13 @@ const router = createBrowserRouter([
       },
       {
         element: <MentorLayout />,
-        children: [mentorHomePageRoute, timetablePageRoute, schedulePageRoute],
+        children: [
+          mentorHomePageRoute,
+          timetablePageRoute,
+          schedulePageRoute,
+          subjectPageRoute,
+          groupPageRoute,
+        ],
       },
       { element: <IntroLayout />, children: [loginPageRoute] },
     ],
