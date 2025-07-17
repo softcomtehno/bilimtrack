@@ -71,7 +71,7 @@ export const MentorHomePage = () => {
           <EventCard />
           <Title Icon={Newspaper} title="Новости" />
           <EventCard />
-          <GradeBook />
+          {/* <GradeBook /> */}
           {/* <FullSchedule /> */}
           {/* <GradeBook2 /> */}
         </CardBody>

@@ -9,7 +9,7 @@ import { QRGenerator } from '@/features/lesson/qr-generator'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
-export function GradeBook() {
+export function GradeBook({ subjectId, groupId }) {
   const [rowData, setRowData] = useState<any[]>([])
   const [allDates, setAllDates] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -17,26 +17,39 @@ export function GradeBook() {
   const todayDate = new Date().toLocaleDateString('ru-RU') // dd.mm.yyyy
   const todaySafe = todayDate.replace(/\./g, '_') // dd_mm_yyyy
 
+  const columnsPerPage = 9
+
   useEffect(() => {
     async function fetchGrades() {
       try {
-        const res = await gradeApi.getGrades(1, 1)
+        const res = await gradeApi.getGrades(groupId, subjectId)
         const { sessions, grades } = res.data
 
-        // Получаем все даты из сессий
         const dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
 
         const transformedData = grades.map((g: any) => {
           const scores: Record<string, number> = {}
+          const scoreIds: Record<string, number> = {}
+          const sessionIds: Record<string, string> = {}
+
           dates.forEach((date) => {
             const score = g.scores.find(
               (s: any) => s.date.replace(/-/g, '_') === date
             )
             scores[date] = score ? score.grade : 0
+            scoreIds[date] = score?.id
+            sessionIds[date] =
+              score?.session ||
+              sessions.find((s: any) => s.date.replace(/-/g, '_') === date)?.id
           })
+
           return {
             fullName: g.user.fullName,
-            ...scores,
+            userId: g.user.id,
+            scores,
+            scoreIds,
+            sessionIds,
+            ...scores, // для колонок AG Grid
           }
         })
 
@@ -51,7 +64,6 @@ export function GradeBook() {
     fetchGrades()
   }, [])
 
-  const columnsPerPage = 9
   const paginatedDates = allDates.filter((d) => d !== todaySafe)
   const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
 
@@ -89,14 +101,75 @@ export function GradeBook() {
           if (isNaN(value)) return false
           if (value < 0) value = 0
           if (value > 10) value = 10
-          params.data[todaySafe] = value
+
+          const { data } = params
+          const userId = data.userId
+          const sessionId = data.sessionIds[todaySafe]
+          const gradeId = data.scoreIds[todaySafe]
+
+          // 1. Сохраняем старую оценку
+          const previousValue = data[todaySafe]
+
+          // 2. Немедленно показываем новую оценку в UI
+          data[todaySafe] = value
           setRowData((prev) =>
             prev.map((r) =>
-              r.fullName === params.data.fullName
-                ? { ...r, [todaySafe]: value }
-                : r
+              r.fullName === data.fullName ? { ...r, [todaySafe]: value } : r
             )
           )
+
+          // 3. Асинхронно отправляем на сервер
+          ;(async () => {
+            try {
+              if (gradeId) {
+                const res = await gradeApi.updateGradePartial(gradeId, {
+                  grade: value,
+                })
+                // Обновить значением с бэка, если вернулась оценка
+                const updatedGrade = res.data.grade
+                setRowData((prev) =>
+                  prev.map((r) =>
+                    r.fullName === data.fullName
+                      ? { ...r, [todaySafe]: updatedGrade }
+                      : r
+                  )
+                )
+              } else {
+                const res = await gradeApi.createGrade({
+                  user: userId,
+                  session: sessionId,
+                  grade: value,
+                })
+                const created = res.data
+                // Обновить grade + сохранить id новой оценки
+                setRowData((prev) =>
+                  prev.map((r) =>
+                    r.fullName === data.fullName
+                      ? {
+                          ...r,
+                          [todaySafe]: created.grade,
+                          scoreIds: {
+                            ...r.scoreIds,
+                            [todaySafe]: created.id,
+                          },
+                        }
+                      : r
+                  )
+                )
+              }
+            } catch (err) {
+              console.error('Ошибка при сохранении оценки:', err)
+              // 4. Откатить на предыдущее значение при ошибке
+              setRowData((prev) =>
+                prev.map((r) =>
+                  r.fullName === data.fullName
+                    ? { ...r, [todaySafe]: previousValue }
+                    : r
+                )
+              )
+            }
+          })()
+
           return true
         },
       },
@@ -126,11 +199,9 @@ export function GradeBook() {
           tabToNextCell={(params) => {
             const { previousCellPosition, api } = params
             const nextRowIndex = previousCellPosition.rowIndex + 1
-
             if (nextRowIndex >= api.getDisplayedRowCount()) {
               return null
             }
-
             return {
               rowIndex: nextRowIndex,
               column: previousCellPosition.column,
