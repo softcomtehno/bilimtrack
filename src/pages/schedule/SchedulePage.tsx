@@ -11,17 +11,20 @@ import {
   ScheduleGrid,
 } from "@/shared/ui/schedule";
 import { useAppStore } from "@/app/store";
-import { schedulesQueries } from "@/entities/schedules";
+import {
+  schedulesQueries,
+  schedulesTeachersQueries,
+  schedulesGroupsQueries,
+  schedulesRoomsQueryes,
+} from "@/entities/schedule";
 import { DAYS_OF_WEEK } from "@/shared/lib/utils";
-import type { Teachers } from "@/entities/teachers/teachers.types";
+import type { Teachers } from "@/entities/schedule/teachers/teachers.types";
 import type { Teacher } from "@/shared/types";
-import { schedulesGroupsQueries } from "@/entities/groups";
-import type { Groups as ApiGroup } from "@/entities/groups/groups.types";
+import type { Groups as ApiGroup } from "@/entities/schedule/groups/groups.types";
 import type { Group } from "@/shared/types";
-import { schedulesTeachersQueries } from "@/entities/teachers";
-import { schedulesRoomsQueryes } from "@/entities/rooms";
-import type { Rooms } from "@/entities/rooms/rooms.types";
+import type { Rooms } from "@/entities/schedule/rooms/rooms.types";
 import type { Classroom } from "@/shared/types";
+import { usePatchScheduleMutation } from "@/entities/schedule/schedules/schedules.queries";
 
 export const SchedulePage: React.FC = () => {
   const {
@@ -60,6 +63,8 @@ export const SchedulePage: React.FC = () => {
     isLoading: roomsLoading,
     isError: roomsError,
   } = schedulesRoomsQueryes.useGetSchedulesRooms();
+
+  const patchScheduleMutation = usePatchScheduleMutation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | undefined>(undefined);
@@ -142,26 +147,37 @@ export const SchedulePage: React.FC = () => {
         // Для отладки можно вывести предупреждение
         console.warn("lessonTime отсутствует или некорректен для item:", item);
       }
+      // Группы теперь массив
+      const groupIds = Array.isArray(item.groups)
+        ? item.groups.map((g: any) => String(g.id))
+        : item.group
+          ? [String(item.group.id)]
+          : [];
+      const groupNames = Array.isArray(item.groups)
+        ? item.groups.map((g: any) => g.name)
+        : item.group
+          ? [item.group.name]
+          : [];
       return {
         id: String(item.id),
         day: DAYS_OF_WEEK[item.dayOfWeek],
         timeSlot,
         weekType: mapWeekType(item.weekType),
-        groupIds: [String(item.group.id)],
+        groupIds,
         teacherId: String(item.teacher.id),
         classroomId: String(item.room.id),
         subjectId: String(item.subject.id),
         lessonType: item.lessonType?.name ?? "",
         subjectName: item.subject.name,
         teacherName: item.teacher.fullName,
-        groupNames: [item.group.name],
+        groupNames,
         classroomName: `${item.room.number} (${item.room.building})`,
       };
     }
   );
 
   // Фильтрация расписания по выбранным фильтрам
-  const filteredSchedule = transformedSchedule.filter((item) => {
+  let filteredSchedule = transformedSchedule.filter((item) => {
     // Фильтрация по типу недели
     if (weekType !== "Обе" && item.weekType !== weekType) {
       return false;
@@ -182,6 +198,14 @@ export const SchedulePage: React.FC = () => {
       return false;
     }
     return true;
+  });
+
+  // Сортировка: Числитель > Знаменатель > Обе
+  const weekTypeOrder = { Числитель: 0, Знаменатель: 1, Обе: 2 };
+  filteredSchedule = filteredSchedule.sort((a, b) => {
+    return (
+      (weekTypeOrder[a.weekType] ?? 99) - (weekTypeOrder[b.weekType] ?? 99)
+    );
   });
 
   // Преобразование shedulesTeachers (API) к типу Teacher[] (frontend)
@@ -218,9 +242,30 @@ export const SchedulePage: React.FC = () => {
     }
   };
 
-  const handleFormSubmit = (data: ScheduleItem) => {
+  const weekTypeToApi = (weekType: string) => {
+    if (weekType === "Числитель") return "top";
+    if (weekType === "Знаменатель") return "bottom";
+    if (weekType === "Обе") return "weekly";
+    return weekType;
+  };
+
+  const handleFormSubmit = async (data: ScheduleItem) => {
     if (editItem) {
-      updateScheduleItem(data);
+      // PATCH запрос на обновление
+      const patchData = {
+        ...data,
+        id: Number(data.id),
+        teacherId: Number(data.teacherId),
+        classroomId: Number(data.classroomId),
+        subjectId: Number(data.subjectId),
+        groupIds: data.groupIds.map(Number),
+        weekType: weekTypeToApi(data.weekType),
+        // lessonType: data.lessonType.id,
+      };
+      await patchScheduleMutation.mutateAsync({
+        id: patchData.id,
+        data: patchData,
+      });
     } else {
       addScheduleItem(data);
     }
