@@ -12,6 +12,16 @@ import {
 } from "@/shared/ui/schedule";
 import { useAppStore } from "@/app/store";
 import { schedulesQueries } from "@/entities/schedules";
+import { DAYS_OF_WEEK } from "@/shared/lib/utils";
+import type { Teachers } from "@/entities/teachers/teachers.types";
+import type { Teacher } from "@/shared/types";
+import { schedulesGroupsQueries } from "@/entities/groups";
+import type { Groups as ApiGroup } from "@/entities/groups/groups.types";
+import type { Group } from "@/shared/types";
+import { schedulesTeachersQueries } from "@/entities/teachers";
+import { schedulesRoomsQueryes } from "@/entities/rooms";
+import type { Rooms } from "@/entities/rooms/rooms.types";
+import type { Classroom } from "@/shared/types";
 
 export const SchedulePage: React.FC = () => {
   const {
@@ -33,6 +43,24 @@ export const SchedulePage: React.FC = () => {
     isLoading: schedulesLoading,
   } = schedulesQueries.useGetSchedules();
 
+  const {
+    data: shedulesTeachers,
+    isLoading: teachersLoading,
+    isError: teachersError,
+  } = schedulesTeachersQueries.useGetSchedulesTeachers();
+
+  const {
+    data: schedulesGroups,
+    isLoading: groupsLoading,
+    isError: groupsError,
+  } = schedulesGroupsQueries.useGetSchedulesGroups();
+
+  const {
+    data: schedulesRooms,
+    isLoading: roomsLoading,
+    isError: roomsError,
+  } = schedulesRoomsQueryes.useGetSchedulesRooms();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -50,6 +78,25 @@ export const SchedulePage: React.FC = () => {
     string | undefined
   >(activeFilters.classroomId);
 
+  // Преобразование schedulesGroups (API) к типу Group[] (frontend)
+  const apiGroups: Group[] =
+    (schedulesGroups as ApiGroup[] | undefined)?.map((g) => ({
+      id: String(g.id),
+      name: g.name,
+      students: 0,
+      subjects: [],
+    })) || [];
+
+  // Преобразование schedulesRooms (API) к типу Classroom[] (frontend)
+  const apiClassrooms: Classroom[] =
+    (schedulesRooms as Rooms[] | undefined)?.map((r) => ({
+      id: String(r.id),
+      name: `${r.number} (${r.building})`,
+      type: "Стандартная",
+      capacity: 0,
+      features: [],
+    })) || [];
+
   // Синхронизация фильтров с хранилищем
   useEffect(() => {
     setActiveFilters({
@@ -66,30 +113,86 @@ export const SchedulePage: React.FC = () => {
     setActiveFilters,
   ]);
 
+  // Если selectedGroupId не выбран, устанавливаем первую группу по умолчанию
+  useEffect(() => {
+    if (!selectedGroupId && apiGroups.length > 0) {
+      setSelectedGroupId(apiGroups[0].id);
+    }
+  }, [selectedGroupId, apiGroups]);
+
+  // Функция для сопоставления weekType из API к значениям фильтра
+  const mapWeekType = (apiType: string): WeekType => {
+    if (apiType === "weekly") return "Обе";
+    if (apiType === "top") return "Числитель";
+    if (apiType === "bottom") return "Знаменатель";
+    return apiType as WeekType;
+  };
+
   // Преобразование данных
   const transformedSchedule: ScheduleItem[] = (schedulesData || []).map(
-    (item) => ({
-      id: String(item.id),
-      dayOfWeek: item.dayOfWeek,
-      weekType: item.weekType === "weekly" ? "Обе" : item.weekType, // если нужно перевести
-      groupIds: [String(item.group.id)],
-      teacherId: String(item.teacher.id),
-      classroomId: String(item.room.id),
-      subjectId: String(item.subject.id),
-      lessonTime: {
-        id: item.lessonTime.id,
-        startTime: item.lessonTime.startTime,
-        endTime: item.lessonTime.endTime,
-      },
-      lessonType: item.lessonType?.name ?? "",
-
-      // 👇 поля для отображения (в ScheduleCell)
-      subjectName: item.subject.name,
-      teacherName: item.teacher.fullName,
-      groupNames: [item.group.name],
-      classroomName: `${item.room.number} (${item.room.building})`,
-    })
+    (item: any) => {
+      let timeSlot = "";
+      if (
+        item.lessonTime &&
+        item.lessonTime.startTime &&
+        item.lessonTime.endTime
+      ) {
+        timeSlot = `${item.lessonTime.startTime} - ${item.lessonTime.endTime}`;
+      } else {
+        // Для отладки можно вывести предупреждение
+        console.warn("lessonTime отсутствует или некорректен для item:", item);
+      }
+      return {
+        id: String(item.id),
+        day: DAYS_OF_WEEK[item.dayOfWeek],
+        timeSlot,
+        weekType: mapWeekType(item.weekType),
+        groupIds: [String(item.group.id)],
+        teacherId: String(item.teacher.id),
+        classroomId: String(item.room.id),
+        subjectId: String(item.subject.id),
+        lessonType: item.lessonType?.name ?? "",
+        subjectName: item.subject.name,
+        teacherName: item.teacher.fullName,
+        groupNames: [item.group.name],
+        classroomName: `${item.room.number} (${item.room.building})`,
+      };
+    }
   );
+
+  // Фильтрация расписания по выбранным фильтрам
+  const filteredSchedule = transformedSchedule.filter((item) => {
+    // Фильтрация по типу недели
+    if (weekType !== "Обе" && item.weekType !== weekType) {
+      return false;
+    }
+    if (
+      selectedTeacherId &&
+      String(item.teacherId) !== String(selectedTeacherId)
+    ) {
+      return false;
+    }
+    if (selectedGroupId && !item.groupIds.includes(selectedGroupId)) {
+      return false;
+    }
+    if (
+      selectedClassroomId &&
+      String(item.classroomId) !== String(selectedClassroomId)
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  // Преобразование shedulesTeachers (API) к типу Teacher[] (frontend)
+  const apiTeachers: Teacher[] =
+    (shedulesTeachers as Teachers[] | undefined)?.map((t) => ({
+      id: String(t.id),
+      name: t.fullName,
+      subjects: [],
+      availability: [],
+      preferences: [],
+    })) || [];
 
   // Обработчики
   const handleAddItem = () => {
@@ -165,9 +268,9 @@ export const SchedulePage: React.FC = () => {
       <ScheduleFilters
         weekType={weekType}
         setWeekType={setWeekType}
-        teachers={teachers}
-        groups={groups}
-        classrooms={classrooms}
+        teachers={apiTeachers}
+        groups={apiGroups}
+        classrooms={apiClassrooms}
         selectedTeacherId={selectedTeacherId}
         selectedGroupId={selectedGroupId}
         selectedClassroomId={selectedClassroomId}
@@ -191,7 +294,7 @@ export const SchedulePage: React.FC = () => {
       ) : (
         <Card>
           <ScheduleGrid
-            schedule={transformedSchedule}
+            schedule={filteredSchedule}
             weekType={weekType}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
@@ -207,9 +310,9 @@ export const SchedulePage: React.FC = () => {
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleFormSubmit}
         editItem={editItem}
-        teachers={teachers}
-        groups={groups}
-        classrooms={classrooms}
+        teachers={apiTeachers}
+        groups={apiGroups}
+        classrooms={apiClassrooms}
         subjects={subjects}
         schedule={transformedSchedule}
       />
