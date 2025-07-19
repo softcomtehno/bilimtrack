@@ -63,6 +63,7 @@ export interface ScheduleItem {
   day: string;
   timeSlot: string;
   weekType: WeekType;
+  lessonTime?: string;
 }
 
 // Состояние приложения

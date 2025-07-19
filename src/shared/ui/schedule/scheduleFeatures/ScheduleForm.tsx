@@ -20,6 +20,7 @@ import { Dialog } from "../ui/Dialog";
 import {
   useGetSubjects,
   useGetLessonTypes,
+  useGetLessonTimes,
 } from "@/entities/schedule/schedules/schedules.queries";
 
 interface ScheduleFormProps {
@@ -74,7 +75,13 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   const [conflicts, setConflicts] = useState<string[]>([]);
   // Используем данные с API
   const availableSubjects: Subject[] = useGetSubjects()?.data || [];
-  const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || [];
+  const availableLessonTypes: { id: number; name: string }[] =
+    useGetLessonTypes()?.data || [];
+  const availableLessonTimes: {
+    id: number;
+    startTime: string;
+    endTime: string;
+  }[] = useGetLessonTimes()?.data || [];
   const watchedValues = watch();
 
   // Обработка изменения преподавателя
@@ -276,17 +283,11 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               render={({ field }) => (
                 <Select
                   label="Тип занятия"
-                  options={availableLessonTypes.map((type, idx) => {
-                    if (typeof type === "string") {
-                      return { value: type, label: type, key: type };
-                    } else {
-                      return {
-                        value: type.value || type.name || String(idx),
-                        label: type.label || type.name || String(idx),
-                        key: type.value || type.name || String(idx),
-                      };
-                    }
-                  })}
+                  options={availableLessonTypes.map((type) => ({
+                    value: String(type.id),
+                    label: type.name,
+                    key: String(type.id),
+                  }))}
                   error={errors.lessonType?.message}
                   {...field}
                 />
@@ -367,17 +368,18 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           {/* Временной слот */}
           <div>
             <Controller
-              name="timeSlot"
+              name="lessonTime"
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
                 <Select
                   label="Время"
-                  options={DEFAULT_TIME_SLOTS.map((slot) => ({
-                    value: slot,
-                    label: slot,
+                  options={availableLessonTimes.map((slot) => ({
+                    value: String(slot.id),
+                    label: `${slot.startTime} - ${slot.endTime}`,
+                    key: String(slot.id),
                   }))}
-                  error={errors.timeSlot?.message}
+                  error={errors.lessonTime?.message}
                   {...field}
                 />
               )}
