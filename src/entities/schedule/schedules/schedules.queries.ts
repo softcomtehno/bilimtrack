@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
+  getLessonTimes,
   getLessonTypes,
   getSchedules,
   getSubjects,
@@ -10,6 +11,7 @@ const keys = {
   root: () => ["schedules"],
   getSubjects: () => [...keys.root(), "subjects"],
   getLessonTypes: () => [...keys.root(), "lessonTypes"],
+  getLessonTimes: () => [...keys.root(), "lessonTimes"],
 };
 
 export function useGetSchedules() {
@@ -30,6 +32,13 @@ export function useGetLessonTypes() {
   return useQuery({
     queryKey: keys.getLessonTypes(),
     queryFn: getLessonTypes,
+  });
+}
+
+export function useGetLessonTimes() {
+  return useQuery({
+    queryKey: keys.getLessonTimes(),
+    queryFn: getLessonTimes,
   });
 }
 

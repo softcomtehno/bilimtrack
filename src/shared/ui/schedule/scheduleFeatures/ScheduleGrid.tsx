@@ -117,10 +117,10 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               {DAYS_OF_WEEK.map((day) => (
                 <td
                   key={`${day.index}-${slot.id}`}
-                  className="p-2 w-[200px] border"
+                  className="p-2 pt-6 w-[200px] border"
                 >
                   {scheduleMap[day.index][slot.id].length > 0 ? (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-6">
                       {scheduleMap[day.index][slot.id].map((item) => (
                         <ScheduleCell
                           key={item.id}

@@ -21,3 +21,8 @@ export const getLessonTypes = async () => {
   const response = await $api.get("schedules/lesson-types/");
   return response.data;
 };
+
+export const getLessonTimes = async () => {
+  const response = await $api.get("schedules/lesson-times/");
+  return response.data;
+};

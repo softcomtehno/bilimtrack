@@ -253,14 +253,17 @@ export const SchedulePage: React.FC = () => {
     if (editItem) {
       // PATCH запрос на обновление
       const patchData = {
-        ...data,
         id: Number(data.id),
-        teacherId: Number(data.teacherId),
-        classroomId: Number(data.classroomId),
-        subjectId: Number(data.subjectId),
-        groupIds: data.groupIds.map(Number),
+        groups: data.groupIds.filter(Boolean).map(Number),
+        subject: Number(data.subjectId),
+        teacher: Number(data.teacherId),
+        room: Number(data.classroomId),
+        lessonType: Number(data.lessonType),
+        dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
         weekType: weekTypeToApi(data.weekType),
-        // lessonType: data.lessonType.id,
+        ...(typeof (data as any).lessonTime !== "undefined"
+          ? { lessonTime: Number((data as any).lessonTime) }
+          : {}),
       };
       await patchScheduleMutation.mutateAsync({
         id: patchData.id,
