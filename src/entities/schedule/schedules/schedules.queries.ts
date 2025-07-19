@@ -5,6 +5,7 @@ import {
   getSchedules,
   getSubjects,
   patchSchedule,
+  deleteSchedule,
 } from "./schedules.api";
 
 const keys = {
@@ -46,5 +47,11 @@ export function usePatchScheduleMutation() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string | number; data: any }) =>
       patchSchedule(id, data),
+  });
+}
+
+export function useDeleteScheduleMutation() {
+  return useMutation({
+    mutationFn: (id: string | number) => deleteSchedule(id),
   });
 }

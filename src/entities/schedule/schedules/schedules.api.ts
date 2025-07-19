@@ -12,6 +12,11 @@ export const patchSchedule = async (id: string | number, data: any) => {
   return response.data;
 };
 
+export const deleteSchedule = async (id: string | number) => {
+  const response = await $api.delete(`schedules/${id}/`);
+  return response.data;
+};
+
 export const getSubjects = async () => {
   const response = await $api.get("schedules/subjects/");
   return response.data;
