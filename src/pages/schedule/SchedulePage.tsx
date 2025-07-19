@@ -24,7 +24,11 @@ import type { Groups as ApiGroup } from "@/entities/schedule/groups/groups.types
 import type { Group } from "@/shared/types";
 import type { Rooms } from "@/entities/schedule/rooms/rooms.types";
 import type { Classroom } from "@/shared/types";
-import { usePatchScheduleMutation } from "@/entities/schedule/schedules/schedules.queries";
+import {
+  usePatchScheduleMutation,
+  useDeleteScheduleMutation,
+} from "@/entities/schedule/schedules/schedules.queries";
+import { toast } from "react-toastify";
 
 export const SchedulePage: React.FC = () => {
   const {
@@ -44,6 +48,7 @@ export const SchedulePage: React.FC = () => {
     data: schedulesData,
     isError: schedulesError,
     isLoading: schedulesLoading,
+    refetch: refetchSchedules,
   } = schedulesQueries.useGetSchedules();
 
   const {
@@ -65,6 +70,7 @@ export const SchedulePage: React.FC = () => {
   } = schedulesRoomsQueryes.useGetSchedulesRooms();
 
   const patchScheduleMutation = usePatchScheduleMutation();
+  const deleteScheduleMutation = useDeleteScheduleMutation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | undefined>(undefined);
@@ -234,9 +240,11 @@ export const SchedulePage: React.FC = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (itemToDelete) {
-      deleteScheduleItem(itemToDelete);
+      await deleteScheduleMutation.mutateAsync(itemToDelete);
+      await refetchSchedules();
+      toast.success("Занятие успешно удалено!");
       setIsDeleteDialogOpen(false);
       setItemToDelete(null);
     }
@@ -269,6 +277,8 @@ export const SchedulePage: React.FC = () => {
         id: patchData.id,
         data: patchData,
       });
+      await refetchSchedules();
+      toast.success("Занятие успешно изменено!");
     } else {
       addScheduleItem(data);
     }
@@ -372,8 +382,8 @@ export const SchedulePage: React.FC = () => {
       >
         <div className="mb-6">
           <div className="flex items-center text-warning-600 mb-3">
-            <AlertTriangle size={24} className="mr-2" />
-            <p className="font-medium">
+            <AlertTriangle color="red" size={24} className="mr-2" />
+            <p className="font-medium text-red-500">
               Вы уверены, что хотите удалить это занятие?
             </p>
           </div>
@@ -382,15 +392,20 @@ export const SchedulePage: React.FC = () => {
             расписания.
           </p>
         </div>
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-center space-x-3">
           <Button
-            variant="outline"
+            className="hover:text-black hover:bg-transparent border bg-red-500 text-white"
+            // variant="danger"
+            onClick={confirmDelete}
+          >
+            Удалить
+          </Button>
+          <Button
+            className="hover:text-black hover:bg-transparent border bg-gray-500 text-white"
+            // variant="outline"
             onClick={() => setIsDeleteDialogOpen(false)}
           >
             Отмена
-          </Button>
-          <Button variant="danger" onClick={confirmDelete}>
-            Удалить
           </Button>
         </div>
       </Dialog>
