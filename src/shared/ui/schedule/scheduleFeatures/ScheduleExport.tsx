@@ -9,25 +9,21 @@ interface ScheduleExportProps {
 }
 
 export const ScheduleExport: React.FC<ScheduleExportProps> = ({ schedule }) => {
-  const handleExportPDF = async () => {
-    await exportToPDF("schedule-grid", "Расписание");
-  };
-
-  const handleExportExcel = async () => {
-    // Преобразуем данные расписания в формат для Excel
-    const excelData = schedule.map((item) => ({
-      Предмет: item.subjectName,
-      "Тип занятия": item.lessonType,
-      Преподаватель: item.teacherName,
-      Аудитория: item.classroomName,
-      Группы: item.groupNames.join(", "),
-      День: item.day,
-      Время: item.timeSlot,
-      Неделя: item.weekType,
-    }));
-
-    await exportToExcel(excelData, "Расписание");
-  };
+  const handleExportPDF = () => exportToPDF("schedule-grid", "Расписание");
+  const handleExportExcel = () =>
+    exportToExcel(
+      schedule.map((item) => ({
+        Предмет: item.subjectName,
+        "Тип занятия": item.lessonType,
+        Преподаватель: item.teacherName,
+        Аудитория: item.classroomName,
+        Группы: item.groupNames.join(", "),
+        День: item.day,
+        Время: item.timeSlot,
+        Неделя: item.weekType,
+      })),
+      "Расписание"
+    );
 
   return (
     <div className="flex space-x-2">

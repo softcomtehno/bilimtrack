@@ -72,91 +72,60 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   });
 
   const [conflicts, setConflicts] = useState<string[]>([]);
-  // Используем данные с API
   const availableSubjects: Subject[] = useGetSubjects()?.data || [];
   const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || [];
   const watchedValues = watch();
 
-  // Обработка изменения преподавателя
+  // Универсальный useEffect для синхронизации связанных полей
   useEffect(() => {
-    if (watchedValues.teacherId) {
-      const teacher = teachers.find((t) => t.id === watchedValues.teacherId);
-      if (teacher) {
-        setValue("teacherName", teacher.name);
-
-        // Сбрасываем выбранный предмет, если он недоступен для преподавателя
-        if (
-          watchedValues.subjectId &&
-          !teacher.subjects.includes(watchedValues.subjectId)
-        ) {
-          setValue("subjectId", "");
-          setValue("subjectName", "");
-        }
-      }
-    }
-  }, [watchedValues.teacherId, teachers, subjects, setValue]);
-
-  // Обработка изменения предмета
-  useEffect(() => {
-    if (watchedValues.subjectId) {
-      const subject = subjects.find((s) => s.id === watchedValues.subjectId);
-      if (subject) {
-        setValue("subjectName", subject.name);
-      } else {
-        setValue("subjectName", "");
-      }
-    } else {
-      setValue("subjectName", "");
-    }
-  }, [watchedValues.subjectId, subjects, setValue]);
-
-  // Обработка изменения аудитории
-  useEffect(() => {
-    if (watchedValues.classroomId) {
-      const classroom = classrooms.find(
-        (c) => c.id === watchedValues.classroomId
-      );
-      if (classroom) {
-        setValue("classroomName", classroom.name);
-      }
-    }
-  }, [watchedValues.classroomId, classrooms, setValue]);
-
-  // Обработка изменения групп
-  useEffect(() => {
-    if (watchedValues.groupIds && watchedValues.groupIds.length > 0) {
-      const selectedGroups = groups.filter((g) =>
-        watchedValues.groupIds.includes(g.id)
-      );
+    // Преподаватель
+    const teacher = teachers.find((t) => t.id === watchedValues.teacherId);
+    if (teacher) setValue("teacherName", teacher.name);
+    // Предмет
+    const subject = subjects.find((s) => s.id === watchedValues.subjectId);
+    setValue("subjectName", subject ? subject.name : "");
+    // Аудитория
+    const classroom = classrooms.find(
+      (c) => c.id === watchedValues.classroomId
+    );
+    if (classroom) setValue("classroomName", classroom.name);
+    // Группы
+    if (watchedValues.groupIds?.length) {
       setValue(
         "groupNames",
-        selectedGroups.map((g) => g.name)
+        groups
+          .filter((g) => watchedValues.groupIds.includes(g.id))
+          .map((g) => g.name)
       );
     } else {
       setValue("groupNames", []);
     }
-  }, [watchedValues.groupIds, groups, setValue]);
+  }, [
+    watchedValues.teacherId,
+    watchedValues.subjectId,
+    watchedValues.classroomId,
+    watchedValues.groupIds,
+    teachers,
+    subjects,
+    classrooms,
+    groups,
+    setValue,
+  ]);
 
-  // Проверка конфликтов при изменении важных полей
+  // Проверка конфликтов
   useEffect(() => {
     if (
       watchedValues.teacherId &&
       watchedValues.classroomId &&
-      watchedValues.groupIds?.length > 0 &&
+      watchedValues.groupIds?.length &&
       watchedValues.day &&
       watchedValues.timeSlot &&
       watchedValues.weekType
     ) {
-      // Исключаем текущий элемент из проверки при редактировании
       const scheduleToCheck = editItem
         ? schedule.filter((item) => item.id !== editItem.id)
         : schedule;
-
-      const conflictMessages = checkScheduleConflicts(
-        scheduleToCheck,
-        watchedValues
-      );
-      setConflicts(conflictMessages);
+      setConflicts(checkScheduleConflicts(scheduleToCheck, watchedValues));
     } else {
       setConflicts([]);
     }
@@ -194,25 +163,8 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     }
   }, [isOpen, editItem, reset]);
 
-  useEffect(() => {
-    if (
-      isOpen &&
-      editItem &&
-      availableSubjects.length > 0 &&
-      editItem.subjectId
-    ) {
-      setValue("subjectId", editItem.subjectId);
-      const subj = availableSubjects.find((s) => s.id === editItem.subjectId);
-      if (subj) setValue("subjectName", subj.name);
-    }
-  }, [isOpen, editItem, availableSubjects, setValue]);
-
   const onFormSubmit = (data: ScheduleItem) => {
-    // Если это новый элемент, генерируем ID
-    if (!data.id) {
-      data.id = crypto.randomUUID();
-    }
-
+    if (!data.id) data.id = crypto.randomUUID();
     onSubmit(data);
     onClose();
   };
@@ -226,7 +178,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className="grid grid-cols-2 gap-4">
-          {/* Преподаватель */}
           <div>
             <Controller
               name="teacherId"
@@ -245,8 +196,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
-
-          {/* Предмет */}
           <div>
             <Controller
               name="subjectId"
@@ -266,8 +215,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
-
-          {/* Тип занятия */}
           <div>
             <Controller
               name="lessonType"
@@ -276,25 +223,21 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               render={({ field }) => (
                 <Select
                   label="Тип занятия"
-                  options={availableLessonTypes.map((type, idx) => {
-                    if (typeof type === "string") {
-                      return { value: type, label: type, key: type };
-                    } else {
-                      return {
-                        value: type.value || type.name || String(idx),
-                        label: type.label || type.name || String(idx),
-                        key: type.value || type.name || String(idx),
-                      };
-                    }
-                  })}
+                  options={(availableLessonTypes as any[]).map((type, idx) =>
+                    typeof type === "string"
+                      ? { value: type, label: type, key: type }
+                      : {
+                          value: type.value || type.name || String(idx),
+                          label: type.label || type.name || String(idx),
+                          key: type.value || type.name || String(idx),
+                        }
+                  )}
                   error={errors.lessonType?.message}
                   {...field}
                 />
               )}
             />
           </div>
-
-          {/* Аудитория */}
           <div>
             <Controller
               name="classroomId"
@@ -313,13 +256,17 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
-
-          {/* Группы */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-1"
+              htmlFor="group-checkbox-list"
+            >
               Группы
             </label>
-            <div className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3">
+            <div
+              className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3"
+              id="group-checkbox-list"
+            >
               {groups.map((group) => (
                 <div key={group.id} className="flex items-center">
                   <input
@@ -343,8 +290,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               </p>
             )}
           </div>
-
-          {/* День недели */}
           <div>
             <Controller
               name="day"
@@ -363,8 +308,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
-
-          {/* Временной слот */}
           <div>
             <Controller
               name="timeSlot"
@@ -383,8 +326,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
-
-          {/* Тип недели */}
           <div>
             <Controller
               name="weekType"
@@ -405,8 +346,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             />
           </div>
         </div>
-
-        {/* Предупреждения о конфликтах */}
         {conflicts.length > 0 && (
           <div className="mt-4 p-3 bg-warning-50 border border-warning-200 rounded-md">
             <h4 className="text-warning-800 font-medium mb-2">
@@ -419,7 +358,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             </ul>
           </div>
         )}
-
         <div className="mt-6 flex justify-end space-x-3">
           <Button variant="outline" onClick={onClose}>
             Отмена
