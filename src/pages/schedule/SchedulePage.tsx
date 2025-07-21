@@ -27,6 +27,8 @@ import type { Classroom } from "@/shared/types";
 import {
   usePatchScheduleMutation,
   useDeleteScheduleMutation,
+  useGetLessonTimes,
+  useGetLessonTypes,
 } from "@/entities/schedule/schedules/schedules.queries";
 import { toast } from "react-toastify";
 
@@ -37,8 +39,6 @@ export const SchedulePage: React.FC = () => {
     classrooms,
     subjects,
     addScheduleItem,
-    updateScheduleItem,
-    deleteScheduleItem,
     activeFilters,
     setActiveFilters,
     resetFilters,
@@ -50,30 +50,18 @@ export const SchedulePage: React.FC = () => {
     isLoading: schedulesLoading,
     refetch: refetchSchedules,
   } = schedulesQueries.useGetSchedules();
-
-  const {
-    data: shedulesTeachers,
-    isLoading: teachersLoading,
-    isError: teachersError,
-  } = schedulesTeachersQueries.useGetSchedulesTeachers();
-
-  const {
-    data: schedulesGroups,
-    isLoading: groupsLoading,
-    isError: groupsError,
-  } = schedulesGroupsQueries.useGetSchedulesGroups();
-
-  const {
-    data: schedulesRooms,
-    isLoading: roomsLoading,
-    isError: roomsError,
-  } = schedulesRoomsQueryes.useGetSchedulesRooms();
-
+  const { data: shedulesTeachers } =
+    schedulesTeachersQueries.useGetSchedulesTeachers();
+  const { data: schedulesGroups } =
+    schedulesGroupsQueries.useGetSchedulesGroups();
+  const { data: schedulesRooms } = schedulesRoomsQueryes.useGetSchedulesRooms();
+  const { data: lessonTimes } = useGetLessonTimes();
+  const { data: lessonTypes } = useGetLessonTypes();
   const patchScheduleMutation = usePatchScheduleMutation();
   const deleteScheduleMutation = useDeleteScheduleMutation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<ScheduleItem | undefined>(undefined);
+  const [editItem, setEditItem] = useState<ScheduleItem | undefined>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [weekType, setWeekType] = useState<WeekType | "Обе">(
@@ -89,7 +77,7 @@ export const SchedulePage: React.FC = () => {
     string | undefined
   >(activeFilters.classroomId);
 
-  // Преобразование schedulesGroups (API) к типу Group[] (frontend)
+  // Преобразование API-данных
   const apiGroups: Group[] =
     (schedulesGroups as ApiGroup[] | undefined)?.map((g) => ({
       id: String(g.id),
@@ -97,8 +85,6 @@ export const SchedulePage: React.FC = () => {
       students: 0,
       subjects: [],
     })) || [];
-
-  // Преобразование schedulesRooms (API) к типу Classroom[] (frontend)
   const apiClassrooms: Classroom[] =
     (schedulesRooms as Rooms[] | undefined)?.map((r) => ({
       id: String(r.id),
@@ -107,8 +93,16 @@ export const SchedulePage: React.FC = () => {
       capacity: 0,
       features: [],
     })) || [];
+  const apiTeachers: Teacher[] =
+    (shedulesTeachers as Teachers[] | undefined)?.map((t) => ({
+      id: String(t.id),
+      name: t.fullName,
+      subjects: [],
+      availability: [],
+      preferences: [],
+    })) || [];
 
-  // Синхронизация фильтров с хранилищем
+  // Синхронизация фильтров
   useEffect(() => {
     setActiveFilters({
       weekType: weekType !== "Обе" ? (weekType as WeekType) : undefined,
@@ -124,36 +118,26 @@ export const SchedulePage: React.FC = () => {
     setActiveFilters,
   ]);
 
-  // Если selectedGroupId не выбран, устанавливаем первую группу по умолчанию
   useEffect(() => {
-    if (!selectedGroupId && apiGroups.length > 0) {
+    if (!selectedGroupId && apiGroups.length > 0)
       setSelectedGroupId(apiGroups[0].id);
-    }
   }, [selectedGroupId, apiGroups]);
 
-  // Функция для сопоставления weekType из API к значениям фильтра
-  const mapWeekType = (apiType: string): WeekType => {
-    if (apiType === "weekly") return "Обе";
-    if (apiType === "top") return "Числитель";
-    if (apiType === "bottom") return "Знаменатель";
-    return apiType as WeekType;
-  };
-
-  // Преобразование данных
+  // Преобразование данных расписания
+  const mapWeekType = (apiType: string): WeekType =>
+    apiType === "weekly"
+      ? "Обе"
+      : apiType === "top"
+        ? "Числитель"
+        : apiType === "bottom"
+          ? "Знаменатель"
+          : (apiType as WeekType);
   const transformedSchedule: ScheduleItem[] = (schedulesData || []).map(
     (item: any) => {
-      let timeSlot = "";
-      if (
-        item.lessonTime &&
-        item.lessonTime.startTime &&
-        item.lessonTime.endTime
-      ) {
-        timeSlot = `${item.lessonTime.startTime} - ${item.lessonTime.endTime}`;
-      } else {
-        // Для отладки можно вывести предупреждение
-        console.warn("lessonTime отсутствует или некорректен для item:", item);
-      }
-      // Группы теперь массив
+      const timeSlot =
+        item.lessonTime?.startTime && item.lessonTime?.endTime
+          ? `${item.lessonTime.startTime} - ${item.lessonTime.endTime}`
+          : "";
       const groupIds = Array.isArray(item.groups)
         ? item.groups.map((g: any) => String(g.id))
         : item.group
@@ -182,96 +166,79 @@ export const SchedulePage: React.FC = () => {
     }
   );
 
-  // Фильтрация расписания по выбранным фильтрам
-  let filteredSchedule = transformedSchedule.filter((item) => {
-    // Фильтрация по типу недели
-    if (weekType !== "Обе" && item.weekType !== weekType) {
-      return false;
-    }
-    if (
-      selectedTeacherId &&
-      String(item.teacherId) !== String(selectedTeacherId)
-    ) {
-      return false;
-    }
-    if (selectedGroupId && !item.groupIds.includes(selectedGroupId)) {
-      return false;
-    }
-    if (
-      selectedClassroomId &&
-      String(item.classroomId) !== String(selectedClassroomId)
-    ) {
-      return false;
-    }
-    return true;
-  });
-
-  // Сортировка: Числитель > Знаменатель > Обе
+  // Фильтрация и сортировка расписания
   const weekTypeOrder = { Числитель: 0, Знаменатель: 1, Обе: 2 };
-  filteredSchedule = filteredSchedule.sort((a, b) => {
-    return (
-      (weekTypeOrder[a.weekType] ?? 99) - (weekTypeOrder[b.weekType] ?? 99)
+  const filteredSchedule = transformedSchedule
+    .filter(
+      (item) =>
+        (weekType === "Обе" || item.weekType === weekType) &&
+        (!selectedTeacherId ||
+          String(item.teacherId) === String(selectedTeacherId)) &&
+        (!selectedGroupId || item.groupIds.includes(selectedGroupId)) &&
+        (!selectedClassroomId ||
+          String(item.classroomId) === String(selectedClassroomId))
+    )
+    .sort(
+      (a, b) =>
+        (weekTypeOrder[a.weekType] ?? 99) - (weekTypeOrder[b.weekType] ?? 99)
     );
-  });
-
-  // Преобразование shedulesTeachers (API) к типу Teacher[] (frontend)
-  const apiTeachers: Teacher[] =
-    (shedulesTeachers as Teachers[] | undefined)?.map((t) => ({
-      id: String(t.id),
-      name: t.fullName,
-      subjects: [],
-      availability: [],
-      preferences: [],
-    })) || [];
 
   // Обработчики
   const handleAddItem = () => {
     setEditItem(undefined);
     setIsFormOpen(true);
   };
-
   const handleEditItem = (item: ScheduleItem) => {
     setEditItem(item);
     setIsFormOpen(true);
   };
-
   const handleDeleteItem = (id: string) => {
     setItemToDelete(id);
     setIsDeleteDialogOpen(true);
   };
-
   const confirmDelete = async () => {
-    if (itemToDelete) {
-      await deleteScheduleMutation.mutateAsync(itemToDelete);
-      await refetchSchedules();
-      toast.success("Занятие успешно удалено!");
-      setIsDeleteDialogOpen(false);
-      setItemToDelete(null);
-    }
+    if (!itemToDelete) return;
+    await deleteScheduleMutation.mutateAsync(itemToDelete);
+    await refetchSchedules();
+    toast.success("Занятие успешно удалено!");
+    setIsDeleteDialogOpen(false);
+    setItemToDelete(null);
   };
-
-  const weekTypeToApi = (weekType: string) => {
-    if (weekType === "Числитель") return "top";
-    if (weekType === "Знаменатель") return "bottom";
-    if (weekType === "Обе") return "weekly";
-    return weekType;
-  };
-
+  const weekTypeToApi = (weekType: string) =>
+    weekType === "Числитель"
+      ? "top"
+      : weekType === "Знаменатель"
+        ? "bottom"
+        : weekType === "Обе"
+          ? "weekly"
+          : weekType;
   const handleFormSubmit = async (data: ScheduleItem) => {
     if (editItem) {
-      // PATCH запрос на обновление
+      if (!lessonTimes)
+        return toast.error(
+          "Данные о времени занятий ещё не загружены. Попробуйте позже."
+        );
+      if (!lessonTypes)
+        return toast.error(
+          "Данные о типах занятий ещё не загружены. Попробуйте позже."
+        );
+      const lessonTimeId = lessonTimes.find(
+        (time: any) => `${time.startTime} - ${time.endTime}` === data.timeSlot
+      )?.id;
+      const lessonTypeId = lessonTypes.find(
+        (type: any) =>
+          type.name === data.lessonType || type.label === data.lessonType
+      )?.id;
       const patchData = {
         id: Number(data.id),
         groups: data.groupIds.filter(Boolean).map(Number),
         subject: Number(data.subjectId),
         teacher: Number(data.teacherId),
         room: Number(data.classroomId),
-        lessonType: Number(data.lessonType),
+        lessonType: lessonTypeId,
+        lessonTime: lessonTimeId,
         dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
         weekType: weekTypeToApi(data.weekType),
-        ...(typeof (data as any).lessonTime !== "undefined"
-          ? { lessonTime: Number((data as any).lessonTime) }
-          : {}),
       };
       await patchScheduleMutation.mutateAsync({
         id: patchData.id,
@@ -285,7 +252,6 @@ export const SchedulePage: React.FC = () => {
     setIsFormOpen(false);
     setEditItem(undefined);
   };
-
   const handleResetFilters = () => {
     setWeekType("Обе");
     setSelectedTeacherId(undefined);
@@ -294,17 +260,14 @@ export const SchedulePage: React.FC = () => {
     resetFilters();
   };
 
-  if (schedulesLoading) {
+  if (schedulesLoading)
     return <div className="text-center py-10 text-gray-500">Загрузка...</div>;
-  }
-
-  if (schedulesError) {
+  if (schedulesError)
     return (
       <div className="text-center py-10 text-red-600">
         Ошибка при загрузке расписания
       </div>
     );
-  }
 
   return (
     <div>
@@ -322,7 +285,6 @@ export const SchedulePage: React.FC = () => {
           </Button>
         </div>
       </div>
-
       <ScheduleFilters
         weekType={weekType}
         setWeekType={setWeekType}
@@ -337,7 +299,6 @@ export const SchedulePage: React.FC = () => {
         setSelectedClassroomId={setSelectedClassroomId}
         resetFilters={handleResetFilters}
       />
-
       {transformedSchedule.length === 0 ? (
         <Card className="text-center py-12">
           <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
@@ -362,7 +323,6 @@ export const SchedulePage: React.FC = () => {
           />
         </Card>
       )}
-
       <ScheduleForm
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -374,7 +334,6 @@ export const SchedulePage: React.FC = () => {
         subjects={subjects}
         schedule={transformedSchedule}
       />
-
       <Dialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
@@ -395,14 +354,12 @@ export const SchedulePage: React.FC = () => {
         <div className="flex justify-center space-x-3">
           <Button
             className="hover:text-black hover:bg-transparent border bg-red-500 text-white"
-            // variant="danger"
             onClick={confirmDelete}
           >
             Удалить
           </Button>
           <Button
             className="hover:text-black hover:bg-transparent border bg-gray-500 text-white"
-            // variant="outline"
             onClick={() => setIsDeleteDialogOpen(false)}
           >
             Отмена
