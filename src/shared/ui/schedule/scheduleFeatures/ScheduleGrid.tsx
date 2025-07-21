@@ -41,54 +41,33 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   filteredTeacherId,
   filteredClassroomId,
 }) => {
-  const filteredSchedule = schedule.filter((item) => {
-    if (
-      weekType !== "Обе" &&
-      item.weekType !== "Обе" &&
-      item.weekType !== weekType
-    ) {
-      return false;
-    }
-
-    if (filteredGroupId && !item.groupIds.includes(filteredGroupId)) {
-      return false;
-    }
-
-    if (filteredTeacherId && item.teacherId !== filteredTeacherId) {
-      return false;
-    }
-
-    if (filteredClassroomId && item.classroomId !== filteredClassroomId) {
-      return false;
-    }
-
-    return true;
-  });
+  const filteredSchedule = schedule.filter(
+    (item) =>
+      (weekType === "Обе" ||
+        item.weekType === "Обе" ||
+        item.weekType === weekType) &&
+      (!filteredGroupId || item.groupIds.includes(filteredGroupId)) &&
+      (!filteredTeacherId || item.teacherId === filteredTeacherId) &&
+      (!filteredClassroomId || item.classroomId === filteredClassroomId)
+  );
 
   // Строим карту расписания: dayIndex -> lessonTimeId -> ScheduleItem[]
   const scheduleMap: Record<number, Record<number, ScheduleItem[]>> = {};
-
-  for (const day of DAYS_OF_WEEK) {
+  DAYS_OF_WEEK.forEach((day) => {
     scheduleMap[day.index] = {};
-    for (const slot of DEFAULT_TIME_SLOTS) {
+    DEFAULT_TIME_SLOTS.forEach((slot) => {
       scheduleMap[day.index][slot.id] = [];
-    }
-  }
-
-  for (const item of filteredSchedule) {
-    // Получаем индекс дня недели по строке
+    });
+  });
+  filteredSchedule.forEach((item) => {
     const dayIndex = DAYS_OF_WEEK.find((d) => d.label === item.day)?.index;
-    // Получаем id временного слота по строке
     const slotId = DEFAULT_TIME_SLOTS.find(
       (s) => s.label === item.timeSlot
     )?.id;
     if (dayIndex !== undefined && slotId !== undefined) {
-      if (!scheduleMap[dayIndex][slotId]) {
-        scheduleMap[dayIndex][slotId] = [];
-      }
       scheduleMap[dayIndex][slotId].push(item);
     }
-  }
+  });
 
   return (
     <div className="overflow-x-auto" id="schedule-grid">
@@ -119,7 +98,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                   key={`${day.index}-${slot.id}`}
                   className="p-2 pt-6 w-[200px] border"
                 >
-                  {scheduleMap[day.index][slot.id].length > 0 ? (
+                  {scheduleMap[day.index][slot.id].length ? (
                     <div className="flex flex-col gap-6">
                       {scheduleMap[day.index][slot.id].map((item) => (
                         <ScheduleCell
