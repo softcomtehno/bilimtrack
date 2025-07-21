@@ -285,7 +285,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               ))}
             </div>
             {errors.groupIds && (
-              <p className="mt-1 text-sm text-error-600">
+              <p className="mt-1 text-sm text-red-500">
                 {errors.groupIds.message}
               </p>
             )}

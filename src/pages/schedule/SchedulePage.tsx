@@ -29,6 +29,7 @@ import {
   useDeleteScheduleMutation,
   useGetLessonTimes,
   useGetLessonTypes,
+  useAddScheduleMutation,
 } from "@/entities/schedule/schedules/schedules.queries";
 import { toast } from "react-toastify";
 
@@ -58,6 +59,7 @@ export const SchedulePage: React.FC = () => {
   const { data: lessonTimes } = useGetLessonTimes();
   const { data: lessonTypes } = useGetLessonTypes();
   const patchScheduleMutation = usePatchScheduleMutation();
+  const addScheduleMutation = useAddScheduleMutation();
   const deleteScheduleMutation = useDeleteScheduleMutation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -247,7 +249,34 @@ export const SchedulePage: React.FC = () => {
       await refetchSchedules();
       toast.success("Занятие успешно изменено!");
     } else {
-      addScheduleItem(data);
+      if (!lessonTimes)
+        return toast.error(
+          "Данные о времени занятий ещё не загружены. Попробуйте позже."
+        );
+      if (!lessonTypes)
+        return toast.error(
+          "Данные о типах занятий ещё не загружены. Попробуйте позже."
+        );
+      const lessonTimeId = lessonTimes.find(
+        (time: any) => `${time.startTime} - ${time.endTime}` === data.timeSlot
+      )?.id;
+      const lessonTypeId = lessonTypes.find(
+        (type: any) =>
+          type.name === data.lessonType || type.label === data.lessonType
+      )?.id;
+      const postData = {
+        groups: data.groupIds.filter(Boolean).map(Number),
+        subject: Number(data.subjectId),
+        teacher: Number(data.teacherId),
+        room: Number(data.classroomId),
+        lessonType: lessonTypeId,
+        lessonTime: lessonTimeId,
+        dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
+        weekType: weekTypeToApi(data.weekType),
+      };
+      await addScheduleMutation.mutateAsync(postData);
+      await refetchSchedules();
+      toast.success("Занятие успешно добавлено!");
     }
     setIsFormOpen(false);
     setEditItem(undefined);

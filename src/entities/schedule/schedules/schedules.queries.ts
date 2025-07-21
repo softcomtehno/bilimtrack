@@ -4,6 +4,7 @@ import {
   getLessonTypes,
   getSchedules,
   getSubjects,
+  addSchedule,
   patchSchedule,
   deleteSchedule,
 } from "./schedules.api";
@@ -40,6 +41,12 @@ export function useGetLessonTimes() {
   return useQuery({
     queryKey: keys.getLessonTimes(),
     queryFn: getLessonTimes,
+  });
+}
+
+export function useAddScheduleMutation() {
+  return useMutation({
+    mutationFn: (data: any) => addSchedule(data),
   });
 }
 

@@ -7,6 +7,11 @@ export const getSchedules = async () => {
   return response.data;
 };
 
+export const addSchedule = async (data: any) => {
+  const response = await $api.post(`schedules/`, data);
+  return response.data;
+};
+
 export const patchSchedule = async (id: string | number, data: any) => {
   const response = await $api.patch(`schedules/${id}/`, data);
   return response.data;
