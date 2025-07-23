@@ -28,14 +28,19 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
     return (
       <div className="w-full">
-        {label && (
-          <label
-            htmlFor={props.id}
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            {label}
-          </label>
-        )}
+        <div className="flex items-center gap-2">
+          {label && (
+            <label
+              htmlFor={props.id}
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {label}
+            </label>
+          )}
+          {label === "Курс" && (
+            <span className="text-red-500 font-bold">*</span>
+          )}
+        </div>
         <select
           className={cn(
             "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500",
@@ -54,7 +59,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="mt-1 text-sm text-error-600">{error}</p>}
+        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
       </div>
     );
   }

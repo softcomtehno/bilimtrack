@@ -27,7 +27,11 @@ export interface Group {
   id: string;
   name: string;
   students: number;
-  subjects: string[]; // ID предметов для группы
+  subjects: string[];
+  course?: {
+    id: number;
+    number: number;
+  };
 }
 
 // Аудитория
@@ -63,6 +67,7 @@ export interface ScheduleItem {
   day: string;
   timeSlot: string;
   weekType: WeekType;
+  lessonTime?: string;
 }
 
 // Состояние приложения
