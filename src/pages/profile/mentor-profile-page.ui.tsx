@@ -6,6 +6,7 @@ import {
   Divider,
   Input,
   Textarea,
+  Tooltip,
 } from '@heroui/react';
 import {
   Mail,
@@ -61,9 +62,10 @@ export const MentorProfilePage = () => {
   const [educations, setEducations] = useState([]);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
+  const [isEditingPhoto, setIsEditingPhoto] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isEditMode) {
       const skillIds = user.skills?.map((s) => s.id) || [];
       setSkills(skillIds);
 
@@ -83,7 +85,7 @@ export const MentorProfilePage = () => {
       setPreviewImage(null);
       setPhotoFile(null);
     }
-  }, [user]);
+  }, [user, isEditMode]);
 
   const renderFieldOrPlaceholder = (
     value: any,
@@ -206,22 +208,19 @@ export const MentorProfilePage = () => {
         <h1 className="text-3xl font-semibold">Профиль преподавателя</h1>
         <Button
           onClick={() => setIsEditMode(!isEditMode)}
-          variant="outline"
           className="flex items-center gap-2"
         >
           <Pencil size={18} />
           {isEditMode ? 'Отменить' : 'Редактировать'}
         </Button>
       </div>
-
-      <Card className="flex flex-col md:flex-row gap-8 p-6 rounded-lg shadow-lg">
-        {/* Левая колонка */}
+      <Card className="flex flex-col md:flex-row gap-8 p-6 rounded-lg shadow-lg border">
         <div className="flex flex-col items-center md:items-start md:w-1/3 gap-4">
-          <div className="relative group">
+          <div className="relative group flex flex-col items-center">
             <div
-              className={`cursor-pointer block`}
+              className="relative cursor-pointer"
               onClick={() => {
-                if (isEditMode && !showCropModal) {
+                if (isEditingPhoto) {
                   document.getElementById('avatar-file-input')?.click();
                 }
               }}
@@ -231,14 +230,33 @@ export const MentorProfilePage = () => {
                 alt={`${user.firstName} ${user.lastName}`}
                 className="rounded-full border-4 border-indigo-500 w-32 h-32"
               />
-              {isEditMode && (
-                <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition">
-                  <Pencil size={20} />
+
+              {isEditingPhoto && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center">
+                  <Pencil size={24} className="text-white" />
                 </div>
               )}
             </div>
+            {!isEditingPhoto && (
+              <Tooltip content="Изменить фото профиля" placement="bottom">
+                <button
+                  className="absolute bottom-0 right-3 bg-white border-3 border-indigo-500 rounded-full p-1 shadow-md hover:bg-gray-100 transition"
+                  onClick={() => setIsEditingPhoto(true)}
+                >
+                  <Pencil size={20} className="text-gray-600" />
+                </button>
+              </Tooltip>
+            )}
+            {isEditingPhoto && (
+              <Button
+                size="sm"
+                className="mt-2"
+                onClick={() => setIsEditingPhoto(false)}
+              >
+                Отменить
+              </Button>
+            )}
 
-            {/* Скрытый инпут вне кликабельной области */}
             <input
               id="avatar-file-input"
               type="file"
@@ -256,10 +274,14 @@ export const MentorProfilePage = () => {
             {showCropModal && cropFile && (
               <ImageCropModal
                 file={cropFile}
-                onClose={() => setShowCropModal(false)}
+                onClose={() => {
+                  setShowCropModal(false);
+                  setIsEditingPhoto(false);
+                }}
                 onCropDone={(imageDataUrl, croppedFile) => {
                   setPreviewImage(imageDataUrl);
                   setPhotoFile(croppedFile);
+                  setIsEditingPhoto(false);
                 }}
               />
             )}
@@ -592,7 +614,7 @@ export const MentorProfilePage = () => {
 
           {isEditMode && (
             <Button
-              className="mt-4"
+              className="mt-4 bg-blue-500 text-white"
               onClick={handleSaveChanges}
               disabled={editMentorProfile.isPending}
             >
