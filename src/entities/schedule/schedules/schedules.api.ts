@@ -36,3 +36,8 @@ export const getLessonTimes = async () => {
   const response = await $api.get("schedules/lesson-times/");
   return response.data;
 };
+
+export const getCourses = async () => {
+  const response = await $api.get("schedules/courses/");
+  return response.data;
+};
