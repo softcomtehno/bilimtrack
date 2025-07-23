@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Calendar, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Plus, Calendar, AlertTriangle, Filter } from "lucide-react";
 import { WeekType, ScheduleItem } from "@/shared/types";
 import {
   Button,
@@ -30,6 +30,7 @@ import {
   useGetLessonTimes,
   useGetLessonTypes,
   useAddScheduleMutation,
+  useGetCourses,
 } from "@/entities/schedule/schedules/schedules.queries";
 import { toast } from "react-toastify";
 
@@ -51,13 +52,16 @@ export const SchedulePage: React.FC = () => {
     isLoading: schedulesLoading,
     refetch: refetchSchedules,
   } = schedulesQueries.useGetSchedules();
-  const { data: shedulesTeachers } =
+  const { data: schedulesTeachers, isLoading: teachersLoading } =
     schedulesTeachersQueries.useGetSchedulesTeachers();
-  const { data: schedulesGroups } =
+  const { data: schedulesGroups, isLoading: groupsLoading } =
     schedulesGroupsQueries.useGetSchedulesGroups();
-  const { data: schedulesRooms } = schedulesRoomsQueryes.useGetSchedulesRooms();
+  const { data: schedulesRooms, isLoading: classroomsLoading } =
+    schedulesRoomsQueryes.useGetSchedulesRooms();
   const { data: lessonTimes } = useGetLessonTimes();
   const { data: lessonTypes } = useGetLessonTypes();
+  const { data: courses, isLoading: coursesLoading } = useGetCourses();
+
   const patchScheduleMutation = usePatchScheduleMutation();
   const addScheduleMutation = useAddScheduleMutation();
   const deleteScheduleMutation = useDeleteScheduleMutation();
@@ -78,54 +82,101 @@ export const SchedulePage: React.FC = () => {
   const [selectedClassroomId, setSelectedClassroomId] = useState<
     string | undefined
   >(activeFilters.classroomId);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(
+    activeFilters.courseId ||
+      (courses && courses.length > 0 ? String(courses[0].id) : undefined)
+  );
 
-  // Преобразование API-данных
-  const apiGroups: Group[] =
-    (schedulesGroups as ApiGroup[] | undefined)?.map((g) => ({
-      id: String(g.id),
-      name: g.name,
-      students: 0,
-      subjects: [],
-    })) || [];
-  const apiClassrooms: Classroom[] =
-    (schedulesRooms as Rooms[] | undefined)?.map((r) => ({
-      id: String(r.id),
-      name: `${r.number} (${r.building})`,
-      type: "Стандартная",
-      capacity: 0,
-      features: [],
-    })) || [];
-  const apiTeachers: Teacher[] =
-    (shedulesTeachers as Teachers[] | undefined)?.map((t) => ({
-      id: String(t.id),
-      name: t.fullName,
-      subjects: [],
-      availability: [],
-      preferences: [],
-    })) || [];
-
-  // Синхронизация фильтров
+  // При загрузке курсов
   useEffect(() => {
+    if (courses && courses.length > 0 && !selectedCourseId) {
+      setSelectedCourseId(String(courses[0].id));
+    }
+  }, [courses, selectedCourseId]);
+
+  // Load saved filters from localStorage
+  useEffect(() => {
+    const savedFilters = localStorage.getItem("scheduleFilters");
+    if (savedFilters) {
+      const parsed = JSON.parse(savedFilters);
+      setWeekType(parsed.weekType || "Обе");
+      setSelectedTeacherId(parsed.teacherId);
+      setSelectedGroupId(parsed.groupId);
+      setSelectedClassroomId(parsed.classroomId);
+      setSelectedCourseId(parsed.courseId);
+    }
+  }, []);
+
+  // Save filters to localStorage
+  useEffect(() => {
+    const filters = {
+      weekType,
+      teacherId: selectedTeacherId,
+      groupId: selectedGroupId,
+      classroomId: selectedClassroomId,
+      courseId: selectedCourseId,
+    };
+    localStorage.setItem("scheduleFilters", JSON.stringify(filters));
     setActiveFilters({
       weekType: weekType !== "Обе" ? (weekType as WeekType) : undefined,
       teacherId: selectedTeacherId,
       groupId: selectedGroupId,
       classroomId: selectedClassroomId,
+      courseId: selectedCourseId,
     });
   }, [
     weekType,
     selectedTeacherId,
     selectedGroupId,
     selectedClassroomId,
+    selectedCourseId,
     setActiveFilters,
   ]);
 
-  useEffect(() => {
-    if (!selectedGroupId && apiGroups.length > 0)
-      setSelectedGroupId(apiGroups[0].id);
-  }, [selectedGroupId, apiGroups]);
+  const apiGroups: Group[] = useMemo(
+    () =>
+      (schedulesGroups as ApiGroup[] | undefined)?.map((g) => ({
+        id: String(g.id),
+        name: g.name,
+        students: 0,
+        subjects: [],
+        course: g.course, // Добавляем информацию о курсе
+      })) || [],
+    [schedulesGroups]
+  );
 
-  // Преобразование данных расписания
+  // Добавляем фильтрацию групп по курсу
+  const filteredGroups = useMemo(() => {
+    if (!selectedCourseId) return apiGroups;
+    return apiGroups.filter(
+      (group) => group.course?.id?.toString() === selectedCourseId
+    );
+  }, [apiGroups, selectedCourseId]);
+
+  const apiClassrooms: Classroom[] = useMemo(
+    () =>
+      (schedulesRooms as Rooms[] | undefined)?.map((r) => ({
+        id: String(r.id),
+        name: `${r.number} (${r.building})`,
+        type: "Стандартная",
+        capacity: 0,
+        features: [],
+      })) || [],
+    [schedulesRooms]
+  );
+
+  const apiTeachers: Teacher[] = useMemo(
+    () =>
+      (schedulesTeachers as Teachers[] | undefined)?.map((t) => ({
+        id: String(t.id),
+        name: t.fullName,
+        subjects: [],
+        availability: [],
+        preferences: [],
+      })) || [],
+    [schedulesTeachers]
+  );
+
   const mapWeekType = (apiType: string): WeekType =>
     apiType === "weekly"
       ? "Обе"
@@ -134,207 +185,265 @@ export const SchedulePage: React.FC = () => {
         : apiType === "bottom"
           ? "Знаменатель"
           : (apiType as WeekType);
-  const transformedSchedule: ScheduleItem[] = (schedulesData || []).map(
-    (item: any) => {
-      const timeSlot =
-        item.lessonTime?.startTime && item.lessonTime?.endTime
-          ? `${item.lessonTime.startTime} - ${item.lessonTime.endTime}`
-          : "";
-      const groupIds = Array.isArray(item.groups)
-        ? item.groups.map((g: any) => String(g.id))
-        : item.group
-          ? [String(item.group.id)]
-          : [];
-      const groupNames = Array.isArray(item.groups)
-        ? item.groups.map((g: any) => g.name)
-        : item.group
-          ? [item.group.name]
-          : [];
-      return {
-        id: String(item.id),
-        day: DAYS_OF_WEEK[item.dayOfWeek],
-        timeSlot,
-        weekType: mapWeekType(item.weekType),
-        groupIds,
-        teacherId: String(item.teacher.id),
-        classroomId: String(item.room.id),
-        subjectId: String(item.subject.id),
-        lessonType: item.lessonType?.name ?? "",
-        subjectName: item.subject.name,
-        teacherName: item.teacher.fullName,
-        groupNames,
-        classroomName: `${item.room.number} (${item.room.building})`,
-      };
-    }
+
+  const transformedSchedule: ScheduleItem[] = useMemo(
+    () =>
+      (schedulesData || []).map((item: any) => {
+        const timeSlot =
+          item.lessonTime?.startTime && item.lessonTime?.endTime
+            ? `${item.lessonTime.startTime} - ${item.lessonTime.endTime}`
+            : "";
+        const groupIds = Array.isArray(item.groups)
+          ? item.groups.map((g: any) => String(g.id))
+          : item.group
+            ? [String(item.group.id)]
+            : [];
+        const groupNames = Array.isArray(item.groups)
+          ? item.groups.map((g: any) => g.name)
+          : item.group
+            ? [item.group.name]
+            : [];
+        return {
+          id: String(item.id),
+          day: DAYS_OF_WEEK[item.dayOfWeek],
+          timeSlot,
+          weekType: mapWeekType(item.weekType),
+          groupIds,
+          teacherId: String(item.teacher.id),
+          classroomId: String(item.room.id),
+          subjectId: String(item.subject.id),
+          lessonType: item.lessonType?.name ?? "",
+          subjectName: item.subject.name,
+          teacherName: item.teacher.fullName,
+          groupNames,
+          classroomName: `${item.room.number} (${item.room.building})`,
+        };
+      }),
+    [schedulesData]
   );
 
-  // Фильтрация и сортировка расписания
   const weekTypeOrder = { Числитель: 0, Знаменатель: 1, Обе: 2 };
-  const filteredSchedule = transformedSchedule
-    .filter(
-      (item) =>
-        (weekType === "Обе" || item.weekType === weekType) &&
-        (!selectedTeacherId ||
-          String(item.teacherId) === String(selectedTeacherId)) &&
-        (!selectedGroupId || item.groupIds.includes(selectedGroupId)) &&
-        (!selectedClassroomId ||
-          String(item.classroomId) === String(selectedClassroomId))
-    )
-    .sort(
-      (a, b) =>
-        (weekTypeOrder[a.weekType] ?? 99) - (weekTypeOrder[b.weekType] ?? 99)
-    );
+  const filteredSchedule = useMemo(
+    () =>
+      transformedSchedule
+        .filter(
+          (item) =>
+            (weekType === "Обе" || item.weekType === weekType) &&
+            (!selectedTeacherId ||
+              String(item.teacherId) === String(selectedTeacherId)) &&
+            (!selectedGroupId || item.groupIds.includes(selectedGroupId)) &&
+            (!selectedClassroomId ||
+              String(item.classroomId) === String(selectedClassroomId)) &&
+            (!selectedCourseId ||
+              item.groupIds.some((groupId) => {
+                const group = schedulesGroups?.find(
+                  (g: any) => String(g.id) === groupId
+                );
+                return group?.course?.id?.toString() === selectedCourseId;
+              }))
+        )
+        .sort(
+          (a, b) =>
+            (weekTypeOrder[a.weekType] ?? 99) -
+            (weekTypeOrder[b.weekType] ?? 99)
+        ),
+    [
+      transformedSchedule,
+      weekType,
+      selectedTeacherId,
+      selectedGroupId,
+      selectedClassroomId,
+      selectedCourseId,
+      schedulesGroups,
+    ]
+  );
 
-  // Обработчики
   const handleAddItem = () => {
     setEditItem(undefined);
     setIsFormOpen(true);
   };
+
   const handleEditItem = (item: ScheduleItem) => {
     setEditItem(item);
     setIsFormOpen(true);
   };
+
   const handleDeleteItem = (id: string) => {
     setItemToDelete(id);
     setIsDeleteDialogOpen(true);
   };
+
   const confirmDelete = async () => {
     if (!itemToDelete) return;
-    await deleteScheduleMutation.mutateAsync(itemToDelete);
-    await refetchSchedules();
-    toast.success("Занятие успешно удалено!");
-    setIsDeleteDialogOpen(false);
-    setItemToDelete(null);
+    try {
+      await deleteScheduleMutation.mutateAsync(itemToDelete);
+      await refetchSchedules();
+      toast.success("Занятие успешно удалено!");
+    } catch (error) {
+      toast.error("Не удалось удалить занятие");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
   };
+
   const weekTypeToApi = (weekType: string) =>
     weekType === "Числитель"
       ? "top"
       : weekType === "Знаменатель"
         ? "bottom"
-        : weekType === "Обе"
-          ? "weekly"
-          : weekType;
+        : "weekly";
+
   const handleFormSubmit = async (data: ScheduleItem) => {
-    if (editItem) {
-      if (!lessonTimes)
-        return toast.error(
-          "Данные о времени занятий ещё не загружены. Попробуйте позже."
-        );
-      if (!lessonTypes)
-        return toast.error(
-          "Данные о типах занятий ещё не загружены. Попробуйте позже."
-        );
-      const lessonTimeId = lessonTimes.find(
-        (time: any) => `${time.startTime} - ${time.endTime}` === data.timeSlot
-      )?.id;
-      const lessonTypeId = lessonTypes.find(
-        (type: any) =>
-          type.name === data.lessonType || type.label === data.lessonType
-      )?.id;
-      const patchData = {
-        id: Number(data.id),
-        groups: data.groupIds.filter(Boolean).map(Number),
-        subject: Number(data.subjectId),
-        teacher: Number(data.teacherId),
-        room: Number(data.classroomId),
-        lessonType: lessonTypeId,
-        lessonTime: lessonTimeId,
-        dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
-        weekType: weekTypeToApi(data.weekType),
-      };
-      await patchScheduleMutation.mutateAsync({
-        id: patchData.id,
-        data: patchData,
-      });
-      await refetchSchedules();
-      toast.success("Занятие успешно изменено!");
-    } else {
-      if (!lessonTimes)
-        return toast.error(
-          "Данные о времени занятий ещё не загружены. Попробуйте позже."
-        );
-      if (!lessonTypes)
-        return toast.error(
-          "Данные о типах занятий ещё не загружены. Попробуйте позже."
-        );
-      const lessonTimeId = lessonTimes.find(
-        (time: any) => `${time.startTime} - ${time.endTime}` === data.timeSlot
-      )?.id;
-      const lessonTypeId = lessonTypes.find(
-        (type: any) =>
-          type.name === data.lessonType || type.label === data.lessonType
-      )?.id;
-      const postData = {
-        groups: data.groupIds.filter(Boolean).map(Number),
-        subject: Number(data.subjectId),
-        teacher: Number(data.teacherId),
-        room: Number(data.classroomId),
-        lessonType: lessonTypeId,
-        lessonTime: lessonTimeId,
-        dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
-        weekType: weekTypeToApi(data.weekType),
-      };
-      await addScheduleMutation.mutateAsync(postData);
-      await refetchSchedules();
-      toast.success("Занятие успешно добавлено!");
+    if (!lessonTimes || !lessonTypes) {
+      return toast.error("Не загружены данные для формы. Повторите позже.");
     }
-    setIsFormOpen(false);
-    setEditItem(undefined);
+
+    const lessonTimeId = lessonTimes.find(
+      (time: any) => `${time.startTime} - ${time.endTime}` === data.timeSlot
+    )?.id;
+    const lessonTypeId = lessonTypes.find(
+      (type: any) =>
+        type.name === data.lessonType || type.label === data.lessonType
+    )?.id;
+
+    try {
+      if (editItem) {
+        const patchData = {
+          id: Number(data.id),
+          groups: data.groupIds.filter(Boolean).map(Number),
+          subject: Number(data.subjectId),
+          teacher: Number(data.teacherId),
+          room: Number(data.classroomId),
+          lessonType: lessonTypeId,
+          lessonTime: lessonTimeId,
+          dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
+          weekType: weekTypeToApi(data.weekType),
+        };
+        await patchScheduleMutation.mutateAsync({
+          id: patchData.id,
+          data: patchData,
+        });
+        toast.success("Занятие успешно изменено!");
+      } else {
+        const postData = {
+          groups: data.groupIds.filter(Boolean).map(Number),
+          subject: Number(data.subjectId),
+          teacher: Number(data.teacherId),
+          room: Number(data.classroomId),
+          lessonType: lessonTypeId,
+          lessonTime: lessonTimeId,
+          dayOfWeek: DAYS_OF_WEEK.indexOf(data.day),
+          weekType: weekTypeToApi(data.weekType),
+        };
+        await addScheduleMutation.mutateAsync(postData);
+        toast.success("Занятие успешно добавлено!");
+      }
+      await refetchSchedules();
+      setIsFormOpen(false);
+      setEditItem(undefined);
+    } catch (error) {
+      toast.error("Произошла ошибка при сохранении");
+    }
   };
+
   const handleResetFilters = () => {
     setWeekType("Обе");
     setSelectedTeacherId(undefined);
     setSelectedGroupId(undefined);
     setSelectedClassroomId(undefined);
+    setSelectedCourseId(undefined);
     resetFilters();
+    localStorage.removeItem("scheduleFilters");
   };
 
-  if (schedulesLoading)
-    return <div className="text-center py-10 text-gray-500">Загрузка...</div>;
-  if (schedulesError)
+  if (schedulesLoading) {
     return (
-      <div className="text-center py-10 text-red-600">
-        Ошибка при загрузке расписания
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center py-10 text-gray-500">Загрузка...</div>
       </div>
     );
+  }
+
+  if (schedulesError) {
+    return (
+      <Card className="text-center py-10">
+        <AlertTriangle size={48} className="mx-auto mb-4 text-red-500" />
+        <h2 className="text-xl font-semibold mb-2 text-red-600">
+          Ошибка при загрузке расписания
+        </h2>
+        <p className="text-gray-600 mb-4">
+          Не удалось загрузить данные расписания. Пожалуйста, попробуйте позже.
+        </p>
+        <Button onClick={refetchSchedules} variant="outline">
+          Попробовать снова
+        </Button>
+      </Card>
+    );
+  }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold mb-2">Расписание занятий</h1>
           <p className="text-gray-600">
             Просмотр и редактирование текущего расписания занятий
           </p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-3">
           <ScheduleExport schedule={transformedSchedule} />
           <Button onClick={handleAddItem} icon={<Plus size={16} />}>
             Добавить занятие
           </Button>
         </div>
       </div>
+
       <ScheduleFilters
         weekType={weekType}
         setWeekType={setWeekType}
         teachers={apiTeachers}
         groups={apiGroups}
+        filteredGroups={filteredGroups}
         classrooms={apiClassrooms}
         selectedTeacherId={selectedTeacherId}
         selectedGroupId={selectedGroupId}
         selectedClassroomId={selectedClassroomId}
+        selectedCourseId={selectedCourseId}
         setSelectedTeacherId={setSelectedTeacherId}
         setSelectedGroupId={setSelectedGroupId}
         setSelectedClassroomId={setSelectedClassroomId}
+        setSelectedCourseId={setSelectedCourseId}
+        courses={courses || []}
         resetFilters={handleResetFilters}
+        teachersLoading={teachersLoading}
+        groupsLoading={groupsLoading}
+        classroomsLoading={classroomsLoading}
+        coursesLoading={coursesLoading}
       />
-      {transformedSchedule.length === 0 ? (
+
+      {filteredSchedule.length === 0 ? (
         <Card className="text-center py-12">
-          <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
-          <h2 className="text-xl font-semibold mb-2">Расписание пока пусто</h2>
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            Добавьте занятия вручную или с помощью автоматического генератора.
-          </p>
+          {transformedSchedule.length === 0 ? (
+            <>
+              <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
+              <h2 className="text-xl font-semibold mb-2">
+                Расписание пока пусто
+              </h2>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                Добавьте занятия вручную или с помощью автоматического
+                генератора.
+              </p>
+            </>
+          ) : (
+            <>
+              <Filter size={48} className="mx-auto mb-4 text-gray-400" />
+              <h2 className="text-xl font-semibold mb-2">Ничего не найдено</h2>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                Попробуйте изменить параметры фильтрации.
+              </p>
+            </>
+          )}
           <Button onClick={handleAddItem} icon={<Plus size={16} />}>
             Добавить занятие
           </Button>
@@ -352,6 +461,7 @@ export const SchedulePage: React.FC = () => {
           />
         </Card>
       )}
+
       <ScheduleForm
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -363,6 +473,7 @@ export const SchedulePage: React.FC = () => {
         subjects={subjects}
         schedule={transformedSchedule}
       />
+
       <Dialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
@@ -382,13 +493,13 @@ export const SchedulePage: React.FC = () => {
         </div>
         <div className="flex justify-center space-x-3">
           <Button
-            className="hover:text-black hover:bg-transparent border bg-red-500 text-white"
+            className="border bg-red-500 text-white hover:bg-red-600"
             onClick={confirmDelete}
           >
             Удалить
           </Button>
           <Button
-            className="hover:text-black hover:bg-transparent border bg-gray-500 text-white"
+            className="border bg-gray-500 text-white hover:bg-gray-600"
             onClick={() => setIsDeleteDialogOpen(false)}
           >
             Отмена
