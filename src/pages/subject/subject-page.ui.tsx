@@ -38,7 +38,6 @@ export const SubjectPage = () => {
     enabled: !!subject?.id, // не запускать, пока нет id
   })
 
-  // Загрузка
   if (isSubjectLoading || isGroupLoading) {
     return <div>Загрузка...</div>
   }
