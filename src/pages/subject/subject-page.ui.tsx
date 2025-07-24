@@ -19,7 +19,7 @@ export const SubjectPage = () => {
     data: subjectsData,
     isLoading: isSubjectLoading,
     isError: isSubjectError,
-  } = subjectQueries.useGetSubjects()
+  } = subjectQueries.useGetSubjectsMentor()
 
   // Находим нужный предмет по id (без useState/useEffect)
   const subject = useMemo(() => {
@@ -57,7 +57,7 @@ export const SubjectPage = () => {
     <div>
       <h1 className="text-lg font-semibold mb-4">{subject.name}</h1>
 
-      <Title Icon={Album} title="Предметы" />
+      <Title Icon={Album} title="Группы" />
       <Swiper
         className="w-[100%] pb-[40px] default-slider"
         modules={[Pagination]}
