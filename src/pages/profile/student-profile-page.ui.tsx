@@ -10,17 +10,25 @@ import {
   Chip,
   user,
 } from '@heroui/react';
-import { Album, CheckIcon, CircleEllipsis, Star, Trophy, UserRound, UsersRound } from 'lucide-react';
+import {
+  Album,
+  CheckIcon,
+  CircleEllipsis,
+  Star,
+  Trophy,
+  UserRound,
+  UsersRound,
+} from 'lucide-react';
 
-import "swiper/css";
-import "swiper/css/pagination";
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Chart } from '@/widgets/chart';
 import { userQueries } from '@/entities/user';
 
-export const ProfilePage = () => {
+export const StudentProfilePage = () => {
   const {
     data: userData,
     isLoading,
@@ -54,9 +62,7 @@ export const ProfilePage = () => {
             <Chip
               color="success"
               startContent={
-
-                <UserRound className="bg-success/40 rounded-full" size={18}/>
-           
+                <UserRound className="bg-success/40 rounded-full" size={18} />
               }
               variant="faded"
             >
@@ -78,7 +84,10 @@ export const ProfilePage = () => {
             <Chip
               color="success"
               startContent={
-                <CircleEllipsis  className="bg-success/40 rounded-full" size={18} />
+                <CircleEllipsis
+                  className="bg-success/40 rounded-full"
+                  size={18}
+                />
               }
               variant="faded"
             >
@@ -89,10 +98,13 @@ export const ProfilePage = () => {
             <Chip
               color="success"
               startContent={
-                <Trophy className="bg-success/40 p-[3px] rounded-full" size={18}  />
+                <Trophy
+                  className="bg-success/40 p-[3px] rounded-full"
+                  size={18}
+                />
               }
               variant="faded"
-              className=''
+              className=""
             >
               Достижения: 15
             </Chip>

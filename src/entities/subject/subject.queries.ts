@@ -1,14 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
-import { getSubjects } from './subject.api'
+import { getSubjects, getSubjectsMentor } from './subject.api'
 
 const keys = {
   root: () => ['subjects'],
-  // getDocuments: () => [...keys.root(), 'documents'],
+  byMentor: () => [...keys.root(), 'mentor'],
 }
 
 export function useGetSubjects() {
   return useQuery({
     queryKey: keys.root(),
     queryFn: getSubjects,
+  })
+}
+
+export function useGetSubjectsMentor() {
+  return useQuery({
+    queryKey: keys.byMentor(),
+    queryFn: getSubjectsMentor,
   })
 }

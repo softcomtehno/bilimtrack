@@ -3,15 +3,17 @@ import {
   useQuery,
   queryOptions as tsqQueryOptions,
   useQueryClient,
-} from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { setCookie } from "typescript-cookie";
-import { toast } from "react-toastify";
+} from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { setCookie } from 'typescript-cookie';
+import { toast } from 'react-toastify';
 
 import {
+  editMentorProfile,
   editUserProfile,
   emailActivationMutation,
   getPerfomanceChart,
+  getSkills,
   getTokenMutation,
   loginUserQuery,
   registerUserMutation,
@@ -33,12 +35,13 @@ const ACCESS_TOKEN_KEY = 'access';
 const REFRESH_TOKEN_KEY = 'refresh';
 
 const keys = {
-  root: () => ["user"],
-  getToken: () => [...keys.root(), "getToken"] as const,
-  loginUser: () => [...keys.root(), "loginUser"] as const,
-  chart: () => [...keys.root(), "chart"] as const,
-  registerUser: () => [...keys.root(), "registerUser"] as const,
-  user: (username: string) => [...keys.root(), "username", username] as const,
+  root: () => ['user'],
+  getToken: () => [...keys.root(), 'getToken'] as const,
+  loginUser: () => [...keys.root(), 'loginUser'] as const,
+  chart: () => [...keys.root(), 'chart'] as const,
+  skills: () => [...keys.root(), 'skills'] as const,
+  registerUser: () => [...keys.root(), 'registerUser'] as const,
+  user: (username: string) => [...keys.root(), 'username', username] as const,
 };
 
 export const userService = {
@@ -96,7 +99,7 @@ export function useGetTokenMutation() {
   return useMutation({
     mutationKey: keys.getToken(),
     mutationFn: getTokenMutation,
-    onSuccess: (response:any) => {
+    onSuccess: (response: any) => {
       const { access, refresh } = response.data;
       setCookie(ACCESS_TOKEN_KEY, access, {
         sameSite: 'Strict',
@@ -108,8 +111,7 @@ export function useGetTokenMutation() {
       navigate(pathKeys.profile.root());
     },
     onError: (error: AxiosErrorType) => {
-      const errorMessage =
-        error.response?.data?.detail || 'Ошибка авторизации';
+      const errorMessage = error.response?.data?.detail || 'Ошибка авторизации';
       toast.error(errorMessage);
     },
   });
@@ -121,7 +123,7 @@ export function useRegisterMutation() {
     mutationFn: registerUserMutation,
     onSuccess: async () => {
       await toast.success(
-        "На вашу почту отправлено письмо для подтверждения вашей почты.",
+        'На вашу почту отправлено письмо для подтверждения вашей почты.'
       );
     },
     onError: (error: AxiosErrorType) => {
@@ -132,7 +134,7 @@ export function useRegisterMutation() {
           toast.error(`${field}: ${errors[field][0]}`);
         });
       } else {
-        toast.error("Ошибка при выполнении запроса");
+        toast.error('Ошибка при выполнении запроса');
       }
     },
   });
@@ -145,7 +147,7 @@ export function useEditUserProfile() {
     mutationKey: keys.root(),
     mutationFn: editUserProfile,
     onSuccess: async () => {
-      await toast.success("Ваш профиль успешно изменен!");
+      await toast.success('Ваш профиль успешно изменен!');
       await queryClient.invalidateQueries({ queryKey: keys.root() });
     },
     onError: (error: AxiosErrorType) => {
@@ -156,8 +158,23 @@ export function useEditUserProfile() {
           toast.error(`${field}: ${errors[field][0]}`);
         });
       } else {
-        toast.error("Ошибка при выполнении запроса");
+        toast.error('Ошибка при выполнении запроса');
       }
+    },
+  });
+}
+
+export function useEditMentorProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: editMentorProfile,
+    onSuccess: () => {
+      toast.success('Профиль ментора успешно обновлён!');
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError: () => {
+      toast.error('Ошибка при обновлении профиля');
     },
   });
 }
@@ -167,7 +184,7 @@ export function useActivationMutation() {
     mutationKey: keys.registerUser(),
     mutationFn: emailActivationMutation,
     onSuccess: async () => {
-      await toast.success("Success");
+      await toast.success('Success');
     },
     onError: (error: AxiosErrorType) => {
       if (error.response && error.response.data) {
@@ -177,7 +194,7 @@ export function useActivationMutation() {
           toast.error(`${field}: ${errors[field][0]}`);
         });
       } else {
-        toast.error("Ошибка при выполнении запроса");
+        toast.error('Ошибка при выполнении запроса');
       }
     },
   });
@@ -187,5 +204,12 @@ export function useGetUserPerfomanceChart() {
   return useQuery({
     queryKey: keys.chart(),
     queryFn: () => getPerfomanceChart(),
+  });
+}
+
+export function useGetSkills() {
+  return useQuery({
+    queryKey: keys.skills(),
+    queryFn: () => getSkills(),
   });
 }

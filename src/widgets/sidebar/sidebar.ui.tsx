@@ -16,7 +16,7 @@ export function SidebarNav() {
     isLoading: isSubjectsLoading,
     isError: isSubjectsError,
     isSuccess: isSubjectSuccess,
-  } = subjectQueries.useGetSubjects()
+  } = subjectQueries.useGetSubjectsMentor()
   if (isSubjectSuccess) {
     return (
       <Sidebar
