@@ -15,30 +15,39 @@ export const ScheduleCell: React.FC<ScheduleCellProps> = ({
   onDelete,
 }) => {
   const lessonTypeColors: Record<LessonType, string> = {
-    Лекция: "bg-primary-100 border-primary-300 text-primary-800",
-    Практика: "bg-secondary-100 border-secondary-300 text-secondary-800",
-    Лаборатория: "bg-accent-100 border-accent-300 text-accent-800",
+    Лекция: "border-primary-300 text-primary-800",
+    Практика: "border-secondary-300 text-secondary-800",
+    Лаборатория: "border-accent-300 text-accent-800",
   };
 
+  // 💡 Кастомный фон в зависимости от предмета
+  const subjectBgColor =
+    {
+      Backend: "bg-secondary-100 border-secondary-300 text-secondary-800",
+      Frontend: "bg-primary-100 border-primary-300 text-primary-800",
+    }[item.subjectName] || "bg-white"; // остальные — белый фон
+
+  const combinedStyles = cn(
+    "rounded-md border p-2 text-xs relative",
+    subjectBgColor
+    // lessonTypeColors[item.lessonType] || ""
+  );
+
   return (
-    <div
-      className={cn(
-        "rounded-md border p-2 text-xs",
-        item.weekType === "Обе"
-          ? lessonTypeColors[item.lessonType]
-          : item.weekType === "Числитель"
-            ? "bg-gray-200 " +
-              (lessonTypeColors[item.lessonType]?.replace(/bg-[^ ]+/, "") || "")
-            : "bg-white " +
-              (lessonTypeColors[item.lessonType]?.replace(/bg-[^ ]+/, "") || "")
-      )}
-    >
-      <div className="font-semibold">{item.subjectName}</div>
+    <div className={combinedStyles}>
+      <div className="flex justify-between">
+        <div className="font-semibold">{item.subjectName}</div>
+        <div className="font-semibold">{item.lessonType}</div>
+      </div>
       <div className="flex justify-between items-center mt-1">
         <div>
-          <div>{item.teacherName}</div>
-          <div>Ауд. {item.classroomName}</div>
-          <div className="mt-1 font-medium">{item.groupNames.join(", ")}</div>
+          <div className="font-semibold">Препод: {item.teacherName}</div>
+          <div className="absolute top-[-18px] left-0 bg-orange-500 p-1 rounded-md text-white">
+            Ауд. {item.classroomName}
+          </div>
+          <div className="mt-1 font-medium border p-1 border-orange-500 rounded-md">
+            {item.groupNames.join(", ")}
+          </div>
         </div>
         {(onEdit || onDelete) && (
           <div className="flex flex-col gap-1">
@@ -64,8 +73,8 @@ export const ScheduleCell: React.FC<ScheduleCellProps> = ({
         )}
       </div>
       {item.weekType !== "Обе" && (
-        <div className="mt-1 text-2xs font-semibold">
-          {item.weekType === "Числитель" ? "Ч" : "З"}
+        <div className="mt-1 text-2xs font-semibold bg-orange-500 w-full text-white text-center rounded-md">
+          {item.weekType === "Числитель" ? "Числитель" : "Знаменатель"}
         </div>
       )}
     </div>
