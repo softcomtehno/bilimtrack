@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   LessonType,
@@ -32,6 +32,7 @@ interface ScheduleFormProps {
   classrooms: Classroom[];
   subjects: Subject[];
   schedule: ScheduleItem[];
+  courses: { id: number; number: number }[];
 }
 
 export const ScheduleForm: React.FC<ScheduleFormProps> = ({
@@ -44,7 +45,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   classrooms,
   subjects,
   schedule,
+  courses,
 }) => {
+  const getDefaultCourseId = useCallback(() => {
+    return courses?.[0]?.id ? String(courses[0].id) : "";
+  }, [courses]);
+
   const {
     register,
     handleSubmit,
@@ -53,28 +59,54 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     watch,
     setValue,
     formState: { errors },
-  } = useForm<ScheduleItem>({
-    defaultValues: editItem || {
-      id: "",
-      subjectId: "",
-      subjectName: "",
-      teacherId: "",
-      teacherName: "",
-      classroomId: "",
-      classroomName: "",
-      groupIds: [],
-      groupNames: [],
-      lessonType: "Лекция",
-      day: DAYS_OF_WEEK[0],
-      timeSlot: DEFAULT_TIME_SLOTS[0],
-      weekType: "Обе",
+  } = useForm<ScheduleItem & { courseId: string }>({
+    defaultValues: {
+      ...(editItem || {
+        id: "",
+        subjectId: "",
+        subjectName: "",
+        teacherId: "",
+        teacherName: "",
+        classroomId: "",
+        classroomName: "",
+        groupIds: [],
+        groupNames: [],
+        lessonType: "",
+        day: DAYS_OF_WEEK[0],
+        timeSlot: DEFAULT_TIME_SLOTS[0],
+        weekType: "Обе",
+      }),
+      courseId: getDefaultCourseId(),
     },
   });
 
   const [conflicts, setConflicts] = useState<string[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups);
   const availableSubjects: Subject[] = useGetSubjects()?.data || [];
   const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || [];
   const watchedValues = watch();
+
+  // Фильтрация групп по выбранному курсу
+  useEffect(() => {
+    if (watchedValues.courseId) {
+      const filtered = groups.filter(
+        (group) => group.course?.id?.toString() === watchedValues.courseId
+      );
+      setFilteredGroups(filtered);
+
+      // Сбрасываем выбранные группы, если они не принадлежат новому курсу
+      if (watchedValues.groupIds?.length) {
+        const validGroups = watchedValues.groupIds.filter((groupId) =>
+          filtered.some((g) => g.id === groupId)
+        );
+        if (validGroups.length !== watchedValues.groupIds.length) {
+          setValue("groupIds", validGroups);
+        }
+      }
+    } else {
+      setFilteredGroups(groups);
+    }
+  }, [watchedValues.courseId, groups, setValue, watchedValues.groupIds]);
 
   // Универсальный useEffect для синхронизации связанных полей
   useEffect(() => {
@@ -93,7 +125,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     if (watchedValues.groupIds?.length) {
       setValue(
         "groupNames",
-        groups
+        filteredGroups
           .filter((g) => watchedValues.groupIds.includes(g.id))
           .map((g) => g.name)
       );
@@ -108,7 +140,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     teachers,
     subjects,
     classrooms,
-    groups,
+    filteredGroups,
     setValue,
   ]);
 
@@ -143,8 +175,8 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   // Сброс формы при открытии/закрытии или изменении редактируемого элемента
   useEffect(() => {
     if (isOpen) {
-      reset(
-        editItem || {
+      reset({
+        ...(editItem || {
           id: "",
           subjectId: "",
           subjectName: "",
@@ -154,16 +186,17 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           classroomName: "",
           groupIds: [],
           groupNames: [],
-          lessonType: "Лекция",
+          lessonType: "",
           day: DAYS_OF_WEEK[0],
           timeSlot: DEFAULT_TIME_SLOTS[0],
           weekType: "Обе",
-        }
-      );
+        }),
+        courseId: getDefaultCourseId(),
+      });
     }
-  }, [isOpen, editItem, reset]);
+  }, [isOpen, editItem, reset, getDefaultCourseId]);
 
-  const onFormSubmit = (data: ScheduleItem) => {
+  const onFormSubmit = (data: ScheduleItem & { courseId: string }) => {
     if (!data.id) data.id = crypto.randomUUID();
     onSubmit(data);
     onClose();
@@ -178,6 +211,26 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className="grid grid-cols-2 gap-4">
+          {/* Добавляем выбор курса */}
+          <div>
+            <Controller
+              name="courseId"
+              control={control}
+              rules={{ required: "Обязательное поле" }}
+              render={({ field }) => (
+                <Select
+                  label="Курс"
+                  options={courses.map((course) => ({
+                    value: String(course.id),
+                    label: `${course.number} курс`,
+                  }))}
+                  error={errors.courseId?.message}
+                  {...field}
+                />
+              )}
+            />
+          </div>
+
           <div>
             <Controller
               name="teacherId"
@@ -196,6 +249,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
+
           <div>
             <Controller
               name="subjectId"
@@ -215,6 +269,26 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
+
+          <div>
+            <Controller
+              name="classroomId"
+              control={control}
+              rules={{ required: "Обязательное поле" }}
+              render={({ field }) => (
+                <Select
+                  label="Аудитория"
+                  options={classrooms.map((classroom) => ({
+                    value: classroom.id,
+                    label: `${classroom.name} (${classroom.type}, ${classroom.capacity} мест)`,
+                  }))}
+                  error={errors.classroomId?.message}
+                  {...field}
+                />
+              )}
+            />
+          </div>
+
           <div>
             <Controller
               name="lessonType"
@@ -238,58 +312,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               )}
             />
           </div>
-          <div>
-            <Controller
-              name="classroomId"
-              control={control}
-              rules={{ required: "Обязательное поле" }}
-              render={({ field }) => (
-                <Select
-                  label="Аудитория"
-                  options={classrooms.map((classroom) => ({
-                    value: classroom.id,
-                    label: `${classroom.name} (${classroom.type}, ${classroom.capacity} мест)`,
-                  }))}
-                  error={errors.classroomId?.message}
-                  {...field}
-                />
-              )}
-            />
-          </div>
-          <div className="col-span-2">
-            <label
-              className="block text-sm font-medium text-gray-700 mb-1"
-              htmlFor="group-checkbox-list"
-            >
-              Группы
-            </label>
-            <div
-              className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3"
-              id="group-checkbox-list"
-            >
-              {groups.map((group) => (
-                <div key={group.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`group-${group.id}`}
-                    value={group.id}
-                    className="checkbox"
-                    {...register("groupIds", {
-                      required: "Выберите хотя бы одну группу",
-                    })}
-                  />
-                  <label htmlFor={`group-${group.id}`} className="ml-2 text-sm">
-                    {group.name} ({group.students} чел.)
-                  </label>
-                </div>
-              ))}
-            </div>
-            {errors.groupIds && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.groupIds.message}
-              </p>
-            )}
-          </div>
+
           <div>
             <Controller
               name="day"
@@ -346,6 +369,42 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             />
           </div>
         </div>
+
+        <div className="col-span-2 mt-4">
+          <label
+            className="block text-sm font-medium text-gray-700 mb-1"
+            htmlFor="group-checkbox-list"
+          >
+            Группы
+          </label>
+          <div
+            className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3"
+            id="group-checkbox-list"
+          >
+            {filteredGroups.map((group) => (
+              <div key={group.id} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`group-${group.id}`}
+                  value={group.id}
+                  className="checkbox"
+                  {...register("groupIds", {
+                    required: "Выберите хотя бы одну группу",
+                  })}
+                />
+                <label htmlFor={`group-${group.id}`} className="ml-2 text-sm">
+                  {group.name} ({group.students} чел.)
+                </label>
+              </div>
+            ))}
+          </div>
+          {errors.groupIds && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.groupIds.message}
+            </p>
+          )}
+        </div>
+
         {conflicts.length > 0 && (
           <div className="mt-4 p-3 bg-warning-50 border border-warning-200 rounded-md">
             <h4 className="text-warning-800 font-medium mb-2">
@@ -358,6 +417,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             </ul>
           </div>
         )}
+
         <div className="mt-6 flex justify-end space-x-3">
           <Button variant="outline" onClick={onClose}>
             Отмена
