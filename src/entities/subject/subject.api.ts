@@ -6,3 +6,6 @@ export function getSubjects() {
 export function getSubjectsMentor() {
   return $api.get(`mentor/subjects/me/`)
 }
+export function getSubjectsStudent() {
+  return $api.get(`subjects/me/`)
+}

@@ -38,3 +38,11 @@ export function updateGradePartial(
 ) {
   return $api.patch(`mentor-grades/${id}/`, data)
 }
+
+export function getStudentGrades(subjectId: number) {
+  return $api.get(`student-grades/me/`, {
+    params: {
+      subjectId,
+    },
+  })
+}
