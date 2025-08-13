@@ -9,7 +9,7 @@ import { QRGenerator } from '@/features/lesson/qr-generator'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
-export function GradeBook({ subjectId, groupId }) {
+export function GradeBook({ subjectId, groupId = null }) {
   const [rowData, setRowData] = useState<any[]>([])
   const [allDates, setAllDates] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -22,7 +22,10 @@ export function GradeBook({ subjectId, groupId }) {
   useEffect(() => {
     async function fetchGrades() {
       try {
-        const res = await gradeApi.getGrades(groupId, subjectId)
+        // const res = await gradeApi.getGrades(groupId, subjectId)
+        const res = groupId
+          ? await gradeApi.getGrades(groupId, subjectId)
+          : await gradeApi.getStudentGrades(subjectId)
         const { sessions, grades } = res.data
 
         const dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))

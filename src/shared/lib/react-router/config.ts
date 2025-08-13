@@ -88,4 +88,9 @@ export const pathKeys = {
       return `attend/${id}/`
     },
   },
+  studentGrade: {
+    byId(id: string) {
+      return `student-grade/${id}`
+    },
+  },
 }
