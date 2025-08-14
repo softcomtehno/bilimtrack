@@ -3,6 +3,9 @@ export const pathKeys = {
   home() {
     return pathKeys.root
   },
+  more(){
+    return pathKeys.root.concat('more/')
+  },
   schedule() {
     return pathKeys.root.concat('schedule/')
   },
@@ -33,11 +36,11 @@ export const pathKeys = {
   login() {
     return pathKeys.root.concat('auth/')
   },
-  program() {
-    return pathKeys.root.concat('course/')
+  mysubjects() {
+    return pathKeys.root.concat('mysubjects/')
   },
-  ranking() {
-    return pathKeys.root.concat('ranking/')
+  rating() {
+    return pathKeys.root.concat('rating/')
   },
 
   tanda() {

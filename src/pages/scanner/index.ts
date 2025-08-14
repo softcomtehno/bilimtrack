@@ -1,1 +1,1 @@
-export { homePageRoute } from "./scanner-page.route";
+export { scannerPageRoute } from "./scanner-page.route";

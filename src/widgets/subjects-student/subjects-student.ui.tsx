@@ -17,7 +17,7 @@ export const SubjectsStudent = () => {
   }, [])
   return (
     <>
-      <Title Icon={Album} title="Предметы" />
+      <Title Icon={Album} title="Мои предметы" />
       <Swiper
         className="w-[100%] pb-[40px] default-slider"
         modules={[Pagination]}

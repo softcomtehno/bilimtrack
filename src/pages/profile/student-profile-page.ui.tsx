@@ -1,30 +1,5 @@
-import CourseCard from '@/entities/course/ui/card';
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Divider,
-  Avatar,
-  Button,
-  Chip,
-  user,
-} from '@heroui/react';
-import {
-  Album,
-  CheckIcon,
-  CircleEllipsis,
-  Star,
-  Trophy,
-  UserRound,
-  UsersRound,
-} from 'lucide-react';
-
-import 'swiper/css';
-import 'swiper/css/pagination';
-
-import 'swiper/css';
-import 'swiper/css/pagination';
+import { Card, Avatar, Button, Chip, Divider } from '@heroui/react';
+import { Mail, ShieldUser, UsersRound } from 'lucide-react';
 import { Chart } from '@/widgets/chart';
 import { userQueries } from '@/entities/user';
 
@@ -43,75 +18,47 @@ export const StudentProfilePage = () => {
     return <div>Error fetching user data.</div>;
   }
 
-  return (
-    <>
-      <Card className="w-full rounded-none p-3">
-        <div className="flex gap-3 items-center">
-          <div>
-            <h3 className="flex gap-2 ">
-              {' '}
-              <span>{userData?.data.firstName}</span>
-              {userData?.data.lastName}
-            </h3>
-            <h6>@{userData?.data.username}</h6>
-          </div>
-        </div>
+  const user = userData?.data;
 
-        <div className="p-0 my -4 flex flex-wrap gap-2">
-          <div className="">
-            <Chip
-              color="success"
-              startContent={
-                <UserRound className="bg-success/40 rounded-full" size={18} />
-              }
-              variant="faded"
-            >
-              Группа: IT-23
-            </Chip>
-          </div>
-          <div className="">
-            <Chip
-              color="success"
-              startContent={
-                <Star className="bg-success/40 rounded-full" size={18} />
-              }
-              variant="faded"
-            >
-              Рейтинг: 85
-            </Chip>
-          </div>
-          <div className="">
-            <Chip
-              color="success"
-              startContent={
-                <CircleEllipsis
-                  className="bg-success/40 rounded-full"
-                  size={18}
-                />
-              }
-              variant="faded"
-            >
-              Баллы: 85
-            </Chip>
-          </div>
-          <div className="">
-            <Chip
-              color="success"
-              startContent={
-                <Trophy
-                  className="bg-success/40 p-[3px] rounded-full"
-                  size={18}
-                />
-              }
-              variant="faded"
-              className=""
-            >
-              Достижения: 15
-            </Chip>
+  
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Card className="w-full rounded-none p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
+          {/* Аватар */}
+          <Avatar
+            src={user?.avatarUrl || '/default-avatar.png'}
+            alt={`${user?.firstName} ${user?.lastName}`}
+            size="lg"
+            className="border"
+          />
+          
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xl font-semibold">
+              {user?.firstName} {user?.lastName}
+            </h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+       <ShieldUser size={16} />
+                <span>Логин:            @{user?.username}</span>
+              </div>
+            {user?.group && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <UsersRound size={16} />
+                <span>Группа: {user.group}</span>
+              </div>
+            )}
+            {user?.email && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Mail size={16} />
+                <span>{user.email}</span>
+              </div>
+            )}
           </div>
         </div>
+        <Divider className="my-4" />
         <Chart />
       </Card>
-    </>
+    </div>
   );
 };

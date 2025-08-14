@@ -21,6 +21,9 @@ import { lessonIDPageRoute } from '@/pages/lesson-id'
 import { subjectPageRoute } from '@/pages/subject'
 import { groupPageRoute } from '@/pages/group'
 import { studentGradePageRoute } from '@/pages/student-grade'
+import { subjectsPageRoute } from '@/pages/subjects'
+import { ratingPageRoute } from '@/pages/rating'
+import { morePageRoute } from '@/pages/more'
 
 function BubbleError() {
   const error = useRouteError()
@@ -52,6 +55,9 @@ const router = createBrowserRouter([
           subjectPageRoute,
           groupPageRoute,
           studentGradePageRoute,
+          subjectsPageRoute,
+          ratingPageRoute,
+          morePageRoute
         ],
       },
       {
