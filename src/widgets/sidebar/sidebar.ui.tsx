@@ -1,4 +1,4 @@
-import { subjectQueries } from '@/entities/subject'
+import { subjectQueries } from '@/entities/subject';
 import {
   BookCopy,
   CalendarCheck2,
@@ -6,9 +6,9 @@ import {
   CircleUser,
   GraduationCap,
   Home,
-} from 'lucide-react'
-import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar'
-import { Link } from 'react-router-dom'
+} from 'lucide-react';
+import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+import { Link } from 'react-router-dom';
 
 export function SidebarNav() {
   const {
@@ -16,7 +16,7 @@ export function SidebarNav() {
     isLoading: isSubjectsLoading,
     isError: isSubjectsError,
     isSuccess: isSubjectSuccess,
-  } = subjectQueries.useGetSubjectsMentor()
+  } = subjectQueries.useGetSubjectsMentor();
   if (isSubjectSuccess) {
     return (
       <Sidebar
@@ -52,13 +52,13 @@ export function SidebarNav() {
                 Главная
               </MenuItem>
               <MenuItem
-                component={<Link to="/schedule" />}
+                component={<Link to="/mentor/timetable" />}
                 icon={<CalendarCheck2 />}
               >
                 График работы
               </MenuItem>
               <MenuItem
-                component={<Link to="/profile" />}
+                component={<Link to="/mentor/profile" />}
                 icon={<CircleUser />}
               >
                 Профиль
@@ -82,7 +82,7 @@ export function SidebarNav() {
                     {subjectsData?.data?.map((subject) => (
                       <MenuItem
                         key={subject.id}
-                        component={<Link to={`/subjects/${subject.id}`} />}
+                        component={<Link to={`/mentor/subjects/${subject.id}`} />}
                       >
                         <div className="w-[100%]  text-xs whitespace-normal break-words leading-snug">
                           {subject.name}
@@ -99,6 +99,6 @@ export function SidebarNav() {
           </div>
         </div>
       </Sidebar>
-    )
+    );
   }
 }

@@ -15,8 +15,8 @@ interface LayoutProps {
 
 export function GenericLayout({ children }: LayoutProps) {
   return (
-    <div className="my-5 mx-auto">
-      <Card className="max-w-[400px] mx-auto border rounded-md">
+    <div className=" mx-auto">
+      <Card className="max-w-[400px] pb-[60px] mx-auto border-none rounded-none shadow-none">
         <TopBar />
         {children || <Outlet />}
         <Navigation />
@@ -63,11 +63,12 @@ export function RoleBasedLayout() {
     isError,
   } = userQueries.useLoginUserQuery()
 
-  if (isLoading) return <div className="text-center mt-10">Загрузка...</div>
+  if (isLoading) return <div>Загрузка...</div>
 
   if (isError || !userData?.data) {
     return <Navigate to="/auth" replace />
   }
+
   if (userData.data.role === 'mentor') {
     return <MentorLayout />
   }

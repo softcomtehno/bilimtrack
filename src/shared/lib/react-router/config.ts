@@ -1,7 +1,10 @@
 export const pathKeys = {
-  root: '/',
+  root: '',
   home() {
-    return pathKeys.root
+    return ""
+  },
+  more(){
+    return pathKeys.root.concat('more/')
   },
   schedule() {
     return pathKeys.root.concat('schedule/')
@@ -13,7 +16,7 @@ export const pathKeys = {
     return pathKeys.root.concat('timetable/')
   },
   student() {
-    return pathKeys.root.concat('student/')
+    return pathKeys.root.concat('/')
   },
   about() {
     return pathKeys.root.concat('about/')
@@ -33,11 +36,11 @@ export const pathKeys = {
   login() {
     return pathKeys.root.concat('auth/')
   },
-  program() {
-    return pathKeys.root.concat('course/')
+  mysubjects() {
+    return pathKeys.root.concat('mysubjects/')
   },
-  ranking() {
-    return pathKeys.root.concat('ranking/')
+  rating() {
+    return pathKeys.root.concat('rating/')
   },
 
   tanda() {
@@ -69,6 +72,11 @@ export const pathKeys = {
     },
     badges() {
       return pathKeys.profile.root().concat('badges/')
+    },
+  },
+  learn:{
+    root() {
+      return pathKeys.root.concat('learn/')
     },
   },
   subject: {
