@@ -11,7 +11,7 @@ export function Navigation() {
       id: "home",
       icon: <Home className="h-6 w-6" />,
       label: "Home",
-      path: "/",
+      path: "/student",
     },
     {
       id: "settings",

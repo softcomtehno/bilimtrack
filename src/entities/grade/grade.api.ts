@@ -38,3 +38,16 @@ export function updateGradePartial(
 ) {
   return $api.patch(`mentor-grades/${id}/`, data)
 }
+
+export function getStudentGrades(subjectId: number) {
+  return $api.get(`student-grades/me/`, {
+    params: {
+      subjectId,
+    },
+  })
+}
+
+// Оплата за отсутствие
+export function createAbsencePayment(sessionId: string) {
+  return $api.post(`payments/absence/create/`, { sessionId })
+}
