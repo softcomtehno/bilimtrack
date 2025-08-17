@@ -18,7 +18,7 @@ export default function CourseCard({
 
         <Divider />
         <CardFooter>
-          <Link to={`groups/${id}`}>Просмотреть Группу</Link>
+          <Link to={`groups/${id}`}>Подробнее</Link>
         </CardFooter>
       </Card>
     </Link>

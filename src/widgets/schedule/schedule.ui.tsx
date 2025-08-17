@@ -89,7 +89,7 @@ export function Schedule() {
 
       <Link
         className="flex items-center no-underline justify-center my-3 w-full h-[40px] rounded-lg border-2 border-white bg-sky-400  text-white"
-        to="/schedule"
+        to="https://comtehno.kg/timetable/groups/{id}"
       >
         Полное расписание
       </Link>

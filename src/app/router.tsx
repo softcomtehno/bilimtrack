@@ -2,39 +2,42 @@ import {
   RouterProvider,
   createBrowserRouter,
   useRouteError,
-} from 'react-router-dom'
+} from 'react-router-dom';
 
 import {
-  mentorHomePageRoute,
-  rootHomePageRoute,
-  studentHomePageRoute,
-} from '@/pages/home'
+  GenericLayout,
+  IntroLayout,
+  MentorLayout,
+  RoleBasedLayout,
+} from '@/pages/layout/layout.ui';
 
-import { IntroLayout, RoleBasedLayout } from '@/pages/layout/layout.ui'
+import { loginPageRoute } from '@/pages/shared/login';
+import { scannerPageRoute } from '@/pages/student/scanner/scanner-page.route';
+import { lessonIDPageRoute } from '@/pages/student/lesson-id';
+import { subjectPageRoute } from '@/pages/mentor/subject';
+import { groupPageRoute } from '@/pages/mentor/group';
+import { studentGradePageRoute } from '@/pages/student/student-grade';
+import { ratingPageRoute } from '@/pages/student/rating';
+import { studentHomePageRoute } from '@/pages/student/home';
+import { mentorHomePageRoute } from '@/pages/mentor/home';
+import { morePageRoute } from '@/pages/student/more';
+import { learnPageRoute } from '@/pages/student/learn';
+import { studentprofilePageRoute } from '@/pages/student/profile';
+import { mentorprofilePageRoute } from '@/pages/mentor/profile';
+import { timetablePageRoute } from '@/pages/mentor/timetable';
+import { schedulePageRoute } from '@/pages/admin/schedule';
 
-import { loginPageRoute } from '@/pages/login'
-import { profilePageRoute } from '@/pages/profile'
-import { scannerPageRoute } from '@/pages/scanner/scanner-page.route'
-import { timetablePageRoute } from '@/pages/timetable'
-import { schedulePageRoute } from '@/pages'
-import { lessonIDPageRoute } from '@/pages/lesson-id'
-import { subjectPageRoute } from '@/pages/subject'
-import { groupPageRoute } from '@/pages/group'
-import { studentGradePageRoute } from '@/pages/student-grade'
-import { subjectsPageRoute } from '@/pages/subjects'
-import { ratingPageRoute } from '@/pages/rating'
-import { morePageRoute } from '@/pages/more'
 
 function BubbleError() {
-  const error = useRouteError()
-  if (!error) return null
+  const error = useRouteError();
+  if (!error) return null;
 
   return (
     <div>
       <h1>Произошла ошибка!</h1>
       <pre>{JSON.stringify(error)}</pre>
     </div>
-  )
+  );
 }
 
 const router = createBrowserRouter([
@@ -44,20 +47,33 @@ const router = createBrowserRouter([
       {
         element: <RoleBasedLayout />,
         children: [
-          studentHomePageRoute,
-          mentorHomePageRoute,
-          rootHomePageRoute,
-          profilePageRoute,
-          scannerPageRoute,
-          lessonIDPageRoute,
-          timetablePageRoute,
-          schedulePageRoute,
-          subjectPageRoute,
-          groupPageRoute,
-          studentGradePageRoute,
-          subjectsPageRoute,
-          ratingPageRoute,
-          morePageRoute
+          {
+            path: '/student',
+            children: [
+              studentHomePageRoute,
+              morePageRoute,
+              learnPageRoute,
+              scannerPageRoute,
+              studentprofilePageRoute,
+              ratingPageRoute,
+              lessonIDPageRoute,
+              groupPageRoute,
+              studentGradePageRoute,
+            ],
+          },
+          {
+            path: '/mentor',
+            children: [
+              mentorHomePageRoute,
+              mentorprofilePageRoute,
+              timetablePageRoute,
+              subjectPageRoute,
+            ],
+          },
+          {
+            path: '/admin',
+            children: [schedulePageRoute],
+          },
         ],
       },
       {
@@ -66,8 +82,8 @@ const router = createBrowserRouter([
       },
     ],
   },
-])
+]);
 
 export function BrowserRouter() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }

@@ -1,7 +1,7 @@
 export const pathKeys = {
-  root: '/',
+  root: '',
   home() {
-    return pathKeys.root
+    return ""
   },
   more(){
     return pathKeys.root.concat('more/')
@@ -16,7 +16,7 @@ export const pathKeys = {
     return pathKeys.root.concat('timetable/')
   },
   student() {
-    return pathKeys.root.concat('student/')
+    return pathKeys.root.concat('/')
   },
   about() {
     return pathKeys.root.concat('about/')
@@ -72,6 +72,11 @@ export const pathKeys = {
     },
     badges() {
       return pathKeys.profile.root().concat('badges/')
+    },
+  },
+  learn:{
+    root() {
+      return pathKeys.root.concat('learn/')
     },
   },
   subject: {

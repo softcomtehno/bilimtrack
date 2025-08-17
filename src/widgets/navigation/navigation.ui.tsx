@@ -21,30 +21,30 @@ export function Navigation() {
       path: '/student',
     },
     {
-      id: 'subjects',
+      id: 'learn',
       icon: <BookCopy className="h-6 w-6" />,
-      label: 'Предметы',
-      path: '/subjects',
+      label: 'Обучение',
+      path: 'student/learn',
     },
     {
-      id: 'settings',
+      id: 'scaner',
       icon: (
         <ScanBarcode className="h-8 w-8 mt-[-4px] text-black/70 border rounded-md border-black" />
       ),
       label: '',
-      path: '/scanner',
+      path: '/student/scanner',
     },
     {
       id: 'rating',
       icon: <ChartNoAxesCombined className="h-6 w-6" />,
       label: 'Рейтинг',
-      path: '/rating',
+      path: '/student/rating',
     },
     {
       id: 'more',
       icon: <Bubbles className=' h-6 w-6' />,
       label: 'Еще',
-      path: '/more',
+      path: '/student/more',
     },
   ];
 
