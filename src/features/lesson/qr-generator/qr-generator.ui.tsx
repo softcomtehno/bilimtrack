@@ -38,7 +38,6 @@ export function QRGenerator() {
       <div className="flex justify-end">
         <Button
           color="primary"
-          className="mt-10"
           onClick={() => setIsOpen(true)}
           disabled={!sessionId}
         >

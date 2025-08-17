@@ -1,4 +1,4 @@
-import { Pagination } from '@heroui/react'
+import { Pagination, Select, SelectItem, Button } from '@heroui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
@@ -6,13 +6,21 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { gradeApi } from '@/entities/grade'
 import { QRGenerator } from '@/features/lesson/qr-generator'
+import { topicApi } from '@/entities/topic'
+import { sessionApi } from '@/entities/session'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
 export function GradeBook({ subjectId, groupId = null }) {
   const [rowData, setRowData] = useState<any[]>([])
   const [allDates, setAllDates] = useState<string[]>([])
+  const [sessions, setSessions] = useState<any[]>([])
+  const [topics, setTopics] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+
+  const [selectedDate, setSelectedDate] = useState<string>('') // выбранная дата
+  const [selectedTopic, setSelectedTopic] = useState<string>('') // выбранная тема для select
+  const [fixedTopic, setFixedTopic] = useState<string>('') // тема для отображения, если уже назначена
 
   const todayDate = new Date().toLocaleDateString('ru-RU') // dd.mm.yyyy
   const todaySafe = todayDate.replace(/\./g, '_') // dd_mm_yyyy
@@ -22,10 +30,9 @@ export function GradeBook({ subjectId, groupId = null }) {
   useEffect(() => {
     async function fetchGrades() {
       try {
-        // const res = await gradeApi.getGrades(groupId, subjectId)
-        const res = groupId
-          ? await gradeApi.getGrades(groupId, subjectId)
-          : await gradeApi.getStudentGrades(subjectId)
+        const res = await gradeApi.getGrades(groupId, subjectId)
+        console.log(res);
+        
         const { sessions, grades } = res.data
 
         const dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
@@ -42,7 +49,7 @@ export function GradeBook({ subjectId, groupId = null }) {
             scores[date] = score ? score.grade : 0
             scoreIds[date] = score?.id
             sessionIds[date] =
-              score?.session ||
+              score?.sessionId ||
               sessions.find((s: any) => s.date.replace(/-/g, '_') === date)?.id
           })
 
@@ -52,20 +59,76 @@ export function GradeBook({ subjectId, groupId = null }) {
             scores,
             scoreIds,
             sessionIds,
-            ...scores, // для колонок AG Grid
+            ...scores,
           }
         })
 
         setAllDates(dates)
+        setSessions(sessions)
         setRowData(transformedData)
         setCurrentPage(Math.ceil(dates.length / columnsPerPage))
+
+        // Выбираем сегодня или первую дату
+        const todayExists = dates.includes(todaySafe)
+        const initialDate = todayExists ? todaySafe : dates[0]
+        setSelectedDate(initialDate)
+
+        // Проверяем, есть ли тема на выбранную дату
+        const sessionForDate = sessions.find(
+          (s) => s.date.replace(/-/g, '_') === initialDate
+        )
+        if (sessionForDate?.topic) {
+          setFixedTopic(sessionForDate.topic)
+        } else {
+          setFixedTopic('')
+        }
+        setSelectedTopic('') // select всегда пустой при инициализации
       } catch (error) {
         console.error('Ошибка при загрузке оценок:', error)
       }
     }
 
     fetchGrades()
-  }, [])
+  }, [groupId, subjectId])
+
+  useEffect(() => {
+    async function fetchTopics() {
+      try {
+        const res = await topicApi.getTopics(subjectId)
+        setTopics(res.data)
+      } catch (err) {
+        console.error('Ошибка при загрузке тем:', err)
+      }
+    }
+    fetchTopics()
+  }, [subjectId])
+
+  async function handleSave() {
+    if (!selectedDate || !selectedTopic) return
+
+    try {
+      const session = sessions.find(
+        (s) => s.date.replace(/-/g, '_') === selectedDate
+      )
+
+      if (!session) return
+
+      await sessionApi.updateSessionTopic(session.id, Number(selectedTopic))
+
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === session.id ? { ...s, topic: selectedTopic } : s
+        )
+      )
+
+      setFixedTopic(selectedTopic)
+      setSelectedTopic('')
+      alert('Тема успешно сохранена!')
+    } catch (err) {
+      console.error('Ошибка при обновлении темы:', err)
+      alert('Ошибка при сохранении темы.')
+    }
+  }
 
   const paginatedDates = allDates.filter((d) => d !== todaySafe)
   const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
@@ -99,120 +162,90 @@ export function GradeBook({ subjectId, groupId = null }) {
         editable: true,
         pinned: 'right',
         cellClass: 'hover:bg-blue-100',
-        valueSetter: (params: any) => {
-          let value = Number(params.newValue)
-          if (isNaN(value)) return false
-          if (value < 0) value = 0
-          if (value > 10) value = 10
-
-          const { data } = params
-          const userId = data.userId
-          const sessionId = data.sessionIds[todaySafe]
-          const gradeId = data.scoreIds[todaySafe]
-
-          // 1. Сохраняем старую оценку
-          const previousValue = data[todaySafe]
-
-          // 2. Немедленно показываем новую оценку в UI
-          data[todaySafe] = value
-          setRowData((prev) =>
-            prev.map((r) =>
-              r.fullName === data.fullName ? { ...r, [todaySafe]: value } : r
-            )
-          )
-
-          // 3. Асинхронно отправляем на сервер
-          ;(async () => {
-            try {
-              if (gradeId) {
-                const res = await gradeApi.updateGradePartial(gradeId, {
-                  grade: value,
-                })
-                // Обновить значением с бэка, если вернулась оценка
-                const updatedGrade = res.data.grade
-                setRowData((prev) =>
-                  prev.map((r) =>
-                    r.fullName === data.fullName
-                      ? { ...r, [todaySafe]: updatedGrade }
-                      : r
-                  )
-                )
-              } else {
-                const res = await gradeApi.createGrade({
-                  user: userId,
-                  session: sessionId,
-                  grade: value,
-                })
-                const created = res.data
-                // Обновить grade + сохранить id новой оценки
-                setRowData((prev) =>
-                  prev.map((r) =>
-                    r.fullName === data.fullName
-                      ? {
-                          ...r,
-                          [todaySafe]: created.grade,
-                          scoreIds: {
-                            ...r.scoreIds,
-                            [todaySafe]: created.id,
-                          },
-                        }
-                      : r
-                  )
-                )
-              }
-            } catch (err) {
-              console.error('Ошибка при сохранении оценки:', err)
-              // 4. Откатить на предыдущее значение при ошибке
-              setRowData((prev) =>
-                prev.map((r) =>
-                  r.fullName === data.fullName
-                    ? { ...r, [todaySafe]: previousValue }
-                    : r
-                )
-              )
-            }
-          })()
-
-          return true
-        },
       },
     ]
   }, [rowData, currentDateFields, todaySafe])
+  console.log(allDates)
 
   return (
     <div>
-      <div className="flex justify-left my-4">
-        <Pagination
-          isCompact
-          showControls
-          total={totalPages}
-          page={currentPage}
-          onChange={(page) => setCurrentPage(page)}
-        />
-      </div>
-      <div className="ag-theme-alpine" style={{ width: '100%' }}>
-        <AgGridReact
-          rowData={rowData}
-          columnDefs={columnDefs}
-          domLayout="autoHeight"
-          pagination={true}
-          paginationPageSize={30}
-          paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
-          rowHoverHighlight={true}
-          tabToNextCell={(params) => {
-            const { previousCellPosition, api } = params
-            const nextRowIndex = previousCellPosition.rowIndex + 1
-            if (nextRowIndex >= api.getDisplayedRowCount()) {
-              return null
-            }
-            return {
-              rowIndex: nextRowIndex,
-              column: previousCellPosition.column,
-              floating: null,
-            }
-          }}
-        />
-        <QRGenerator />
+      {/* Таблица с оценками */}
+      <div>
+        <div className="flex justify-left my-4">
+          <Pagination
+            isCompact
+            showControls
+            total={totalPages}
+            page={currentPage}
+            onChange={(page) => setCurrentPage(page)}
+          />
+        </div>
+
+        <div className="ag-theme-alpine" style={{ width: '100%' }}>
+          <AgGridReact
+            rowData={rowData}
+            columnDefs={columnDefs}
+            domLayout="autoHeight"
+            pagination={true}
+            paginationPageSize={30}
+            paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
+            rowHoverHighlight={true}
+          />
+
+          <div className="flex items-start justify-between mt-5 gap-10">
+            <div className="flex w-[80%] gap-10 flex-col">
+              <div className="flex w-full gap-5">
+                {/* Выбор даты */}
+                <Select
+                  label="Дата"
+                  selectedKeys={selectedDate ? [selectedDate] : []}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value)
+                    const session = sessions.find(
+                      (s) => s.date.replace(/-/g, '_') === e.target.value
+                    )
+                    setFixedTopic(session?.topic || '')
+                    setSelectedTopic('')
+                  }}
+                >
+                  {allDates.map((date) => (
+                    <SelectItem key={date} value={date}>
+                      {date.replace(/_/g, '.')}
+                    </SelectItem>
+                  ))}
+                </Select>
+
+                {/* Если есть уже тема — показываем div с текущей темой */}
+                {fixedTopic && (
+                  <div className="px-4 py-2 border rounded bg-gray-100 w-full">
+                    Текущая тема:{' '}
+                    {topics.find((t) => String(t.id) === String(fixedTopic))
+                      ?.title || fixedTopic}
+                  </div>
+                )}
+
+                {/* Select для изменения или выбора темы */}
+                <Select
+                  label="Тема"
+                  selectedKeys={selectedTopic ? [selectedTopic] : []}
+                  onChange={(e) => setSelectedTopic(e.target.value)}
+                >
+                  {topics.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.title}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+
+              <Button onClick={handleSave} appearance="primary">
+                Сохранить
+              </Button>
+            </div>
+
+            <QRGenerator />
+          </div>
+        </div>
       </div>
     </div>
   )
