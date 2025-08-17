@@ -46,3 +46,8 @@ export function getStudentGrades(subjectId: number) {
     },
   })
 }
+
+// Оплата за отсутствие
+export function createAbsencePayment(sessionId: string) {
+  return $api.post(`payments/absence/create/`, { sessionId })
+}
