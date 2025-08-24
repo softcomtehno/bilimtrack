@@ -54,7 +54,6 @@ export const StudentProfilePage = () => {
           </div>
         </div>
         <Divider className="my-4" />
-        <Chart />
       </Card>
     </div>
   );

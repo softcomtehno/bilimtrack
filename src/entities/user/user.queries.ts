@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { setCookie } from 'typescript-cookie';
+import { setCookie,  removeCookie } from 'typescript-cookie';
 import { toast } from 'react-toastify';
 
 import {
@@ -212,4 +212,31 @@ export function useGetSkills() {
     queryKey: keys.skills(),
     queryFn: () => getSkills(),
   });
+}
+
+
+
+export function useLogout() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  return () => {
+    console.log('Logout clicked'); // <- проверка
+    try {
+      // Удаляем токены
+      removeCookie(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.clear()
+      // Чистим кэш пользователя
+      queryClient.removeQueries({ queryKey: ['user'] });
+
+      toast.success('Вы вышли из аккаунта');
+
+      // Редирект на главную
+      navigate(pathKeys.home());
+    } catch (err) {
+      console.error('Ошибка при выходе:', err);
+      toast.error('Не удалось выйти из аккаунта');
+    }
+  };
 }

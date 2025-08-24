@@ -1,7 +1,7 @@
-import { useState } from "react";
-import ReactApexChart from "react-apexcharts";
-import { Book } from "lucide-react";
-import { Select, SelectItem } from "@heroui/react";
+import { useState } from 'react';
+import ReactApexChart from 'react-apexcharts';
+import { Book } from 'lucide-react';
+import { Select, SelectItem } from '@heroui/react';
 
 interface ChartDataPoint {
   date: string;
@@ -9,88 +9,88 @@ interface ChartDataPoint {
 }
 
 export const animals = [
-  { key: "cat", label: "Front-end Разработка" },
-  { key: "dog", label: "Back-end Разработка" },
-  { key: "elephant", label: "Кыргыз Тили" },
-  { key: "lion", label: "Кыргыз Адабият" },
-  { key: "tiger", label: "Культура речи" },
-  { key: "giraffe", label: "Человек и Общество" },
+  { key: 'cat', label: 'Front-end Разработка' },
+  { key: 'dog', label: 'Back-end Разработка' },
+  { key: 'elephant', label: 'Кыргыз Тили' },
+  { key: 'lion', label: 'Кыргыз Адабият' },
+  { key: 'tiger', label: 'Культура речи' },
+  { key: 'giraffe', label: 'Человек и Общество' },
 ];
 
 const subjectData: Record<string, ChartDataPoint[]> = {
   cat: [
-    { date: "01-01", score: 5 },
-    { date: "01-15", score: 7 },
-    { date: "02-01", score: 6 },
-    { date: "02-15", score: 8 },
-    { date: "03-01", score: 9 },
+    { date: '01-01', score: 5 },
+    { date: '01-15', score: 7 },
+    { date: '02-01', score: 6 },
+    { date: '02-15', score: 8 },
+    { date: '03-01', score: 9 },
   ],
   dog: [
-    { date: "01-01", score: 4 },
-    { date: "01-15", score: 0 },
-    { date: "02-01", score: 7 },
-    { date: "02-15", score: 5 },
-    { date: "03-01", score: 7 },
+    { date: '01-01', score: 4 },
+    { date: '01-15', score: 0 },
+    { date: '02-01', score: 7 },
+    { date: '02-15', score: 5 },
+    { date: '03-01', score: 7 },
   ],
   elephant: [
-    { date: "01-01", score: 6 },
-    { date: "01-15", score: 8 },
-    { date: "02-01", score: 0 },
-    { date: "02-15", score: 6 },
-    { date: "03-01", score: 7 },
+    { date: '01-01', score: 6 },
+    { date: '01-15', score: 8 },
+    { date: '02-01', score: 0 },
+    { date: '02-15', score: 6 },
+    { date: '03-01', score: 7 },
   ],
   lion: [
-    { date: "01-01", score: 7 },
-    { date: "01-15", score: 6 },
-    { date: "02-01", score: 8 },
-    { date: "02-15", score: 9 },
-    { date: "03-01", score: 8 },
+    { date: '01-01', score: 7 },
+    { date: '01-15', score: 6 },
+    { date: '02-01', score: 8 },
+    { date: '02-15', score: 9 },
+    { date: '03-01', score: 8 },
   ],
   tiger: [
-    { date: "01-01", score: 8 },
-    { date: "01-15", score: 9 },
-    { date: "02-01", score: 7 },
-    { date: "02-15", score: 0 },
-    { date: "03-01", score: 6 },
+    { date: '01-01', score: 8 },
+    { date: '01-15', score: 9 },
+    { date: '02-01', score: 7 },
+    { date: '02-15', score: 0 },
+    { date: '03-01', score: 6 },
   ],
   giraffe: [
-    { date: "01-01", score: 5 },
-    { date: "01-15", score: 4 },
-    { date: "02-01", score: 6 },
-    { date: "02-15", score: 7 },
-    { date: "03-01", score: 5 },
+    { date: '01-01', score: 5 },
+    { date: '01-15', score: 4 },
+    { date: '02-01', score: 6 },
+    { date: '02-15', score: 7 },
+    { date: '03-01', score: 5 },
   ],
 };
 
 export const Chart: React.FC = () => {
-  const [selectedSubject, setSelectedSubject] = useState("cat");
+  const [selectedSubject, setSelectedSubject] = useState('cat');
   const chartData = subjectData[selectedSubject] ?? [];
 
   const options: ApexCharts.ApexOptions = {
     chart: {
-      type: "line",
+      type: 'line',
       toolbar: { show: false },
       zoom: { enabled: false },
     },
     dataLabels: { enabled: true },
-    stroke: { curve: "smooth" },
+    stroke: { curve: 'smooth' },
     xaxis: {
       categories: chartData.map((data) => data.date),
-      title: { text: "Даты" },
+      title: { text: 'Даты' },
     },
     yaxis: {
       max: 10,
       min: 0,
       tickAmount: 5,
-      title: { text: "Баллы" },
+      title: { text: 'Баллы' },
     },
-    colors: ["#0589c7"],
+    colors: ['#0589c7'],
     tooltip: { shared: true },
   };
 
   const series = [
     {
-      name: "Score",
+      name: 'Score',
       data: chartData.map((data) => data.score),
     },
   ];
@@ -101,7 +101,7 @@ export const Chart: React.FC = () => {
         <Select
           className="max-w-full bg-white rounded-t-md"
           color="primary"
-          defaultSelectedKeys={["cat"]}
+          defaultSelectedKeys={['cat']}
           label="График успеваемости"
           placeholder="Выберите предмет"
           radius="sm"
@@ -130,4 +130,4 @@ export const Chart: React.FC = () => {
     </div>
   );
 };
-("");
+('');
