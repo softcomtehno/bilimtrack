@@ -1,7 +1,7 @@
 import { groupQueries } from '@/entities/group'
 import { subjectQueries, subjectTypes } from '@/entities/subject'
 import { Title } from '@/shared/ui/title'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
@@ -10,6 +10,10 @@ import CourseCard from '@/entities/course/ui/card'
 import { Pagination } from 'swiper/modules'
 import { Album } from 'lucide-react'
 import { Group } from '@/shared/types'
+import { topicApi } from '@/entities/topic'
+import { Input } from '@heroui/input'
+import { Button } from '@heroui/button'
+import { Select, SelectItem } from '@heroui/select'
 
 export const SubjectPage = () => {
   const { id } = useParams()
@@ -31,8 +35,70 @@ export const SubjectPage = () => {
     isLoading: isGroupLoading,
     isError: isGroupError,
   } = groupQueries.useGetMentorGroups(subject?.id, {
-    enabled: !!subject?.id, 
+    enabled: !!subject?.id,
   })
+
+  // -------------------- темы --------------------
+  const [topics, setTopics] = useState<any[]>([])
+  const [loadingTopics, setLoadingTopics] = useState(false)
+  const [newTopic, setNewTopic] = useState('')
+  const [selectedTopic, setSelectedTopic] = useState('')
+  const [editMode, setEditMode] = useState<number | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+
+  useEffect(() => {
+    if (!subject?.id) return
+    loadTopics()
+  }, [subject?.id])
+
+  const loadTopics = async () => {
+    try {
+      setLoadingTopics(true)
+      const res = await topicApi.getTopics(subject?.id)
+      setTopics(res.data) // если backend вернёт {results:[]} → поправь на res.data.results
+    } catch (e) {
+      console.error('Ошибка загрузки тем:', e)
+    } finally {
+      setLoadingTopics(false)
+    }
+  }
+
+  const handleAddTopic = async () => {
+    if (!newTopic.trim()) return
+    try {
+      await topicApi.addTopic(subject?.id, newTopic)
+      setNewTopic('')
+      await loadTopics()
+    } catch (e) {
+      console.error('Ошибка добавления темы:', e)
+    }
+  }
+
+  const handleDeleteTopic = async (topicId: number) => {
+    try {
+      await topicApi.deleteTopic(topicId)
+      await loadTopics()
+    } catch (e) {
+      console.error('Ошибка удаления темы:', e)
+    }
+  }
+
+  const handleStartEdit = (topic: any) => {
+    setEditMode(topic.id)
+    setEditTitle(topic.title)
+  }
+
+  const handleSaveEdit = async (topicId: number) => {
+    try {
+      await topicApi.updateTopic(topicId, subject?.id, editTitle)
+      setEditMode(null)
+      setEditTitle('')
+      await loadTopics()
+    } catch (e) {
+      console.error('Ошибка обновления темы:', e)
+    }
+  }
+  // ------------------------------------------------
 
   if (isSubjectLoading || isGroupLoading) {
     return <div>Загрузка...</div>
@@ -45,10 +111,74 @@ export const SubjectPage = () => {
     return <div>Предмет не найден</div>
   }
 
-  
   return (
     <div>
       <h1 className="text-lg font-semibold mb-4">{subject.name}</h1>
+
+      {/* -------------------- темы -------------------- */}
+      <Title Icon={Album} title="Темы уроков" />
+      <div className="flex gap-2 items-center mb-4">
+        <Input
+          placeholder="Введите название темы"
+          value={newTopic}
+          onChange={(e) => setNewTopic(e.target.value)}
+          className="max-w-xs"
+        />
+        <Button color="primary" onPress={handleAddTopic}>
+          Добавить
+        </Button>
+      </div>
+
+      <div className="space-y-2 mb-8">
+        {topics.map((t) => (
+          <div key={t.id} className="flex items-center gap-2">
+            {editMode === t.id ? (
+              <>
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="max-w-xs"
+                />
+                <Button
+                  size="sm"
+                  color="success"
+                  onPress={() => handleSaveEdit(t.id)}
+                >
+                  Сохранить
+                </Button>
+                <Button
+                  size="sm"
+                  variant="light"
+                  onPress={() => setEditMode(null)}
+                >
+                  Отмена
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="flex-1">{t.title}</span>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  onPress={() => handleStartEdit(t)}
+                >
+                  Изменить
+                </Button>
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="flat"
+                  onPress={() => handleDeleteTopic(t.id)}
+                >
+                  Удалить
+                </Button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+      {/* ------------------------------------------------ */}
+
       <Title Icon={Album} title="Группы" />
       <Swiper
         className="w-[100%] pb-[40px] default-slider"
@@ -57,7 +187,7 @@ export const SubjectPage = () => {
         spaceBetween={20}
         slidesPerView={4}
       >
-        {groupData?.data.map((group: Group, i) => (
+        {groupData?.data.map((group: Group) => (
           <SwiperSlide key={group.id}>
             <CourseCard name={group.name} id={group.id} />
           </SwiperSlide>
