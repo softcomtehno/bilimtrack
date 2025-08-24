@@ -15,7 +15,7 @@ interface LayoutProps {
 
 export function GenericLayout({ children }: LayoutProps) {
   return (
-    <div className=" mx-auto">
+    <div className="mx-auto">
       <Card className="max-w-[400px] pb-[60px] mx-auto border-none rounded-none shadow-none">
         <TopBar />
         {children || <Outlet />}

@@ -1,15 +1,11 @@
-import { CardBody } from '@heroui/react'
-import {
-  BookImage,
-  CalendarCheck2,
-  Newspaper,
-} from 'lucide-react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Title } from '@/shared/ui/title'
-import { Schedule } from '@/widgets/schedule'
-import { EventCard } from '@/entities/event/ui/card'
-
+import { CardBody } from '@heroui/react';
+import { BookImage, CalendarCheck2, Newspaper } from 'lucide-react';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Title } from '@/shared/ui/title';
+import { Schedule } from '@/widgets/schedule';
+import { EventCard } from '@/entities/event/ui/card';
+import { MakalaboxList } from '@/widgets/makalabox-list';
 
 export const StudentHomePage = () => {
   return (
@@ -19,11 +15,11 @@ export const StudentHomePage = () => {
         <Schedule />
         <Title Icon={BookImage} title="Мероприятия" />
         <EventCard />
-        <Title Icon={Newspaper} title="Тематические статьи" />
-        <EventCard />
         <Title Icon={Newspaper} title="Новости" />
         <EventCard />
+        
+        <MakalaboxList />
       </CardBody>
     </>
-  )
-}
+  );
+};

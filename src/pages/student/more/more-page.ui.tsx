@@ -1,4 +1,6 @@
 import { userQueries } from '@/entities/user';
+import { useLogout } from '@/entities/user/user.queries';
+
 import { Card, CardHeader, Image, Listbox, ListboxItem } from '@heroui/react';
 import {
   BookCopy,
@@ -12,7 +14,7 @@ import {
 import { Link } from 'react-router-dom';
 
 export const ListboxWrapper = ({ children }) => (
-  <div className="w-full  border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
+  <div className="w-full border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
     {children}
   </div>
 );
@@ -23,6 +25,8 @@ export const MorePage = () => {
     isLoading,
     isError,
   } = userQueries.useLoginUserQuery();
+
+  const logout = useLogout();
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -58,6 +62,7 @@ export const MorePage = () => {
           </CardHeader>
         </Card>
       </Link>
+
       <ListboxWrapper>
         <Listbox aria-label="Listbox menu with descriptions" variant="faded">
           <ListboxItem
@@ -82,10 +87,11 @@ export const MorePage = () => {
             startContent={<StickyNote />}
             endContent={<ChevronRight />}
           >
-            Comtehno.kg
+            {user.organization?.website}
           </ListboxItem>
         </Listbox>
       </ListboxWrapper>
+
       <ListboxWrapper>
         <Listbox aria-label="Listbox menu with descriptions" variant="faded">
           <ListboxItem
@@ -104,7 +110,10 @@ export const MorePage = () => {
           </ListboxItem>
         </Listbox>
       </ListboxWrapper>
-      <Card className="w-full shadow-none border">
+      <Card
+        className="w-full shadow-none border cursor-pointer"
+        onClick={logout} // <-- здесь
+      >
         <CardHeader className="flex justify-between items-center">
           <div className="flex gap-3 items-center">
             <div className="w-[40px] h-[40px] flex items-center justify-center bg-gray-200 rounded-full">
