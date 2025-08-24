@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { setCookie,  removeCookie } from 'typescript-cookie';
+import { setCookie, removeCookie } from 'typescript-cookie';
 import { toast } from 'react-toastify';
 
 import {
@@ -102,13 +102,14 @@ export function useGetTokenMutation() {
     onSuccess: (response: any) => {
       const { access, refresh } = response.data;
       setCookie(ACCESS_TOKEN_KEY, access, {
+        path: '/', // ключевой момент!
         sameSite: 'Strict',
         secure: true,
       });
       localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
 
       toast.success('Вы успешно авторизовались!', { autoClose: 500 });
-      navigate(pathKeys.profile.root());
+      navigate('/');
     },
     onError: (error: AxiosErrorType) => {
       const errorMessage = error.response?.data?.detail || 'Ошибка авторизации';
@@ -214,8 +215,6 @@ export function useGetSkills() {
   });
 }
 
-
-
 export function useLogout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -226,7 +225,7 @@ export function useLogout() {
       // Удаляем токены
       removeCookie(ACCESS_TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
-      localStorage.clear()
+      localStorage.clear();
       // Чистим кэш пользователя
       queryClient.removeQueries({ queryKey: ['user'] });
 

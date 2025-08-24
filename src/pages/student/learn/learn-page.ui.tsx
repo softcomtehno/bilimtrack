@@ -13,12 +13,13 @@ import { Divider } from '@heroui/react';
 import { Chart } from '@/widgets/chart';
 
 export const LearnPage = () => {
-  const [subjects, setSubjects] = useState([])
+  const [subjects, setSubjects] = useState([]);
 
   useEffect(() => {
-    getSubjectsStudent().then((res) => setSubjects(res))
-  }, [])
-  console.log('subjects', subjects)
+    getSubjectsStudent().then((res) => setSubjects(res));
+  }, []);
+  console.log('subjects', subjects);
+
 
   return (
     <div className="p-4 flex flex-col items-center gap-4">
@@ -30,7 +31,15 @@ export const LearnPage = () => {
       >
         {subjects?.data?.map((subj) => (
           <SwiperSlide key={subj.id}>
-            <CourseCard {...subj} />
+            <CourseCard
+              id={subj.id}
+              name={subj.name}
+              description={subj.description}
+              photo={subj.photo}
+              makalaboxUrl={subj.makalaboxUrl}
+              createdAt={subj.createdAt}
+            />
+
           </SwiperSlide>
         ))}
       </Swiper>

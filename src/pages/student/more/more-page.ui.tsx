@@ -1,5 +1,5 @@
 import { userQueries } from '@/entities/user';
-import { useLogout } from '@/entities/user/user.queries';
+
 
 import { Card, CardHeader, Image, Listbox, ListboxItem } from '@heroui/react';
 import {
@@ -26,7 +26,7 @@ export const MorePage = () => {
     isError,
   } = userQueries.useLoginUserQuery();
 
-  const logout = useLogout();
+
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -112,7 +112,7 @@ export const MorePage = () => {
       </ListboxWrapper>
       <Card
         className="w-full shadow-none border cursor-pointer"
-        onClick={logout} // <-- здесь
+
       >
         <CardHeader className="flex justify-between items-center">
           <div className="flex gap-3 items-center">
