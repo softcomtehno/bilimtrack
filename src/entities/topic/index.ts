@@ -1,0 +1,1 @@
+export * as topicApi from './topic.api'

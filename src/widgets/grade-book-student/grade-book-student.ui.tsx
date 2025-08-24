@@ -25,6 +25,7 @@ export function GradeBookStudent({
   const [error, setError] = useState<string | null>(null)
   const [linkUrl, setLinkUrl] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  console.log(subjectId)
 
   useEffect(() => {
     async function fetchGrades() {
@@ -64,14 +65,27 @@ export function GradeBookStudent({
     fetchGrades()
   }, [subjectId])
 
-  const handlePayClick = async (date: string) => {
+  const handlePayClick = async (date: string, sessionId?: string) => {
+    if (!sessionId) return
     try {
-      console.log(`Оплата для даты: ${date}`)
+      const res = await gradeApi.createAbsencePayment(sessionId)
+
+      const data = res.data
+
+      if (data.paymentLink) {
+        // Открываем ссылку в новой вкладке
+        window.open(data.paymentLink, '_blank')
+      }
+
+      // Обновляем состояние, что "ожидается оплата"
       setGradesByDate((prev) =>
-        prev.map((g) => (g.date === date ? { ...g, isPaid: true } : g))
+        prev.map((g) =>
+          g.sessionId === sessionId ? { ...g, isPaid: false } : g
+        )
       )
     } catch (err) {
       console.error('Ошибка при обработке оплаты:', err)
+      alert('Не удалось создать платёж. Попробуйте позже.')
     }
   }
 
@@ -93,7 +107,8 @@ export function GradeBookStudent({
       setSelectedFile(e.target.files[0])
     }
   }
-
+  console.log(gradesByDate);
+  
   if (isLoading) {
     return (
       <div className={`p-6 rounded-lg border shadow-sm ${className}`}>
@@ -145,7 +160,9 @@ export function GradeBookStudent({
                   : 'bg-white hover:bg-gray-50'
               }`}
               onClick={() =>
-                entry.grade === 0 && !entry.isPaid && handlePayClick(entry.date)
+                entry.grade === 0 &&
+                !entry.isPaid &&
+                handlePayClick(entry.date, entry.sessionId)
               }
             >
               <span className="text-gray-700 font-medium">{entry.date}</span>
@@ -174,7 +191,7 @@ export function GradeBookStudent({
                     className="text-red-600 hover:text-red-700 font-medium"
                     onClick={(e) => {
                       e.stopPropagation()
-                      handlePayClick(entry.date)
+                      handlePayClick(entry.date, entry.sessionId)
                     }}
                   >
                     Оплатить

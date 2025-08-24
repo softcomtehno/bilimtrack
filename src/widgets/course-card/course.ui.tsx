@@ -1,13 +1,7 @@
-import { Card, CardBody, CardHeader, Image } from '@heroui/react';
-import { Link } from 'react-router-dom';
+import { Card, CardBody, CardHeader, Image } from '@heroui/react'
+import { Link } from 'react-router-dom'
 
-export function CourseCard({
-  name,
-  description,
-  photo,
-  makalaboxUrl,
-  createdAt,
-}) {
+export function CourseCard({ id, name, description, photo }) {
   return (
     <Card className="w-full shadow-none border">
       <CardHeader className=" font-bold text-lg flex  gap-2 p-0">
@@ -23,11 +17,11 @@ export function CourseCard({
         <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
         <Link
           className="bg-sky-500 flex items-center justify-center rounded-md my-2 text-white py-1"
-          to="/home"
+          to={`/student/subject/${id}`}
         >
           Подробнее
         </Link>
       </CardBody>
     </Card>
-  );
+  )
 }

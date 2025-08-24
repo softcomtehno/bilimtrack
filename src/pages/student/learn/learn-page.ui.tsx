@@ -20,6 +20,7 @@ export const LearnPage = () => {
   }, []);
   console.log('subjects', subjects);
 
+
   return (
     <div className="p-4 flex flex-col items-center gap-4">
       <Swiper
@@ -38,6 +39,7 @@ export const LearnPage = () => {
               makalaboxUrl={subj.makalaboxUrl}
               createdAt={subj.createdAt}
             />
+
           </SwiperSlide>
         ))}
       </Swiper>

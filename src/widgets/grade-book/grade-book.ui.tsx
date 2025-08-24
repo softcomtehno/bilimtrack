@@ -1,4 +1,4 @@
-import { Pagination } from '@heroui/react'
+import { Pagination, Select, SelectItem, Button } from '@heroui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
@@ -6,26 +6,34 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { gradeApi } from '@/entities/grade'
 import { QRGenerator } from '@/features/lesson/qr-generator'
+import { topicApi } from '@/entities/topic'
+import { sessionApi } from '@/entities/session'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
 export function GradeBook({ subjectId, groupId = null }) {
   const [rowData, setRowData] = useState<any[]>([])
   const [allDates, setAllDates] = useState<string[]>([])
+  const [sessions, setSessions] = useState<any[]>([])
+  const [topics, setTopics] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+
+  const [selectedDate, setSelectedDate] = useState<string>('') // выбранная дата
+  const [selectedTopic, setSelectedTopic] = useState<string>('') // выбранная тема для select
+  const [editing, setEditing] = useState(false) // режим редактирования
 
   const todayDate = new Date().toLocaleDateString('ru-RU') // dd.mm.yyyy
   const todaySafe = todayDate.replace(/\./g, '_') // dd_mm_yyyy
 
   const columnsPerPage = 9
 
+  // загрузка оценок и сессий
   useEffect(() => {
     async function fetchGrades() {
       try {
-        // const res = await gradeApi.getGrades(groupId, subjectId)
-        const res = groupId
-          ? await gradeApi.getGrades(groupId, subjectId)
-          : await gradeApi.getStudentGrades(subjectId)
+        const res = await gradeApi.getGrades(groupId, subjectId)
+        console.log(res)
+
         const { sessions, grades } = res.data
 
         const dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
@@ -42,7 +50,7 @@ export function GradeBook({ subjectId, groupId = null }) {
             scores[date] = score ? score.grade : 0
             scoreIds[date] = score?.id
             sessionIds[date] =
-              score?.session ||
+              score?.sessionId ||
               sessions.find((s: any) => s.date.replace(/-/g, '_') === date)?.id
           })
 
@@ -52,21 +60,72 @@ export function GradeBook({ subjectId, groupId = null }) {
             scores,
             scoreIds,
             sessionIds,
-            ...scores, // для колонок AG Grid
+            ...scores,
           }
         })
 
         setAllDates(dates)
+        setSessions(sessions)
         setRowData(transformedData)
         setCurrentPage(Math.ceil(dates.length / columnsPerPage))
+
+        // Выбираем сегодня или первую дату
+        const todayExists = dates.includes(todaySafe)
+        setSelectedDate(todayExists ? todaySafe : dates[0])
       } catch (error) {
         console.error('Ошибка при загрузке оценок:', error)
       }
     }
 
     fetchGrades()
-  }, [])
+  }, [groupId, subjectId])
 
+  // загрузка списка доступных тем (для выбора)
+  useEffect(() => {
+    async function fetchTopics() {
+      try {
+        const res = await topicApi.getTopics(subjectId)
+        setTopics(res.data)
+      } catch (err) {
+        console.error('Ошибка при загрузке тем:', err)
+      }
+    }
+    fetchTopics()
+  }, [subjectId])
+
+  // текущая сессия для выбранной даты
+  const currentSession = sessions.find(
+    (s) => s.date.replace(/-/g, '_') === selectedDate
+  )
+
+  const currentTopic = currentSession?.topic || null
+
+  // сохранение темы
+  async function handleSave() {
+    if (!selectedDate || !selectedTopic) return
+    try {
+      const session = currentSession
+      if (!session) return
+
+      await sessionApi.updateSessionTopic(session.id, Number(selectedTopic))
+
+      const topicObj =
+        topics.find((t) => String(t.id) === String(selectedTopic)) || null
+
+      setSessions((prev) =>
+        prev.map((s) => (s.id === session.id ? { ...s, topic: topicObj } : s))
+      )
+
+      setEditing(false)
+      setSelectedTopic('')
+      alert('Тема успешно сохранена!')
+    } catch (err) {
+      console.error('Ошибка при обновлении темы:', err)
+      alert('Ошибка при сохранении темы.')
+    }
+  }
+
+  // пагинация дат (без сегодняшней)
   const paginatedDates = allDates.filter((d) => d !== todaySafe)
   const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
 
@@ -75,6 +134,7 @@ export function GradeBook({ subjectId, groupId = null }) {
     currentPage * columnsPerPage
   )
 
+  // колонки для таблицы
   const columnDefs = useMemo(() => {
     return [
       {
@@ -85,13 +145,21 @@ export function GradeBook({ subjectId, groupId = null }) {
         cellClass: 'hover:bg-blue-100',
         flex: 2,
       },
-      ...currentDateFields.map((field) => ({
-        field,
-        headerName: field.replace(/_/g, '.'),
-        flex: 1,
-        editable: false,
-        cellClass: 'hover:bg-blue-100',
-      })),
+      ...currentDateFields.map((field) => {
+        const session = sessions.find(
+          (s) => s.date.replace(/-/g, '_') === field
+        )
+        const topicTitle = session?.topic?.title
+        return {
+          field,
+          headerName: `${field.replace(/_/g, '.')} ${
+            topicTitle ? `(${topicTitle})` : ''
+          }`,
+          flex: 1,
+          editable: false,
+          cellClass: 'hover:bg-blue-100',
+        }
+      }),
       {
         field: todaySafe,
         headerName: todaySafe.replace(/_/g, '.'),
@@ -99,85 +167,9 @@ export function GradeBook({ subjectId, groupId = null }) {
         editable: true,
         pinned: 'right',
         cellClass: 'hover:bg-blue-100',
-        valueSetter: (params: any) => {
-          let value = Number(params.newValue)
-          if (isNaN(value)) return false
-          if (value < 0) value = 0
-          if (value > 10) value = 10
-
-          const { data } = params
-          const userId = data.userId
-          const sessionId = data.sessionIds[todaySafe]
-          const gradeId = data.scoreIds[todaySafe]
-
-          // 1. Сохраняем старую оценку
-          const previousValue = data[todaySafe]
-
-          // 2. Немедленно показываем новую оценку в UI
-          data[todaySafe] = value
-          setRowData((prev) =>
-            prev.map((r) =>
-              r.fullName === data.fullName ? { ...r, [todaySafe]: value } : r
-            )
-          )
-
-          // 3. Асинхронно отправляем на сервер
-          ;(async () => {
-            try {
-              if (gradeId) {
-                const res = await gradeApi.updateGradePartial(gradeId, {
-                  grade: value,
-                })
-                // Обновить значением с бэка, если вернулась оценка
-                const updatedGrade = res.data.grade
-                setRowData((prev) =>
-                  prev.map((r) =>
-                    r.fullName === data.fullName
-                      ? { ...r, [todaySafe]: updatedGrade }
-                      : r
-                  )
-                )
-              } else {
-                const res = await gradeApi.createGrade({
-                  user: userId,
-                  session: sessionId,
-                  grade: value,
-                })
-                const created = res.data
-                // Обновить grade + сохранить id новой оценки
-                setRowData((prev) =>
-                  prev.map((r) =>
-                    r.fullName === data.fullName
-                      ? {
-                          ...r,
-                          [todaySafe]: created.grade,
-                          scoreIds: {
-                            ...r.scoreIds,
-                            [todaySafe]: created.id,
-                          },
-                        }
-                      : r
-                  )
-                )
-              }
-            } catch (err) {
-              console.error('Ошибка при сохранении оценки:', err)
-              // 4. Откатить на предыдущее значение при ошибке
-              setRowData((prev) =>
-                prev.map((r) =>
-                  r.fullName === data.fullName
-                    ? { ...r, [todaySafe]: previousValue }
-                    : r
-                )
-              )
-            }
-          })()
-
-          return true
-        },
       },
     ]
-  }, [rowData, currentDateFields, todaySafe])
+  }, [rowData, currentDateFields, todaySafe, sessions])
 
   return (
     <div>
@@ -190,6 +182,7 @@ export function GradeBook({ subjectId, groupId = null }) {
           onChange={(page) => setCurrentPage(page)}
         />
       </div>
+
       <div className="ag-theme-alpine" style={{ width: '100%' }}>
         <AgGridReact
           rowData={rowData}
@@ -199,20 +192,72 @@ export function GradeBook({ subjectId, groupId = null }) {
           paginationPageSize={30}
           paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
           rowHoverHighlight={true}
-          tabToNextCell={(params) => {
-            const { previousCellPosition, api } = params
-            const nextRowIndex = previousCellPosition.rowIndex + 1
-            if (nextRowIndex >= api.getDisplayedRowCount()) {
-              return null
-            }
-            return {
-              rowIndex: nextRowIndex,
-              column: previousCellPosition.column,
-              floating: null,
-            }
-          }}
         />
-        <QRGenerator />
+        <div className="mt-10">
+          <QRGenerator groupId={groupId} subjectId={subjectId} />
+        </div>
+        <div className="flex items-start justify-between mt-5 gap-10">
+          <div className="flex w-full gap-10 flex-col">
+            <div className="flex w-full gap-5">
+              {/* выбор даты */}
+              <Select
+                label="Дата"
+                selectedKeys={selectedDate ? [selectedDate] : []}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value)
+                  setEditing(false)
+                  setSelectedTopic('')
+                }}
+                renderValue={(items) => {
+                  // items — это массив выбранных <SelectItem>
+                  const key = items[0]?.key as string
+                  if (!key) return null
+                  return <span>{key.replace(/_/g, '.')}</span> // только дата
+                }}
+              >
+                {allDates.map((date) => {
+                  const session = sessions.find(
+                    (s) => s.date.replace(/-/g, '_') === date
+                  )
+                  return (
+                    <SelectItem key={date} value={date}>
+                      {date.replace(/_/g, '.')} —{' '}
+                      {session?.topic?.title || 'Без темы'}
+                    </SelectItem>
+                  )
+                })}
+              </Select>
+
+              {/* если есть тема и не в режиме редактирования */}
+              {currentTopic && !editing && (
+                <div className="px-4 py-2 border rounded bg-gray-100 w-full flex justify-between items-center">
+                  <span>Текущая тема: {currentTopic.title}</span>
+                  <Button onClick={() => setEditing(true)}>Изменить</Button>
+                </div>
+              )}
+              {/* если редактируем или темы нет */}
+              {(!currentTopic || editing) && (
+                <Select
+                  label="Тема"
+                  selectedKeys={selectedTopic ? [selectedTopic] : []}
+                  onChange={(e) => setSelectedTopic(e.target.value)}
+                >
+                  {topics.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.title}
+                    </SelectItem>
+                  ))}
+                </Select>
+              )}
+            </div>
+            {/* кнопка сохранить */}
+            {(!currentTopic || editing) && (
+              <Button onClick={handleSave} appearance="primary">
+                Сохранить
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
