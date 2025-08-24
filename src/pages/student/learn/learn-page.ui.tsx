@@ -11,13 +11,13 @@ import { getSubjectsStudent } from '@/entities/subject/subject.api'
 import { CourseCard } from '@/widgets/course-card'
 
 export const LearnPage = () => {
-    const [subjects, setSubjects] = useState([])
+  const [subjects, setSubjects] = useState([])
 
   useEffect(() => {
     getSubjectsStudent().then((res) => setSubjects(res))
   }, [])
-  console.log('subjects', subjects);
-  
+  console.log('subjects', subjects)
+
   return (
     <div className="p-4 flex flex-col items-center gap-4">
       <Swiper
@@ -26,19 +26,11 @@ export const LearnPage = () => {
         pagination={{ clickable: true }}
         spaceBetween={20}
       >
-{subjects?.data?.map((subj) => (
-  <SwiperSlide key={subj.id}>
-    <CourseCard
-      id={subj.id}
-      name={subj.name}
-      description={subj.description}
-      photo={subj.photo}
-      makalaboxUrl={subj.makalaboxUrl}
-      createdAt={subj.createdAt}
-    />
-  </SwiperSlide>
-))}
-
+        {subjects?.data?.map((subj) => (
+          <SwiperSlide key={subj.id}>
+            <CourseCard {...subj} />
+          </SwiperSlide>
+        ))}
       </Swiper>
     </div>
   )

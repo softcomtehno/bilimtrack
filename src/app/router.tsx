@@ -26,6 +26,7 @@ import { studentprofilePageRoute } from '@/pages/student/profile';
 import { mentorprofilePageRoute } from '@/pages/mentor/profile';
 import { timetablePageRoute } from '@/pages/mentor/timetable';
 import { schedulePageRoute } from '@/pages/admin/schedule';
+import { SubjectIDPage, subjectIDPageRoute } from '@/pages/student/subject-id';
 
 
 function BubbleError() {
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
               lessonIDPageRoute,
               groupPageRoute,
               studentGradePageRoute,
+              subjectIDPageRoute
             ],
           },
           {
@@ -68,6 +70,7 @@ const router = createBrowserRouter([
               mentorprofilePageRoute,
               timetablePageRoute,
               subjectPageRoute,
+              groupPageRoute
             ],
           },
           {

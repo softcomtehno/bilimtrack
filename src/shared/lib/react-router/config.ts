@@ -101,4 +101,9 @@ export const pathKeys = {
       return `student-grade/${id}`
     },
   },
+  subjectIdStudent: {
+    byId(id: string) {
+      return `subject/${id}/`
+    },
+  },
 }

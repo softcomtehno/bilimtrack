@@ -10,6 +10,7 @@ export const GroupPage = () => {
   return (
     <div>
       <GradeBook groupId={groupId} subjectId={subjectId} />
+      
     </div>
   );
 };
