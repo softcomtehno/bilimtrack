@@ -20,19 +20,20 @@ export function GradeBook({ subjectId, groupId = null }) {
 
   const [selectedDate, setSelectedDate] = useState<string>('') // выбранная дата
   const [selectedTopic, setSelectedTopic] = useState<string>('') // выбранная тема для select
-  const [fixedTopic, setFixedTopic] = useState<string>('') // тема для отображения, если уже назначена
+  const [editing, setEditing] = useState(false) // режим редактирования
 
   const todayDate = new Date().toLocaleDateString('ru-RU') // dd.mm.yyyy
   const todaySafe = todayDate.replace(/\./g, '_') // dd_mm_yyyy
 
   const columnsPerPage = 9
 
+  // загрузка оценок и сессий
   useEffect(() => {
     async function fetchGrades() {
       try {
         const res = await gradeApi.getGrades(groupId, subjectId)
-        console.log(res);
-        
+        console.log(res)
+
         const { sessions, grades } = res.data
 
         const dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
@@ -70,19 +71,7 @@ export function GradeBook({ subjectId, groupId = null }) {
 
         // Выбираем сегодня или первую дату
         const todayExists = dates.includes(todaySafe)
-        const initialDate = todayExists ? todaySafe : dates[0]
-        setSelectedDate(initialDate)
-
-        // Проверяем, есть ли тема на выбранную дату
-        const sessionForDate = sessions.find(
-          (s) => s.date.replace(/-/g, '_') === initialDate
-        )
-        if (sessionForDate?.topic) {
-          setFixedTopic(sessionForDate.topic)
-        } else {
-          setFixedTopic('')
-        }
-        setSelectedTopic('') // select всегда пустой при инициализации
+        setSelectedDate(todayExists ? todaySafe : dates[0])
       } catch (error) {
         console.error('Ошибка при загрузке оценок:', error)
       }
@@ -91,6 +80,7 @@ export function GradeBook({ subjectId, groupId = null }) {
     fetchGrades()
   }, [groupId, subjectId])
 
+  // загрузка списка доступных тем (для выбора)
   useEffect(() => {
     async function fetchTopics() {
       try {
@@ -103,25 +93,30 @@ export function GradeBook({ subjectId, groupId = null }) {
     fetchTopics()
   }, [subjectId])
 
+  // текущая сессия для выбранной даты
+  const currentSession = sessions.find(
+    (s) => s.date.replace(/-/g, '_') === selectedDate
+  )
+
+  const currentTopic = currentSession?.topic || null
+
+  // сохранение темы
   async function handleSave() {
     if (!selectedDate || !selectedTopic) return
-
     try {
-      const session = sessions.find(
-        (s) => s.date.replace(/-/g, '_') === selectedDate
-      )
-
+      const session = currentSession
       if (!session) return
 
       await sessionApi.updateSessionTopic(session.id, Number(selectedTopic))
 
+      const topicObj =
+        topics.find((t) => String(t.id) === String(selectedTopic)) || null
+
       setSessions((prev) =>
-        prev.map((s) =>
-          s.id === session.id ? { ...s, topic: selectedTopic } : s
-        )
+        prev.map((s) => (s.id === session.id ? { ...s, topic: topicObj } : s))
       )
 
-      setFixedTopic(selectedTopic)
+      setEditing(false)
       setSelectedTopic('')
       alert('Тема успешно сохранена!')
     } catch (err) {
@@ -130,6 +125,7 @@ export function GradeBook({ subjectId, groupId = null }) {
     }
   }
 
+  // пагинация дат (без сегодняшней)
   const paginatedDates = allDates.filter((d) => d !== todaySafe)
   const totalPages = Math.ceil(paginatedDates.length / columnsPerPage)
 
@@ -138,6 +134,7 @@ export function GradeBook({ subjectId, groupId = null }) {
     currentPage * columnsPerPage
   )
 
+  // колонки для таблицы
   const columnDefs = useMemo(() => {
     return [
       {
@@ -148,13 +145,21 @@ export function GradeBook({ subjectId, groupId = null }) {
         cellClass: 'hover:bg-blue-100',
         flex: 2,
       },
-      ...currentDateFields.map((field) => ({
-        field,
-        headerName: field.replace(/_/g, '.'),
-        flex: 1,
-        editable: false,
-        cellClass: 'hover:bg-blue-100',
-      })),
+      ...currentDateFields.map((field) => {
+        const session = sessions.find(
+          (s) => s.date.replace(/-/g, '_') === field
+        )
+        const topicTitle = session?.topic?.title
+        return {
+          field,
+          headerName: `${field.replace(/_/g, '.')} ${
+            topicTitle ? `(${topicTitle})` : ''
+          }`,
+          flex: 1,
+          editable: false,
+          cellClass: 'hover:bg-blue-100',
+        }
+      }),
       {
         field: todaySafe,
         headerName: todaySafe.replace(/_/g, '.'),
@@ -164,67 +169,74 @@ export function GradeBook({ subjectId, groupId = null }) {
         cellClass: 'hover:bg-blue-100',
       },
     ]
-  }, [rowData, currentDateFields, todaySafe])
-  console.log(allDates)
+  }, [rowData, currentDateFields, todaySafe, sessions])
 
   return (
     <div>
-      {/* Таблица с оценками */}
-      <div>
-        <div className="flex justify-left my-4">
-          <Pagination
-            isCompact
-            showControls
-            total={totalPages}
-            page={currentPage}
-            onChange={(page) => setCurrentPage(page)}
-          />
+      <div className="flex justify-left my-4">
+        <Pagination
+          isCompact
+          showControls
+          total={totalPages}
+          page={currentPage}
+          onChange={(page) => setCurrentPage(page)}
+        />
+      </div>
+
+      <div className="ag-theme-alpine" style={{ width: '100%' }}>
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columnDefs}
+          domLayout="autoHeight"
+          pagination={true}
+          paginationPageSize={30}
+          paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
+          rowHoverHighlight={true}
+        />
+        <div className="mt-10">
+          <QRGenerator groupId={groupId} subjectId={subjectId} />
         </div>
-
-        <div className="ag-theme-alpine" style={{ width: '100%' }}>
-          <AgGridReact
-            rowData={rowData}
-            columnDefs={columnDefs}
-            domLayout="autoHeight"
-            pagination={true}
-            paginationPageSize={30}
-            paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
-            rowHoverHighlight={true}
-          />
-
-          <div className="flex items-start justify-between mt-5 gap-10">
-            <div className="flex w-[80%] gap-10 flex-col">
-              <div className="flex w-full gap-5">
-                {/* Выбор даты */}
-                <Select
-                  label="Дата"
-                  selectedKeys={selectedDate ? [selectedDate] : []}
-                  onChange={(e) => {
-                    setSelectedDate(e.target.value)
-                    const session = sessions.find(
-                      (s) => s.date.replace(/-/g, '_') === e.target.value
-                    )
-                    setFixedTopic(session?.topic || '')
-                    setSelectedTopic('')
-                  }}
-                >
-                  {allDates.map((date) => (
+        <div className="flex items-start justify-between mt-5 gap-10">
+          <div className="flex w-full gap-10 flex-col">
+            <div className="flex w-full gap-5">
+              {/* выбор даты */}
+              <Select
+                label="Дата"
+                selectedKeys={selectedDate ? [selectedDate] : []}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value)
+                  setEditing(false)
+                  setSelectedTopic('')
+                }}
+                renderValue={(items) => {
+                  // items — это массив выбранных <SelectItem>
+                  const key = items[0]?.key as string
+                  if (!key) return null
+                  return <span>{key.replace(/_/g, '.')}</span> // только дата
+                }}
+              >
+                {allDates.map((date) => {
+                  const session = sessions.find(
+                    (s) => s.date.replace(/-/g, '_') === date
+                  )
+                  return (
                     <SelectItem key={date} value={date}>
-                      {date.replace(/_/g, '.')}
+                      {date.replace(/_/g, '.')} —{' '}
+                      {session?.topic?.title || 'Без темы'}
                     </SelectItem>
-                  ))}
-                </Select>
+                  )
+                })}
+              </Select>
 
-                {/* Если есть уже тема — показываем div с текущей темой */}
-                {fixedTopic && (
-                  <div className="px-4 py-2 border rounded bg-gray-100 w-full">
-                    Текущая тема:{' '}
-                    {topics.find((t) => String(t.id) === String(fixedTopic))
-                      ?.title || fixedTopic}
-                  </div>
-                )}
-
-                {/* Select для изменения или выбора темы */}
+              {/* если есть тема и не в режиме редактирования */}
+              {currentTopic && !editing && (
+                <div className="px-4 py-2 border rounded bg-gray-100 w-full flex justify-between items-center">
+                  <span>Текущая тема: {currentTopic.title}</span>
+                  <Button onClick={() => setEditing(true)}>Изменить</Button>
+                </div>
+              )}
+              {/* если редактируем или темы нет */}
+              {(!currentTopic || editing) && (
                 <Select
                   label="Тема"
                   selectedKeys={selectedTopic ? [selectedTopic] : []}
@@ -236,14 +248,14 @@ export function GradeBook({ subjectId, groupId = null }) {
                     </SelectItem>
                   ))}
                 </Select>
-              </div>
-
+              )}
+            </div>
+            {/* кнопка сохранить */}
+            {(!currentTopic || editing) && (
               <Button onClick={handleSave} appearance="primary">
                 Сохранить
               </Button>
-            </div>
-
-            <QRGenerator />
+            )}
           </div>
         </div>
       </div>

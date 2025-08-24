@@ -4,22 +4,21 @@ import { QRCodeSVG } from 'qrcode.react'
 import { gradeApi } from '@/entities/grade'
 import { Button } from '@heroui/button'
 
-export function QRGenerator() {
+export function QRGenerator({ groupId, subjectId }) {
   const [sessionId, setSessionId] = useState<string>('')
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     async function fetchSessionId() {
       try {
-        const res = await gradeApi.getGrades(1, 1)
+        const res = await gradeApi.getGrades(Number(groupId), Number(subjectId))
         const today = new Date()
           .toLocaleDateString('ru-RU')
           .split('.')
           .join('-')
-
         const session = res.data.sessions.find((s: any) => s.date === today)
         if (session) {
-          setSessionId(session.sessionId)
+          setSessionId(session.id)
         } else {
           console.warn('Сессия на сегодня не найдена:', today)
         }
@@ -27,12 +26,9 @@ export function QRGenerator() {
         console.error('Ошибка при получении sessionId:', error)
       }
     }
-
     fetchSessionId()
   }, [])
-
   const url = sessionId ? `${window.location.origin}/attend/${sessionId}` : ''
-
   return (
     <>
       <div className="flex justify-end">
