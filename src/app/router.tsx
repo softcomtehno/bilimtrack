@@ -1,4 +1,8 @@
-import { RouterProvider, createBrowserRouter, useRouteError } from 'react-router-dom'
+import {
+  RouterProvider,
+  createBrowserRouter,
+  useRouteError,
+} from 'react-router-dom'
 
 import {
   GenericLayout,
@@ -24,6 +28,7 @@ import { timetablePageRoute } from '@/pages/mentor/timetable'
 import { schedulePageRoute } from '@/pages/admin/schedule'
 import { subjectIDPageRoute } from '@/pages/student/subject-id'
 import { HomeRedirect } from '@/pages/home/home-redirect'
+import { subjectsPageRoute } from '@/pages/mentor/subjects'
 
 function BubbleError() {
   const error = useRouteError()
@@ -43,7 +48,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <HomeRedirect />, 
+        element: <HomeRedirect />,
       },
       {
         element: <RoleBasedLayout />, // <-- твои Layout остаются нетронутыми
@@ -71,6 +76,7 @@ const router = createBrowserRouter([
               timetablePageRoute,
               subjectPageRoute,
               groupPageRoute,
+              subjectsPageRoute,
             ],
           },
           {
