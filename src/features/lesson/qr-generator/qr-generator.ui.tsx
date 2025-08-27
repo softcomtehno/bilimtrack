@@ -7,6 +7,7 @@ import { Button } from '@heroui/button'
 export function QRGenerator({ groupId, subjectId }) {
   const [sessionId, setSessionId] = useState<string>('')
   const [isOpen, setIsOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     async function fetchSessionId() {
@@ -28,9 +29,22 @@ export function QRGenerator({ groupId, subjectId }) {
     }
     fetchSessionId()
   }, [])
+
+  // Отслеживаем ширину экрана
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const url = sessionId
     ? `${window.location.origin}/student/attend/${sessionId}`
     : ''
+  const qrSize = isMobile ? 320 : 500
+
   return (
     <>
       <div className="flex justify-end">
@@ -84,7 +98,7 @@ export function QRGenerator({ groupId, subjectId }) {
                 {sessionId ? (
                   <>
                     <div className="flex justify-center">
-                      <QRCodeSVG value={url} size={500} />
+                      <QRCodeSVG value={url} size={qrSize} />
                     </div>
                     <p className="mt-4 text-sm text-gray-500 break-words">
                       {url}
@@ -95,10 +109,6 @@ export function QRGenerator({ groupId, subjectId }) {
                     Генерация QR-кода...
                   </p>
                 )}
-
-                {/* <div className="mt-6">
-                  <Button onClick={() => setIsOpen(false)}>Закрыть</Button>
-                </div> */}
               </Dialog.Panel>
             </Transition.Child>
           </div>
