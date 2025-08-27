@@ -169,13 +169,40 @@ export function GradeBook({ subjectId, groupId = null }) {
           flex: 2,
           cellClass: 'hover:bg-blue-100',
           editable: mobileDate === todaySafe && hasTodaySession,
-          valueSetter: (params) => {
-            let val = Number(params.newValue)
-            if (isNaN(val)) return false
-            if (val > 10) val = 10
-            if (val < 0) val = 0
-            params.data[params.colDef.field!] = val
-            return true
+          valueSetter: async (params) => {
+            let newValue = Number(params.newValue)
+            if (isNaN(newValue)) return false
+            if (newValue > 10) newValue = 10
+            if (newValue < 0) newValue = 0
+
+            // сохраняем старое значение на случай ошибки
+            const oldValue = params.data[params.colDef.field!]
+            params.data[params.colDef.field!] = newValue
+
+            try {
+              const scoreId = params.data.scoreIds[params.colDef.field!]
+              const sessionId = params.data.sessionIds[params.colDef.field!]
+
+              if (scoreId) {
+                // обновляем существующую оценку
+                await gradeApi.updateGradePartial(scoreId, { grade: newValue })
+              } else {
+                // создаём новую оценку
+                const res = await gradeApi.createGrade({
+                  session: sessionId,
+                  grade: newValue,
+                  user: params.data.userId,
+                })
+                // сохраняем id созданной оценки
+                params.data.scoreIds[params.colDef.field!] = res.data.id
+              }
+
+              return true
+            } catch (err) {
+              console.error('Ошибка при обновлении оценки:', err)
+              params.data[params.colDef.field!] = oldValue || 0
+              return false
+            }
           },
         },
       ]
@@ -212,13 +239,40 @@ export function GradeBook({ subjectId, groupId = null }) {
         pinned: 'right',
         cellClass: 'hover:bg-blue-100',
         editable: true,
-        valueSetter: (params) => {
-          let val = Number(params.newValue)
-          if (isNaN(val)) return false
-          if (val > 10) val = 10
-          if (val < 0) val = 0
-          params.data[params.colDef.field!] = val
-          return true
+        valueSetter: async (params) => {
+          let newValue = Number(params.newValue)
+          if (isNaN(newValue)) return false
+          if (newValue > 10) newValue = 10
+          if (newValue < 0) newValue = 0
+
+          // сохраняем старое значение на случай ошибки
+          const oldValue = params.data[params.colDef.field!]
+          params.data[params.colDef.field!] = newValue
+
+          try {
+            const scoreId = params.data.scoreIds[params.colDef.field!]
+            const sessionId = params.data.sessionIds[params.colDef.field!]
+
+            if (scoreId) {
+              // обновляем существующую оценку
+              await gradeApi.updateGradePartial(scoreId, { grade: newValue })
+            } else {
+              // создаём новую оценку
+              const res = await gradeApi.createGrade({
+                session: sessionId,
+                grade: newValue,
+                user: params.data.userId,
+              })
+              // сохраняем id созданной оценки
+              params.data.scoreIds[params.colDef.field!] = res.data.id
+            }
+
+            return true
+          } catch (err) {
+            console.error('Ошибка при обновлении оценки:', err)
+            params.data[params.colDef.field!] = oldValue || 0
+            return false
+          }
         },
       })
     }
