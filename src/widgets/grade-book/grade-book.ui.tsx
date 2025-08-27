@@ -125,21 +125,27 @@ export function GradeBook({ subjectId, groupId = null }) {
   }
 
   // Массив прошлых дат без сегодняшней
-  const pastDates = allDates
-    .filter((d) => d !== todaySafe)
-    .sort((a, b) => a.localeCompare(b)) // сортировка по возрастанию для десктопа
+  // Массив прошлых дат без сегодняшней
+  const pastDates = allDates.filter((d) => d !== todaySafe)
+
+  // Для десктопа — по возрастанию
+  const desktopPastDates = [...pastDates].sort((a, b) => a.localeCompare(b))
+
+  // Для мобильного — по убыванию (чтобы первая страница была самой свежей)
+  const mobilePastDates = [...pastDates].sort((a, b) => b.localeCompare(a))
+
   const hasTodaySession = sessions.some(
     (s) => s.date.replace(/-/g, '_') === todaySafe
   )
 
   const mobileDate = isMobile
-    ? currentPage === 1 && hasTodaySession
+    ? currentPage === 1
       ? todaySafe
-      : pastDates[hasTodaySession ? currentPage - 2 : currentPage - 1]
+      : mobilePastDates[currentPage - 2]
     : null
 
   const desktopDatesOnPage = !isMobile
-    ? pastDates.slice(
+    ? desktopPastDates.slice(
         (currentPage - 1) * columnsPerPage,
         currentPage * columnsPerPage
       )
