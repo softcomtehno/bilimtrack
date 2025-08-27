@@ -28,7 +28,9 @@ export function QRGenerator({ groupId, subjectId }) {
     }
     fetchSessionId()
   }, [])
-  const url = sessionId ? `${window.location.origin}/attend/${sessionId}` : ''
+  const url = sessionId
+    ? `${window.location.origin}/student/attend/${sessionId}`
+    : ''
   return (
     <>
       <div className="flex justify-end">
