@@ -25,14 +25,17 @@ import {
 interface ScheduleFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ScheduleItem) => void;
+  onSubmit: (
+    data: ScheduleItem & { courseId: string; educationLevelId?: string }
+  ) => void;
   editItem?: ScheduleItem;
   teachers: Teacher[];
   groups: Group[];
   classrooms: Classroom[];
   subjects: Subject[];
   schedule: ScheduleItem[];
-  courses: { id: number; number: number }[];
+  courses: { id: number; number: number; educationLevel?: string | number }[];
+  eduLevelsData?: { id: string; name: string }[];
 }
 
 export const ScheduleForm: React.FC<ScheduleFormProps> = ({
@@ -46,6 +49,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   subjects,
   schedule,
   courses,
+  eduLevelsData,
 }) => {
   const getDefaultCourseId = useCallback(() => {
     return courses?.[0]?.id ? String(courses[0].id) : "";
@@ -59,7 +63,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     watch,
     setValue,
     formState: { errors },
-  } = useForm<ScheduleItem & { courseId: string }>({
+  } = useForm<ScheduleItem & { courseId: string; educationLevelId?: string }>({
     defaultValues: {
       ...(editItem || {
         id: "",
@@ -71,12 +75,13 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
         classroomName: "",
         groupIds: [],
         groupNames: [],
-        lessonType: "",
+        lessonType: "Лекция" as LessonType,
         day: DAYS_OF_WEEK[0],
         timeSlot: DEFAULT_TIME_SLOTS[0],
-        weekType: "Обе",
+        weekType: "Обе" as WeekType | "Обе",
       }),
-      courseId: getDefaultCourseId(),
+      courseId: "",
+      educationLevelId: undefined,
     },
   });
 
@@ -85,6 +90,23 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   const availableSubjects: Subject[] = useGetSubjects()?.data || [];
   const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || [];
   const watchedValues = watch();
+
+  // Фильтрация курсов по выбранному уровню образования
+  const filteredCourses = React.useMemo(() => {
+    const selectedEduLevelId = watchedValues.educationLevelId;
+    if (!selectedEduLevelId) return courses || [];
+    return (courses || []).filter(
+      (course) => String(course.educationLevel) === selectedEduLevelId
+    );
+  }, [courses, watchedValues.educationLevelId]);
+
+  // Сброс курса и групп при очистке уровня образования
+  useEffect(() => {
+    if (!watchedValues.educationLevelId) {
+      setValue("courseId", "");
+      setValue("groupIds", []);
+    }
+  }, [watchedValues.educationLevelId, setValue]);
 
   // Фильтрация групп по выбранному курсу
   useEffect(() => {
@@ -186,21 +208,27 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           classroomName: "",
           groupIds: [],
           groupNames: [],
-          lessonType: "",
+          lessonType: "Лекция" as LessonType,
           day: DAYS_OF_WEEK[0],
           timeSlot: DEFAULT_TIME_SLOTS[0],
-          weekType: "Обе",
+          weekType: "Обе" as WeekType | "Обе",
         }),
-        courseId: getDefaultCourseId(),
+        courseId: "",
+        educationLevelId: undefined,
       });
     }
   }, [isOpen, editItem, reset, getDefaultCourseId]);
 
-  const onFormSubmit = (data: ScheduleItem & { courseId: string }) => {
+  const onFormSubmit = (
+    data: ScheduleItem & { courseId: string; educationLevelId?: string }
+  ) => {
     if (!data.id) data.id = crypto.randomUUID();
     onSubmit(data);
     onClose();
+    window.location.reload();
   };
+
+  const isEduLevelSelected = Boolean(watchedValues.educationLevelId);
 
   return (
     <Dialog
@@ -211,21 +239,48 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className="grid grid-cols-2 gap-4">
-          {/* Добавляем выбор курса */}
+          {/* Уровни образования */}
+          {eduLevelsData?.length ? (
+            <div>
+              <Controller
+                name="educationLevelId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Уровни образования"
+                    options={(eduLevelsData || []).map((lvl) => ({
+                      value: lvl.id,
+                      label: lvl.name,
+                    }))}
+                    {...field}
+                  />
+                )}
+              />
+            </div>
+          ) : null}
+
+          {/* Курс */}
           <div>
             <Controller
               name="courseId"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={
+                isEduLevelSelected
+                  ? { required: "Обязательное поле" }
+                  : undefined
+              }
               render={({ field }) => (
                 <Select
                   label="Курс"
-                  options={courses.map((course) => ({
+                  options={filteredCourses.map((course) => ({
                     value: String(course.id),
                     label: `${course.number} курс`,
                   }))}
                   error={errors.courseId?.message}
-                  {...field}
+                  value={isEduLevelSelected ? field.value : ""}
+                  onChange={field.onChange}
+                  // hideEmptyOption
+                  disabled={!isEduLevelSelected}
                 />
               )}
             />
@@ -370,40 +425,47 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           </div>
         </div>
 
-        <div className="col-span-2 mt-4">
-          <label
-            className="block text-sm font-medium text-gray-700 mb-1"
-            htmlFor="group-checkbox-list"
-          >
-            Группы
-          </label>
-          <div
-            className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3"
-            id="group-checkbox-list"
-          >
-            {filteredGroups.map((group) => (
-              <div key={group.id} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={`group-${group.id}`}
-                  value={group.id}
-                  className="checkbox"
-                  {...register("groupIds", {
-                    required: "Выберите хотя бы одну группу",
-                  })}
-                />
-                <label htmlFor={`group-${group.id}`} className="ml-2 text-sm">
-                  {group.name} ({group.students} чел.)
-                </label>
-              </div>
-            ))}
+        {isEduLevelSelected && watchedValues.courseId ? (
+          <div className="col-span-2 mt-4">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-1"
+              htmlFor="group-checkbox-list"
+            >
+              Группы
+            </label>
+            <div
+              className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3"
+              id="group-checkbox-list"
+            >
+              {filteredGroups.map((group) => (
+                <div key={group.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`group-${group.id}`}
+                    value={group.id}
+                    className="checkbox"
+                    {...register(
+                      "groupIds",
+                      isEduLevelSelected && Boolean(watchedValues.courseId)
+                        ? {
+                            required: "Выберите хотя бы одну группу",
+                          }
+                        : undefined
+                    )}
+                  />
+                  <label htmlFor={`group-${group.id}`} className="ml-2 text-sm">
+                    {group.name} ({group.students} чел.)
+                  </label>
+                </div>
+              ))}
+            </div>
+            {errors.groupIds && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.groupIds.message}
+              </p>
+            )}
           </div>
-          {errors.groupIds && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.groupIds.message}
-            </p>
-          )}
-        </div>
+        ) : null}
 
         {conflicts.length > 0 && (
           <div className="mt-4 p-3 bg-warning-50 border border-warning-200 rounded-md">

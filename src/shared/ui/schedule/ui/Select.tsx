@@ -37,7 +37,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {label}
             </label>
           )}
-          {label === "Курс" && (
+          {label === "Уровни образования" && (
             <span className="text-red-500 font-bold">*</span>
           )}
         </div>
