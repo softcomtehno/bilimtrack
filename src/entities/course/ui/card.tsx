@@ -8,7 +8,7 @@ export default function CourseCard({
 }) {
   return (
     <Link to={`groups/${id}`}>
-      <Card className="max-w-[350px] shadow-none border rounded-md cursor-pointer ">
+      <Card className="min-w-[250px] shadow-none border rounded-md cursor-pointer ">
         <CardHeader className="flex gap-3 items-start">
           <ChartArea />
           <div className="flex flex-col">

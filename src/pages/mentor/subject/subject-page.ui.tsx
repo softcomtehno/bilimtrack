@@ -13,7 +13,6 @@ import { Group } from '@/shared/types'
 import { topicApi } from '@/entities/topic'
 import { Input } from '@heroui/input'
 import { Button } from '@heroui/button'
-import { Select, SelectItem } from '@heroui/select'
 
 export const SubjectPage = () => {
   const { id } = useParams()
@@ -40,9 +39,7 @@ export const SubjectPage = () => {
 
   // -------------------- темы --------------------
   const [topics, setTopics] = useState<any[]>([])
-  const [loadingTopics, setLoadingTopics] = useState(false)
   const [newTopic, setNewTopic] = useState('')
-  const [selectedTopic, setSelectedTopic] = useState('')
   const [editMode, setEditMode] = useState<number | null>(null)
   const [editTitle, setEditTitle] = useState('')
 
@@ -53,13 +50,11 @@ export const SubjectPage = () => {
 
   const loadTopics = async () => {
     try {
-      setLoadingTopics(true)
       const res = await topicApi.getTopics(subject?.id)
       setTopics(res.data) // если backend вернёт {results:[]} → поправь на res.data.results
     } catch (e) {
       console.error('Ошибка загрузки тем:', e)
     } finally {
-      setLoadingTopics(false)
     }
   }
 
@@ -185,7 +180,24 @@ export const SubjectPage = () => {
         modules={[Pagination]}
         pagination={{ clickable: true }}
         spaceBetween={20}
-        slidesPerView={4}
+        // slidesPerView={4}
+        breakpoints={{
+          2500: {
+            slidesPerView: 6,
+          },
+          2000: {
+            slidesPerView: 4,
+          },
+          1024: {
+            slidesPerView: 3,
+          },
+          768: {
+            slidesPerView: 2,
+          },
+          480: {
+            slidesPerView: 1,
+          },
+        }}
       >
         {groupData?.data.map((group: Group) => (
           <SwiperSlide key={group.id}>
