@@ -2,38 +2,15 @@ import {
   RouterProvider,
   createBrowserRouter,
   useRouteError,
-<<<<<<< HEAD
-} from "react-router-dom";
-=======
 } from 'react-router-dom'
->>>>>>> 5142fd2f7f0cee43dd1686449c3e2302b1d82060
 
 import {
   GenericLayout,
   IntroLayout,
   MentorLayout,
   RoleBasedLayout,
-} from "@/pages/layout/layout.ui";
+} from '@/pages/layout/layout.ui'
 
-<<<<<<< HEAD
-import { loginPageRoute } from "@/pages/shared/login";
-import { scannerPageRoute } from "@/pages/student/scanner/scanner-page.route";
-import { lessonIDPageRoute } from "@/pages/student/lesson-id";
-import { subjectPageRoute } from "@/pages/mentor/subject";
-import { groupPageRoute } from "@/pages/mentor/group";
-import { studentGradePageRoute } from "@/pages/student/student-grade";
-import { ratingPageRoute } from "@/pages/student/rating";
-import { studentHomePageRoute } from "@/pages/student/home";
-import { mentorHomePageRoute } from "@/pages/mentor/home";
-import { morePageRoute } from "@/pages/student/more";
-import { learnPageRoute } from "@/pages/student/learn";
-import { studentprofilePageRoute } from "@/pages/student/profile";
-import { mentorprofilePageRoute } from "@/pages/mentor/profile";
-import { timetablePageRoute } from "@/pages/mentor/timetable";
-import { schedulePageRoute } from "@/pages/admin/schedule";
-import { subjectIDPageRoute } from "@/pages/student/subject-id";
-import { HomeRedirect } from "@/pages/home/home-redirect";
-=======
 import { loginPageRoute } from '@/pages/shared/login'
 import { scannerPageRoute } from '@/pages/student/scanner/scanner-page.route'
 import { lessonIDPageRoute } from '@/pages/student/lesson-id'
@@ -51,19 +28,17 @@ import { timetablePageRoute } from '@/pages/mentor/timetable'
 import { schedulePageRoute } from '@/pages/admin/schedule'
 import { subjectIDPageRoute } from '@/pages/student/subject-id'
 import { HomeRedirect } from '@/pages/home/home-redirect'
-import { subjectsPageRoute } from '@/pages/mentor/subjects'
->>>>>>> 5142fd2f7f0cee43dd1686449c3e2302b1d82060
 
 function BubbleError() {
-  const error = useRouteError();
-  if (!error) return null;
+  const error = useRouteError()
+  if (!error) return null
 
   return (
     <div>
       <h1>Произошла ошибка!</h1>
       <pre>{JSON.stringify(error)}</pre>
     </div>
-  );
+  )
 }
 
 const router = createBrowserRouter([
@@ -71,18 +46,14 @@ const router = createBrowserRouter([
     errorElement: <BubbleError />,
     children: [
       {
-<<<<<<< HEAD
-        path: "/",
-=======
         path: '/',
->>>>>>> 5142fd2f7f0cee43dd1686449c3e2302b1d82060
         element: <HomeRedirect />,
       },
       {
         element: <RoleBasedLayout />, // <-- твои Layout остаются нетронутыми
         children: [
           {
-            path: "/student",
+            path: '/student',
             children: [
               studentHomePageRoute,
               morePageRoute,
@@ -97,14 +68,14 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "/mentor",
+            path: '/mentor',
             children: [
               mentorHomePageRoute,
               mentorprofilePageRoute,
               timetablePageRoute,
               subjectPageRoute,
               groupPageRoute,
-              subjectsPageRoute,
+              // subjectsPageRoute,
             ],
           },
           // {
@@ -118,14 +89,14 @@ const router = createBrowserRouter([
         children: [loginPageRoute],
       },
       {
-        path: "/admin",
+        path: '/admin',
         element: <IntroLayout />,
         children: [schedulePageRoute],
       },
     ],
   },
-]);
+])
 
 export function BrowserRouter() {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />
 }
