@@ -24,6 +24,7 @@ import { timetablePageRoute } from '@/pages/mentor/timetable'
 import { schedulePageRoute } from '@/pages/admin/schedule'
 import { subjectIDPageRoute } from '@/pages/student/subject-id'
 import { HomeRedirect } from '@/pages/home/home-redirect'
+import { mentorMorePageRoute } from '@/pages/mentor/more'
 
 function BubbleError() {
   const error = useRouteError()
@@ -46,7 +47,7 @@ const router = createBrowserRouter([
         element: <HomeRedirect />, 
       },
       {
-        element: <RoleBasedLayout />, // <-- твои Layout остаются нетронутыми
+        element: <RoleBasedLayout />, 
         children: [
           {
             path: '/student',
@@ -70,6 +71,7 @@ const router = createBrowserRouter([
               mentorprofilePageRoute,
               timetablePageRoute,
               subjectPageRoute,
+              mentorMorePageRoute, 
               groupPageRoute,
             ],
           },

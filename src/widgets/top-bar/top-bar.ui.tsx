@@ -17,7 +17,7 @@ export function TopBar() {
   if (isError) {
     return <div>Error fetching user data.</div>;
   }
-  console.log('userData', userData);
+
 
   return (
     <>

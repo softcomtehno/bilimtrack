@@ -200,10 +200,10 @@ export const MentorProfilePage = () => {
   const selectedSkills = skillOptions.filter((option) =>
     skills.includes(option.value)
   );
-  console.log(user);
+  
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className=" mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold">Профиль преподавателя</h1>
         <Button
@@ -214,7 +214,7 @@ export const MentorProfilePage = () => {
           {isEditMode ? 'Отменить' : 'Редактировать'}
         </Button>
       </div>
-      <Card className="flex flex-col md:flex-row gap-8 p-6 rounded-lg shadow-lg border">
+      <Card className="flex flex-col md:flex-row gap-8  rounded-lg shadow-none border-none">
         <div className="flex flex-col items-center md:items-start md:w-1/3 gap-4">
           <div className="relative group flex flex-col items-center">
             <div

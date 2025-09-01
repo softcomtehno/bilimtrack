@@ -8,6 +8,7 @@ import 'swiper/css/pagination';
 import { Pagination } from 'swiper/modules';
 import { Button } from '@heroui/button';
 import { makalaboxQueries } from '@/entities/makalabox';
+import { Loading } from '@/shared/ui/loading';
 
 export function MakalaboxList() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | number>(
@@ -21,10 +22,9 @@ export function MakalaboxList() {
     isError,
   } = makalaboxQueries.useGetMakalas();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Loading />;
   if (isError) return <div>Error fetching data.</div>;
 
-  // фильтрация статей
   const filteredMakala =
     selectedCategory === 'all'
       ? makalaData?.data.results

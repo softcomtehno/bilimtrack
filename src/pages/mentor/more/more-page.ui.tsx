@@ -47,7 +47,7 @@ export const MorePage = () => {
 
   return (
     <div className="p-4 flex flex-col items-center gap-4">
-      <Link to="/student/profile" className="w-full">
+      <Link to="/mentor/profile" className="w-full">
         <Card className="w-full shadow-none border">
           <CardHeader className="flex justify-between items-center">
             <div className="flex gap-3 items-center">
@@ -70,37 +70,37 @@ export const MorePage = () => {
         </Card>
       </Link>
 
-           <ListboxWrapper>
-             <Listbox aria-label="Listbox menu with descriptions" variant="faded">
-               <ListboxItem
-                 key="makalabox"
-                 description="Платформа тематических статей"
-                 startContent={<Box />}
-                 endContent={<ChevronRight />}
-                 onClick={() => window.open('https://makalabox.com', '_blank')}
-               >
-                 Makalabox
-               </ListboxItem>
-               <ListboxItem
-                 key="new"
-                 description="Электронная библиотека"
-                 startContent={<BookCopy />}
-                 endContent={<ChevronRight />}
-                 onClick={() => window.open('https://lib-intuit.online/', '_blank')}
-               >
-                 Lib Intuit
-               </ListboxItem>
-               <ListboxItem
-                 key="new"
-                 description="Сайт учебного заведения"
-                 startContent={<StickyNote />}
-                 endContent={<ChevronRight />}
-                 onClick={() => window.open(user.organization?.website, '_blank')}
-               >
-                 {user.organization?.website}
-               </ListboxItem>
-             </Listbox>
-           </ListboxWrapper>
+      <ListboxWrapper>
+        <Listbox aria-label="Listbox menu with descriptions" variant="faded">
+          <ListboxItem
+            key="makalabox"
+            description="Платформа тематических статей"
+            startContent={<Box />}
+            endContent={<ChevronRight />}
+            onClick={() => window.open('https://makalabox.com', '_blank')}
+          >
+            Makalabox
+          </ListboxItem>
+          <ListboxItem
+            key="new"
+            description="Электронная библиотека"
+            startContent={<BookCopy />}
+            endContent={<ChevronRight />}
+            onClick={() => window.open('https://lib-intuit.online/', '_blank')}
+          >
+            Lib Intuit
+          </ListboxItem>
+          <ListboxItem
+            key="new"
+            description="Сайт учебного заведения"
+            startContent={<StickyNote />}
+            endContent={<ChevronRight />}
+            onClick={() => window.open(user.organization?.website, '_blank')}
+          >
+            {user.organization?.website}
+          </ListboxItem>
+        </Listbox>
+      </ListboxWrapper>
 
       <ListboxWrapper>
         <Listbox aria-label="Listbox menu with descriptions" variant="faded">
@@ -120,11 +120,14 @@ export const MorePage = () => {
           </ListboxItem>
         </Listbox>
       </ListboxWrapper>
-      <Card  className="w-full shadow-none border cursor-pointer">
-        <CardHeader onClick={logout} className="flex justify-between items-center">
+      <Card className="w-full shadow-none border cursor-pointer">
+        <CardHeader
+          onClick={logout}
+          className="flex justify-between items-center"
+        >
           <div className="flex gap-3 items-center">
             <div className="w-[40px] h-[40px] flex items-center justify-center bg-danger-200 rounded-full">
-              <LogOut className='text-danger-500' />
+              <LogOut className="text-danger-500" />
             </div>
             <div className="flex flex-col">
               <p className="text-md">Выйти</p>
