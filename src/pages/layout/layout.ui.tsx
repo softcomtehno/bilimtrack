@@ -3,7 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom'
 import { getCookie } from 'typescript-cookie'
 
 import { Navigation } from '@/widgets/navigation'
-import { SidebarNav } from '@/widgets/sidebar'
+import { BottomSidebar, SidebarNav } from '@/widgets/sidebar'
 import { TopBar } from '@/widgets/top-bar'
 import { Card } from '@heroui/card'
 import { userQueries } from '@/entities/user'
@@ -11,7 +11,6 @@ import { userQueries } from '@/entities/user'
 interface LayoutProps {
   children?: ReactNode
 }
-
 
 export function GenericLayout({ children }: LayoutProps) {
   return (
@@ -28,10 +27,19 @@ export function GenericLayout({ children }: LayoutProps) {
 export function MentorLayout({ children }: LayoutProps) {
   return (
     <div className="flex h-screen">
-      <SidebarNav />
-      <main className="flex-1 p-10 overflow-y-auto">
+      {/* Desktop sidebar */}
+      <div className="hidden md:block">
+        <SidebarNav />
+      </div>
+
+      <main className="flex-1 p-10 overflow-y-auto pb-16 md:pb-0">
         {children || <Outlet />}
       </main>
+
+      {/* Mobile bottom sidebar */}
+      <div className="block md:hidden">
+        <BottomSidebar />
+      </div>
     </div>
   )
 }
@@ -57,11 +65,7 @@ export function ProtectedRoute({
 }
 
 export function RoleBasedLayout() {
-  const {
-    data: userData,
-    isLoading,
-    isError,
-  } = userQueries.useLoginUserQuery()
+  const { data: userData, isLoading, isError } = userQueries.useLoginUserQuery()
 
   if (isLoading) return <div>Загрузка...</div>
 
