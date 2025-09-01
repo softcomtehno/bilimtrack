@@ -41,3 +41,8 @@ export const getCourses = async () => {
   const response = await $api.get("schedules/courses/");
   return response.data;
 };
+
+export const getEducationLevels = async () => {
+  const response = await $api.get("schedules/education-levels/");
+  return response.data;
+};

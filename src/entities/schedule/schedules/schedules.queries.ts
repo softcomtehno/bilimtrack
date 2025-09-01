@@ -8,6 +8,7 @@ import {
   patchSchedule,
   deleteSchedule,
   getCourses,
+  getEducationLevels,
 } from "./schedules.api";
 
 const keys = {
@@ -16,6 +17,7 @@ const keys = {
   getLessonTypes: () => [...keys.root(), "lessonTypes"],
   getLessonTimes: () => [...keys.root(), "lessonTimes"],
   getCourses: () => [...keys.root(), "courses"],
+  getEduLevels: () => [...keys.root(), "eduLevels"],
 };
 
 export function useGetSchedules() {
@@ -50,6 +52,13 @@ export function useGetCourses() {
   return useQuery({
     queryKey: keys.getCourses(),
     queryFn: getCourses,
+  });
+}
+
+export function useGetEducationLevels() {
+  return useQuery({
+    queryKey: keys.getEduLevels(),
+    queryFn: getEducationLevels,
   });
 }
 

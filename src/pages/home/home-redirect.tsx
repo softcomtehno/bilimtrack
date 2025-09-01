@@ -1,19 +1,24 @@
-import { Navigate } from 'react-router-dom'
-import { userQueries } from '@/entities/user'
+import { Navigate } from "react-router-dom";
+import { userQueries } from "@/entities/user";
 
 export function HomeRedirect() {
-  const { data: userData, isLoading, isError } = userQueries.useLoginUserQuery()
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = userQueries.useLoginUserQuery();
 
-  if (isLoading) return <div>Загрузка...</div>
+  if (isLoading) return <div>Загрузка...</div>;
 
   if (isError || !userData?.data) {
-    return <Navigate to="/auth" replace />
+    return <Navigate to="/auth" replace />;
   }
 
-  const role = userData.data.role
+  const role = userData.data.role;
 
-  if (role === 'mentor') return <Navigate to="/mentor" replace />
-  if (role === 'student') return <Navigate to="/student" replace />
+  if (role === "mentor") return <Navigate to="/mentor" replace />;
+  if (role === "student") return <Navigate to="/student" replace />;
+  if (role === "scheduler") return <Navigate to="/admin/schedule" replace />;
 
-  return <Navigate to="/auth" replace />
+  return <Navigate to="/auth" replace />;
 }
