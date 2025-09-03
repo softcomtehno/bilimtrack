@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useState, useEffect, useCallback } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import {
   LessonType,
   WeekType,
@@ -8,34 +8,34 @@ import {
   Group,
   Classroom,
   Subject,
-} from "@/shared/types";
+} from '@/shared/types'
 import {
   DAYS_OF_WEEK,
   DEFAULT_TIME_SLOTS,
   checkScheduleConflicts,
-} from "@/shared/lib/utils";
-import { Select } from "../ui/Select";
-import { Button } from "../ui/Button";
-import { Dialog } from "../ui/Dialog";
+} from '@/shared/lib/utils'
+import { Select } from '../ui/Select'
+import { Button } from '../ui/Button'
+import { Dialog } from '../ui/Dialog'
 import {
   useGetSubjects,
   useGetLessonTypes,
-} from "@/entities/schedule/schedules/schedules.queries";
+} from '@/entities/schedule/schedules/schedules.queries'
 
 interface ScheduleFormProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
   onSubmit: (
     data: ScheduleItem & { courseId: string; educationLevelId?: string }
-  ) => void;
-  editItem?: ScheduleItem;
-  teachers: Teacher[];
-  groups: Group[];
-  classrooms: Classroom[];
-  subjects: Subject[];
-  schedule: ScheduleItem[];
-  courses: { id: number; number: number; educationLevel?: string | number }[];
-  eduLevelsData?: { id: string; name: string }[];
+  ) => void
+  editItem?: ScheduleItem
+  teachers: Teacher[]
+  groups: Group[]
+  classrooms: Classroom[]
+  subjects: Subject[]
+  schedule: ScheduleItem[]
+  courses: { id: number; number: number; educationLevel?: string | number }[]
+  eduLevelsData?: { id: string; name: string }[]
 }
 
 export const ScheduleForm: React.FC<ScheduleFormProps> = ({
@@ -52,8 +52,8 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   eduLevelsData,
 }) => {
   const getDefaultCourseId = useCallback(() => {
-    return courses?.[0]?.id ? String(courses[0].id) : "";
-  }, [courses]);
+    return courses?.[0]?.id ? String(courses[0].id) : ''
+  }, [courses])
 
   const {
     register,
@@ -66,93 +66,92 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
   } = useForm<ScheduleItem & { courseId: string; educationLevelId?: string }>({
     defaultValues: {
       ...(editItem || {
-        id: "",
-        subjectId: "",
-        subjectName: "",
-        teacherId: "",
-        teacherName: "",
-        classroomId: "",
-        classroomName: "",
+        id: '',
+        subjectId: '',
+        subjectName: '',
+        teacherId: '',
+        teacherName: '',
+        classroomId: '',
+        classroomName: '',
         groupIds: [],
         groupNames: [],
-        lessonType: "Лекция" as LessonType,
+        lessonType: 'Лекция' as LessonType,
         day: DAYS_OF_WEEK[0],
         timeSlot: DEFAULT_TIME_SLOTS[0],
-        weekType: "Обе" as WeekType | "Обе",
+        weekType: 'Обе' as WeekType | 'Обе',
       }),
-      courseId: "",
+      courseId: '',
       educationLevelId: undefined,
     },
-  });
+  })
 
-  const [conflicts, setConflicts] = useState<string[]>([]);
-  const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups);
-  const availableSubjects: Subject[] = useGetSubjects()?.data || [];
-  const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || [];
-  const watchedValues = watch();
+  const [conflicts, setConflicts] = useState<string[]>([])
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>(groups)
+  const availableSubjects: Subject[] = useGetSubjects()?.data || []
+  const availableLessonTypes: LessonType[] = useGetLessonTypes()?.data || []
+  const watchedValues = watch()
 
   // Фильтрация курсов по выбранному уровню образования
   const filteredCourses = React.useMemo(() => {
-    const selectedEduLevelId = watchedValues.educationLevelId;
-    if (!selectedEduLevelId) return courses || [];
+    const selectedEduLevelId = watchedValues.educationLevelId
+    if (!selectedEduLevelId) return courses || []
     return (courses || []).filter(
       (course) => String(course.educationLevel) === selectedEduLevelId
-    );
-  }, [courses, watchedValues.educationLevelId]);
+    )
+  }, [courses, watchedValues.educationLevelId])
 
   // Сброс курса и групп при очистке уровня образования
   useEffect(() => {
     if (!watchedValues.educationLevelId) {
-      setValue("courseId", "");
-      setValue("groupIds", []);
+      setValue('courseId', '')
+      setValue('groupIds', [])
     }
-  }, [watchedValues.educationLevelId, setValue]);
+  }, [watchedValues.educationLevelId, setValue])
+  console.log(groups)
 
   // Фильтрация групп по выбранному курсу
   useEffect(() => {
     if (watchedValues.courseId) {
       const filtered = groups.filter(
         (group) => group.course?.id?.toString() === watchedValues.courseId
-      );
-      setFilteredGroups(filtered);
+      )
+      setFilteredGroups(filtered)
 
       // Сбрасываем выбранные группы, если они не принадлежат новому курсу
       if (watchedValues.groupIds?.length) {
         const validGroups = watchedValues.groupIds.filter((groupId) =>
           filtered.some((g) => g.id === groupId)
-        );
+        )
         if (validGroups.length !== watchedValues.groupIds.length) {
-          setValue("groupIds", validGroups);
+          setValue('groupIds', validGroups)
         }
       }
     } else {
-      setFilteredGroups(groups);
+      setFilteredGroups(groups)
     }
-  }, [watchedValues.courseId, groups, setValue, watchedValues.groupIds]);
+  }, [watchedValues.courseId, groups, setValue, watchedValues.groupIds])
 
   // Универсальный useEffect для синхронизации связанных полей
   useEffect(() => {
     // Преподаватель
-    const teacher = teachers.find((t) => t.id === watchedValues.teacherId);
-    if (teacher) setValue("teacherName", teacher.name);
+    const teacher = teachers.find((t) => t.id === watchedValues.teacherId)
+    if (teacher) setValue('teacherName', teacher.name)
     // Предмет
-    const subject = subjects.find((s) => s.id === watchedValues.subjectId);
-    setValue("subjectName", subject ? subject.name : "");
+    const subject = subjects.find((s) => s.id === watchedValues.subjectId)
+    setValue('subjectName', subject ? subject.name : '')
     // Аудитория
-    const classroom = classrooms.find(
-      (c) => c.id === watchedValues.classroomId
-    );
-    if (classroom) setValue("classroomName", classroom.name);
+    const classroom = classrooms.find((c) => c.id === watchedValues.classroomId)
+    if (classroom) setValue('classroomName', classroom.name)
     // Группы
     if (watchedValues.groupIds?.length) {
       setValue(
-        "groupNames",
+        'groupNames',
         filteredGroups
           .filter((g) => watchedValues.groupIds.includes(g.id))
           .map((g) => g.name)
-      );
+      )
     } else {
-      setValue("groupNames", []);
+      setValue('groupNames', [])
     }
   }, [
     watchedValues.teacherId,
@@ -164,7 +163,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     classrooms,
     filteredGroups,
     setValue,
-  ]);
+  ])
 
   // Проверка конфликтов
   useEffect(() => {
@@ -178,10 +177,10 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     ) {
       const scheduleToCheck = editItem
         ? schedule.filter((item) => item.id !== editItem.id)
-        : schedule;
-      setConflicts(checkScheduleConflicts(scheduleToCheck, watchedValues));
+        : schedule
+      setConflicts(checkScheduleConflicts(scheduleToCheck, watchedValues))
     } else {
-      setConflicts([]);
+      setConflicts([])
     }
   }, [
     watchedValues.teacherId,
@@ -192,49 +191,55 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     watchedValues.weekType,
     schedule,
     editItem,
-  ]);
+  ])
 
   // Сброс формы при открытии/закрытии или изменении редактируемого элемента
   useEffect(() => {
     if (isOpen) {
       reset({
         ...(editItem || {
-          id: "",
-          subjectId: "",
-          subjectName: "",
-          teacherId: "",
-          teacherName: "",
-          classroomId: "",
-          classroomName: "",
+          id: '',
+          subjectId: '',
+          subjectName: '',
+          teacherId: '',
+          teacherName: '',
+          classroomId: '',
+          classroomName: '',
           groupIds: [],
           groupNames: [],
-          lessonType: "Лекция" as LessonType,
+          lessonType: 'Лекция' as LessonType,
           day: DAYS_OF_WEEK[0],
           timeSlot: DEFAULT_TIME_SLOTS[0],
-          weekType: "Обе" as WeekType | "Обе",
+          weekType: 'Обе' as WeekType | 'Обе',
         }),
-        courseId: "",
+        courseId: '',
         educationLevelId: undefined,
-      });
+      })
     }
-  }, [isOpen, editItem, reset, getDefaultCourseId]);
+  }, [isOpen, editItem, reset, getDefaultCourseId])
 
   const onFormSubmit = (
     data: ScheduleItem & { courseId: string; educationLevelId?: string }
   ) => {
-    if (!data.id) data.id = crypto.randomUUID();
-    onSubmit(data);
-    onClose();
-    window.location.reload();
-  };
+    if (!data.id) data.id = crypto.randomUUID()
+    onSubmit(data)
+    onClose()
+    window.location.reload()
+  }
 
-  const isEduLevelSelected = Boolean(watchedValues.educationLevelId);
+  const isEduLevelSelected = Boolean(watchedValues.educationLevelId)
+  const isCourseSelectable = eduLevelsData?.length
+    ? Boolean(watchedValues.educationLevelId)
+    : true
+  const showGroups =
+    (eduLevelsData?.length ? isEduLevelSelected : true) &&
+    watchedValues.courseId
 
   return (
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={editItem ? "Редактировать занятие" : "Добавить занятие"}
+      title={editItem ? 'Редактировать занятие' : 'Добавить занятие'}
       className="max-w-2xl"
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -265,8 +270,8 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               name="courseId"
               control={control}
               rules={
-                isEduLevelSelected
-                  ? { required: "Обязательное поле" }
+                isCourseSelectable
+                  ? { required: 'Обязательное поле' }
                   : undefined
               }
               render={({ field }) => (
@@ -277,10 +282,9 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
                     label: `${course.number} курс`,
                   }))}
                   error={errors.courseId?.message}
-                  value={isEduLevelSelected ? field.value : ""}
+                  value={field.value}
                   onChange={field.onChange}
-                  // hideEmptyOption
-                  disabled={!isEduLevelSelected}
+                  disabled={!isCourseSelectable}
                 />
               )}
             />
@@ -290,7 +294,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="teacherId"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="Преподаватель"
@@ -309,7 +313,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="subjectId"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="Предмет"
@@ -329,7 +333,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="classroomId"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="Аудитория"
@@ -348,12 +352,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="lessonType"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="Тип занятия"
                   options={(availableLessonTypes as any[]).map((type, idx) =>
-                    typeof type === "string"
+                    typeof type === 'string'
                       ? { value: type, label: type, key: type }
                       : {
                           value: type.value || type.name || String(idx),
@@ -372,7 +376,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="day"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="День недели"
@@ -390,7 +394,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="timeSlot"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="Время"
@@ -408,14 +412,14 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             <Controller
               name="weekType"
               control={control}
-              rules={{ required: "Обязательное поле" }}
+              rules={{ required: 'Обязательное поле' }}
               render={({ field }) => (
                 <Select
                   label="Тип недели"
                   options={[
-                    { value: "Числитель", label: "Числитель" },
-                    { value: "Знаменатель", label: "Знаменатель" },
-                    { value: "Обе", label: "Обе недели" },
+                    { value: 'Числитель', label: 'Числитель' },
+                    { value: 'Знаменатель', label: 'Знаменатель' },
+                    { value: 'Обе', label: 'Обе недели' },
                   ]}
                   error={errors.weekType?.message}
                   {...field}
@@ -425,7 +429,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           </div>
         </div>
 
-        {isEduLevelSelected && watchedValues.courseId ? (
+        {showGroups ? (
           <div className="col-span-2 mt-4">
             <label
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -445,11 +449,9 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
                     value={group.id}
                     className="checkbox"
                     {...register(
-                      "groupIds",
-                      isEduLevelSelected && Boolean(watchedValues.courseId)
-                        ? {
-                            required: "Выберите хотя бы одну группу",
-                          }
+                      'groupIds',
+                      showGroups
+                        ? { required: 'Выберите хотя бы одну группу' }
                         : undefined
                     )}
                   />
@@ -485,10 +487,10 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             Отмена
           </Button>
           <Button type="submit" disabled={conflicts.length > 0}>
-            {editItem ? "Сохранить" : "Добавить"}
+            {editItem ? 'Сохранить' : 'Добавить'}
           </Button>
         </div>
       </form>
     </Dialog>
-  );
-};
+  )
+}
