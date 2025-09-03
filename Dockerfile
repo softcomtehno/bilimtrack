@@ -1,24 +1,26 @@
+# Stage 1: Build frontend
 FROM node:20.11.1-alpine as build
 WORKDIR /app
 
-# Копируем только package.json и package-lock.json, чтобы кэшировалось
+# Копируем package.json и package-lock.json, если есть
 COPY package*.json ./
 
-# Детерминированная установка (требует package-lock.json)
-RUN npm ci --omit=dev
+# Ставим зависимости (но без dev, если не нужны)
+RUN npm install
 
 # Копируем исходники
 COPY . .
 
-# Собираем проект
+# Сборка фронта
 RUN npm run build
 
-# ---
-# Production stage
+# Stage 2: Nginx
 FROM nginx:alpine
+
+# Копируем собранный фронтенд в nginx html директорию
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Конфиг nginx
+# Настраиваем nginx
 RUN echo 'server { \
     listen 80; \
     root /usr/share/nginx/html; \
