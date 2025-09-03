@@ -17,7 +17,7 @@ export function CourseCard({ id, name, description, photo }) {
         <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
         <Link
           className="bg-sky-500 flex items-center justify-center rounded-md my-2 text-white py-1"
-          to={`/student/student-grade/${id}`}
+          to={`/student/subject/${id}`}
         >
           Подробнее
         </Link>

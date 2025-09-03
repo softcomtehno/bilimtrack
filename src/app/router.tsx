@@ -82,10 +82,6 @@ const router = createBrowserRouter([
               subjectsPageRoute,
             ],
           },
-          // {
-          //   path: "/admin",
-          //   children: [schedulePageRoute],
-          // },
         ],
       },
       {

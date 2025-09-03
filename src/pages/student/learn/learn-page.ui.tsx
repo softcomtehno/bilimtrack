@@ -18,8 +18,6 @@ export const LearnPage = () => {
   useEffect(() => {
     getSubjectsStudent().then((res) => setSubjects(res));
   }, []);
-  console.log('subjects', subjects);
-
 
   return (
     <div className="p-4 flex flex-col items-center gap-4">
