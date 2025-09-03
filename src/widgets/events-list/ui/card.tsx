@@ -25,10 +25,16 @@ export function EventCard({ event }: EventCardProps) {
         <p className="text-tiny uppercase font-bold text-primary">
           {event.category?.name}
         </p>
-        <h4 className="font-bold text-large line-clamp-2">
+        <h4 className="font-bold text-large line-clamp-2 leading-[20px]">
           {event.title}
         </h4>
-        <small className="text-default-500">{event.place}</small>
+                <a
+          target="_blank"
+          href={`https://comtehno.kg/event/${event.category?.slug}`}
+          className="bg-sky-500 px-6 rounded-md mt-2 text-white py-[3px]"
+        >
+         Подробнее
+        </a>
       </div>
       <Image
         alt={event.title}

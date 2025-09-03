@@ -29,6 +29,8 @@ import { timetablePageRoute } from "@/pages/mentor/timetable";
 import { schedulePageRoute } from "@/pages/admin/schedule";
 import { subjectIDPageRoute } from "@/pages/student/subject-id";
 import { HomeRedirect } from "@/pages/home/home-redirect";
+import { mentorMorePageRoute } from "@/pages/mentor/more";
+import { subjectsPageRoute } from "@/pages/mentor/subjects";
 
 function BubbleError() {
   const error = useRouteError();
