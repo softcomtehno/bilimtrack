@@ -36,11 +36,12 @@ export function LoginPage() {
           <img src="/images/girl.svg" alt="Login illustration" className="max-w-xs" />
         </div>
 
-        <Card className="shadow-none p-4 w-full md:max-w-sm">
-          <CardBody>
-            <form onSubmit={handleSubmit}>
+        <Card className="shadow-none p-4 w-full md:max-w-sm overflow-x-hidden">
+          <CardBody className='overflow-x-hidden'>
+            <form onSubmit={handleSubmit} className='flex flex-col items-center'>
               <div className="mb-4">
                 <Input
+                className='max-w-[200px] min-w-[200px]'
                   placeholder="Логин"
                   value={form.username}
                   onChange={(e) =>
@@ -49,10 +50,10 @@ export function LoginPage() {
                 />
               </div>
 
-              <div className="mb-4">
+              <div className="mb-4 flex justify-center">
                 <InputOtp
                   placeholder="Пароль"
-                  className="w-full"
+                  className="max-w-[200px] min-w-[200px]"
                   length={4}
                   value={form.password}
                   onValueChange={(value) =>
@@ -63,16 +64,16 @@ export function LoginPage() {
 
               <Button
                 type="submit"
-                className="bg-sky-500 font-medium text-white w-full mb-4"
+                className="bg-sky-500 max-w-[200px] min-w-[200px] font-medium text-white w-full mb-4"
                 disabled={isPending}
               >
                 {isPending ? 'Входим...' : 'Войти в систему'}
               </Button>
 
               <div className="text-center">
-                {/* <a href="#" className="text-sm text-blue-600 hover:underline">
+                <a target='_blank' href="https://t.me/kuma_original" className="text-sm text-blue-600 hover:underline">
                   Забыли пароль?
-                </a> */}
+                </a>
               </div>
 
               {isError && (
