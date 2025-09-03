@@ -226,6 +226,6 @@ export function useLogout() {
 
     toast.info('Вы вышли из аккаунта')
 
-    navigate(pathKeys.login) 
+    navigate("/auth") 
   }
 }
