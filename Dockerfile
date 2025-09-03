@@ -5,9 +5,6 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Deterministic installs
-RUN npm ci
-
 COPY . .
 
 # ⚡ Explicitly set memory limit before build
