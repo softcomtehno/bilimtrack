@@ -1,28 +1,26 @@
-# ---- Build stage ----
-FROM node:20.11.1-alpine AS build
-
+FROM node:20.11.1-alpine as build
 WORKDIR /app
 
+# Копируем только package.json и package-lock.json, чтобы кэшировалось
 COPY package*.json ./
 
+# Детерминированная установка (требует package-lock.json)
+RUN npm ci --omit=dev
+
+# Копируем исходники
 COPY . .
 
-# ⚡ Explicitly set memory limit before build
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-
+# Собираем проект
 RUN npm run build
 
-
-# ---- Production stage ----
+# ---
+# Production stage
 FROM nginx:alpine
-
-# Copy build artifacts
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Basic Nginx SPA config
+# Конфиг nginx
 RUN echo 'server { \
     listen 80; \
-    server_name localhost; \
     root /usr/share/nginx/html; \
     index index.html; \
     location / { \
@@ -31,4 +29,3 @@ RUN echo 'server { \
 }' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
