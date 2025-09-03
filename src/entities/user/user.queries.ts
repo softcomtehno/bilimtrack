@@ -102,6 +102,7 @@ export function useGetTokenMutation() {
     onSuccess: (response: any) => {
       const { access, refresh } = response.data
       setCookie(ACCESS_TOKEN_KEY, access, {
+        path: '/', // ключевой момент!
         sameSite: 'Strict',
         secure: true,
       })
@@ -216,25 +217,15 @@ export function useGetSkills() {
 
 export function useLogout() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
   return () => {
-    console.log('Logout clicked') // <- проверка
-    try {
-      // Удаляем токены
-      removeCookie(ACCESS_TOKEN_KEY)
-      localStorage.removeItem(REFRESH_TOKEN_KEY)
-      localStorage.clear()
-      // Чистим кэш пользователя
-      queryClient.removeQueries({ queryKey: ['user'] })
+    removeCookie(ACCESS_TOKEN_KEY, { path: '/' })
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
 
-      toast.success('Вы вышли из аккаунта')
+    queryClient.removeQueries({ queryKey: keys.root() })
 
-      // Редирект на главную
-      navigate(pathKeys.home())
-    } catch (err) {
-      console.error('Ошибка при выходе:', err)
-      toast.error('Не удалось выйти из аккаунта')
-    }
+    toast.info('Вы вышли из аккаунта')
+
+    navigate("/auth") 
   }
 }

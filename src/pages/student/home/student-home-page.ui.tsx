@@ -4,20 +4,33 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Title } from '@/shared/ui/title';
 import { Schedule } from '@/widgets/schedule';
-import { EventCard } from '@/entities/event/ui/card';
 import { MakalaboxList } from '@/widgets/makalabox-list';
+import { EventsList } from '@/widgets/events-list';
+import { userQueries } from '@/entities/user';
+import { NewsList } from '@/widgets/news-list';
 
 export const StudentHomePage = () => {
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = userQueries.useLoginUserQuery();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error fetching user data.</div>;
+  }
+
   return (
     <>
       <CardBody>
         <Title Icon={CalendarCheck2} title="Расписание" />
         <Schedule />
-        <Title Icon={BookImage} title="Мероприятия" />
-        <EventCard />
-        <Title Icon={Newspaper} title="Новости" />
-        <EventCard />
-        
+        <NewsList endpoint={userData?.data?.organization?.newsApi} />
+        <EventsList endpoint={userData?.data?.organization?.eventsApi} />
         <MakalaboxList />
       </CardBody>
     </>

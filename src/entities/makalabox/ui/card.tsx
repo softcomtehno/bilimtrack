@@ -19,7 +19,7 @@ export function MakalaboxCard({ id, title, photo }: MakalaboxCardProps) {
         <a
           target="_blank"
           href={`https://makalabox.com/article/${id}`}
-          className="border border-primary-400 p-1 px-8 rounded-md text-xs"
+          className="bg-sky-500 px-6 rounded-md mt-2 text-white py-[3px]"
         >
           Читать
         </a>

@@ -1,6 +1,7 @@
 import { subjectQueries } from '@/entities/subject';
 import {
   BookCopy,
+  Bubbles,
   CalendarCheck2,
   ChevronUp,
   CircleUser,
@@ -57,11 +58,12 @@ export function SidebarNav() {
               >
                 График работы
               </MenuItem>
+
               <MenuItem
-                component={<Link to="/mentor/profile" />}
-                icon={<CircleUser />}
+                component={<Link to="/mentor/more" />}
+                icon={<Bubbles />}
               >
-                Профиль
+                Еще
               </MenuItem>
               <Menu
                 renderExpandIcon={({ open }) => (
@@ -82,7 +84,9 @@ export function SidebarNav() {
                     {subjectsData?.data?.map((subject) => (
                       <MenuItem
                         key={subject.id}
-                        component={<Link to={`/mentor/subjects/${subject.id}`} />}
+                        component={
+                          <Link to={`/mentor/subjects/${subject.id}`} />
+                        }
                       >
                         <div className="w-[100%]  text-xs whitespace-normal break-words leading-snug">
                           {subject.name}
