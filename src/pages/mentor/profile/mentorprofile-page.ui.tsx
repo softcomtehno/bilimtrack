@@ -22,6 +22,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { userQueries } from '@/entities/user';
@@ -203,7 +204,7 @@ export const MentorProfilePage = () => {
   
 
   return (
-    <div className=" mx-auto p-4">
+    <div className=" mx-auto p-4 w-full">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold">Профиль преподавателя</h1>
         <Button
@@ -214,7 +215,7 @@ export const MentorProfilePage = () => {
           {isEditMode ? 'Отменить' : 'Редактировать'}
         </Button>
       </div>
-      <Card className="flex flex-col md:flex-row gap-8  rounded-lg shadow-none border-none">
+      <Card className="w-full flex flex-col md:flex-row gap-8 md:justify-between  rounded-lg shadow-none border-none">
         <div className="flex flex-col items-center md:items-start md:w-1/3 gap-4">
           <div className="relative group flex flex-col items-center">
             <div
@@ -362,7 +363,7 @@ export const MentorProfilePage = () => {
         </div>
 
         <Divider orientation="vertical" className="hidden md:block" />
-        <div className="md:w-2/3 space-y-8">
+        <div className="min-w-[60%] space-y-8">
           <section>
             <h3 className="flex items-center gap-2 text-lg font-semibold text-indigo-700 mb-3">
               <Bookmark size={24} /> Навыки
@@ -400,7 +401,7 @@ export const MentorProfilePage = () => {
               </div>
             )}
           </section>
-          <section>
+          {/* <section>
             <h3 className="flex items-center gap-2 text-lg font-semibold text-green-700 mb-3">
               <Award size={24} /> Достижения
             </h3>
@@ -415,7 +416,7 @@ export const MentorProfilePage = () => {
                 {renderFieldOrPlaceholder(user.mentorAchievements)}
               </p>
             )}
-          </section>
+          </section> */}
           <section>
             <h3 className="flex items-center gap-2 text-lg font-semibold text-purple-700 mb-3">
               <Briefcase size={24} /> Опыт работы
@@ -427,10 +428,11 @@ export const MentorProfilePage = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 text-red-500"
+                      className="absolute top-0 z-20 bg-white border border-danger-500 p-1 rounded-full right-0 text-red-500"
                       onClick={() => handleRemoveWork(idx)}
                     >
-                      <Trash2 size={18} />
+                      <X size={18} />
+                 
                     </Button>
                     <Input
                       placeholder="Должность"
@@ -522,10 +524,10 @@ export const MentorProfilePage = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 text-red-500"
+                      className="absolute top-0 z-20 bg-white border border-danger-500 p-1 rounded-full right-0 text-red-500"
                       onClick={() => handleRemoveEducation(idx)}
                     >
-                      <Trash2 size={18} />
+                      <X size={18} />
                     </Button>
                     <Input
                       placeholder="Учебное заведение"
@@ -574,7 +576,6 @@ export const MentorProfilePage = () => {
                 ))}
                 <Button
                   onClick={handleAddEducation}
-                  variant="outline"
                   className="flex items-center gap-2"
                 >
                   <Plus size={18} />

@@ -33,6 +33,8 @@ export function EventsList({ endpoint }: EventsListProps) {
   if (isLoading) return <Loading />;
   if (isError) return <div>Ошибка при загрузке мероприятий</div>;
 
+  console.log(data);
+
   return (
     <div className="flex flex-col">
       <Title Icon={Newspaper} title="Мероприятия" />
@@ -41,6 +43,14 @@ export function EventsList({ endpoint }: EventsListProps) {
         modules={[Pagination]}
         pagination={{ clickable: true }}
         spaceBetween={20}
+        breakpoints={{
+          640: {
+            slidesPerView: 1,
+          },
+          1024: {
+            slidesPerView: 3,
+          },
+        }}
       >
         {data?.map((event) => (
           <SwiperSlide key={event.id}>

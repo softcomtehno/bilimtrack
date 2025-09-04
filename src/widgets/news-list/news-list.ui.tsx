@@ -41,6 +41,14 @@ export function NewsList({ endpoint }: EventsListProps) {
         modules={[Pagination]}
         pagination={{ clickable: true }}
         spaceBetween={20}
+          breakpoints={{
+    640: { 
+      slidesPerView: 1,
+    },
+    1024: {
+      slidesPerView: 3,
+    },
+  }}
       >
         {data?.slice(0,7).map((event) => (
           <SwiperSlide key={event.id}>

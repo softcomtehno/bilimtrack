@@ -30,7 +30,7 @@ export function EventCard({ event }: EventCardProps) {
         </h4>
                 <a
           target="_blank"
-          href={`https://comtehno.kg/event/${event.category?.slug}`}
+          href={`https://comtehno.kg/event/${event?.slug}`}
           className="bg-sky-500 px-6 rounded-md mt-2 text-white py-[3px]"
         >
          Подробнее
