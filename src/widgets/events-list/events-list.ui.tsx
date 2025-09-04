@@ -33,6 +33,8 @@ export function EventsList({ endpoint }: EventsListProps) {
   if (isLoading) return <Loading />;
   if (isError) return <div>Ошибка при загрузке мероприятий</div>;
 
+  console.log(data);
+  
   return (
     <div className="flex flex-col">
       <Title Icon={Newspaper} title="Мероприятия" />
