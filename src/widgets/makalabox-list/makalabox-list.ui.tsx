@@ -100,6 +100,14 @@ export function MakalaboxList() {
           modules={[Pagination]}
           pagination={{ clickable: true }}
           spaceBetween={20}
+                    breakpoints={{
+    640: { 
+      slidesPerView: 1,
+    },
+    1024: {
+      slidesPerView: 3,
+    },
+  }}
         >
           {filteredMakala.slice(0, 7).map((subj: any) => (
             <SwiperSlide key={subj.id}>
