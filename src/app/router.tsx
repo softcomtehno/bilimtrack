@@ -2,15 +2,15 @@ import {
   RouterProvider,
   createBrowserRouter,
   useRouteError,
-} from "react-router-dom";
 
+} from 'react-router-dom'
 
 import {
   GenericLayout,
   IntroLayout,
   MentorLayout,
   RoleBasedLayout,
-} from "@/pages/layout/layout.ui";
+} from '@/pages/layout/layout.ui'
 
 import { loginPageRoute } from "@/pages/shared/login";
 import { scannerPageRoute } from "@/pages/student/scanner/scanner-page.route";
@@ -32,16 +32,17 @@ import { HomeRedirect } from "@/pages/home/home-redirect";
 import { mentorMorePageRoute } from "@/pages/mentor/more";
 import { subjectsPageRoute } from "@/pages/mentor/subjects";
 
+
 function BubbleError() {
-  const error = useRouteError();
-  if (!error) return null;
+  const error = useRouteError()
+  if (!error) return null
 
   return (
     <div>
       <h1>Произошла ошибка!</h1>
       <pre>{JSON.stringify(error)}</pre>
     </div>
-  );
+  )
 }
 
 const router = createBrowserRouter([
@@ -50,13 +51,14 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
+
         element: <HomeRedirect />,
       },
       {
         element: <RoleBasedLayout />, 
         children: [
           {
-            path: "/student",
+            path: '/student',
             children: [
               studentHomePageRoute,
               morePageRoute,
@@ -71,7 +73,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "/mentor",
+            path: '/mentor',
             children: [
               mentorHomePageRoute,
               mentorprofilePageRoute,
@@ -79,7 +81,7 @@ const router = createBrowserRouter([
               subjectPageRoute,
               mentorMorePageRoute, 
               groupPageRoute,
-              subjectsPageRoute,
+              // subjectsPageRoute,
             ],
           },
         ],
@@ -89,14 +91,14 @@ const router = createBrowserRouter([
         children: [loginPageRoute],
       },
       {
-        path: "/admin",
+        path: '/admin',
         element: <IntroLayout />,
         children: [schedulePageRoute],
       },
     ],
   },
-]);
+])
 
 export function BrowserRouter() {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />
 }

@@ -1,149 +1,109 @@
-import React, { useEffect } from "react";
-import { WeekType, Teacher, Group, Classroom } from "@/shared/types";
-import { Select } from "../ui/Select";
-import { Button } from "../ui/Button";
-import { FilterX } from "lucide-react";
+import React, { useEffect, useMemo } from 'react'
+import { Select } from '../ui/Select'
+import { Button } from '../ui/Button'
+import { FilterX } from 'lucide-react'
+import { Teacher, Group, Classroom } from '@/shared/types'
+import { useScheduleFilters } from '@/entities/schedule'
 
 interface ScheduleFiltersProps {
-  weekType: WeekType | "Обе";
-  setWeekType: (weekType: WeekType | "Обе") => void;
-  teachers: Teacher[];
-  groups: Group[];
-  filteredGroups: Group[];
-  classrooms: Classroom[];
-  courses: { id: number; number: number; educationLevel?: string | number }[];
-  selectedTeacherId: string | undefined;
-  selectedGroupId: string | undefined;
-  selectedClassroomId: string | undefined;
-  selectedCourseId: string;
-  setSelectedTeacherId: (id: string | undefined) => void;
-  setSelectedGroupId: (id: string | undefined) => void;
-  setSelectedClassroomId: (id: string | undefined) => void;
-  setSelectedCourseId: (id: string) => void;
-  resetFilters: () => void;
-
-  // 🔥 новый пропс
-  eduLevelsData: { id: string; name: string }[];
-  selectedEduLevelId?: string;
-  setSelectedEduLevelId?: (id: string | undefined) => void;
+  teachers: Teacher[]
+  groups: Group[]
+  classrooms: Classroom[]
+  courses: { id: number; number: number; educationLevel?: string | number }[]
+  eduLevelsData: { id: string; name: string }[]
 }
 
 export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
-  weekType,
-  setWeekType,
   teachers,
   groups,
-  filteredGroups,
   classrooms,
-  selectedCourseId,
-  selectedTeacherId,
-  selectedGroupId,
-  selectedClassroomId,
-  setSelectedCourseId,
-  setSelectedTeacherId,
-  setSelectedGroupId,
-  setSelectedClassroomId,
-  resetFilters,
   courses,
-  selectedEduLevelId,
-  setSelectedEduLevelId,
   eduLevelsData,
 }) => {
+  const {
+    eduLevelId,
+    courseId,
+    groupId,
+    teacherId,
+    classroomId,
+    weekType,
+    setEduLevel,
+    setCourse,
+    setGroup,
+    setTeacher,
+    setClassroom,
+    setWeekType,
+    reset,
+  } = useScheduleFilters()
+
+  const filteredCourses = useMemo(() => {
+    if (!eduLevelsData?.length || !eduLevelId) {
+      // если нет уровней образования (колледж), показываем все курсы
+      return courses
+    }
+    // иначе фильтруем по выбранному уровню
+    return courses.filter((c) => String(c.educationLevel) === eduLevelId)
+  }, [courses, eduLevelId, eduLevelsData])
+
+  const displayGroups = useMemo(() => {
+    if (!courseId) return groups
+    return groups.filter((g) => g.course?.id?.toString() === courseId)
+  }, [groups, courseId])
+  console.log(displayGroups)
+
   const hasActiveFilters =
-    selectedTeacherId ||
-    selectedGroupId ||
-    selectedClassroomId ||
-    weekType !== "Обе";
+    teacherId || groupId || classroomId || weekType !== 'Обе'
 
-  const displayGroups = selectedCourseId ? filteredGroups : groups;
-
+  // При изменении курса — обновляем группу
   useEffect(() => {
-    if (selectedCourseId && selectedGroupId) {
-      const groupExists = filteredGroups.some((g) => g.id === selectedGroupId);
-      if (!groupExists) {
-        setSelectedGroupId(filteredGroups[0]?.id || undefined);
-      }
+    if (courseId && groupId) {
+      const exists = displayGroups.some((g) => g.id === groupId)
+      if (!exists) setGroup(displayGroups[0]?.id)
     }
-  }, [selectedCourseId, filteredGroups, selectedGroupId, setSelectedGroupId]);
-
-  // Сброс курса и группы при очистке уровня образования
-  useEffect(() => {
-    if (!selectedEduLevelId) {
-      setSelectedCourseId("");
-      setSelectedGroupId(undefined);
-    }
-  }, [selectedEduLevelId, setSelectedCourseId, setSelectedGroupId]);
-
-  // Фильтруем курсы по выбранному уровню образования
-  const filteredCourses = React.useMemo(() => {
-    if (!selectedEduLevelId) return [] as typeof courses;
-    return (courses || []).filter(
-      (course) => String(course.educationLevel) === selectedEduLevelId
-    );
-  }, [courses, selectedEduLevelId]);
-
-  // При изменении курса, обновляем также группы
-  const handleCourseChange = (value: string) => {
-    setSelectedCourseId(value);
-    const newFilteredGroups = groups.filter(
-      (g) => g.course?.id?.toString() === value
-    );
-    setSelectedGroupId(newFilteredGroups[0]?.id || undefined);
-  };
-
-  const isEduLevelSelected = Boolean(selectedEduLevelId);
+  }, [courseId, groupId, displayGroups, setGroup])
+  const isCourseDisabled = eduLevelsData?.length > 0 && !eduLevelId
+  const isGroupDisabled = eduLevelsData?.length > 0 && !eduLevelId
 
   return (
-    <div
-      role="region"
-      aria-label="Фильтры расписания"
-      className="bg-white p-4 rounded-lg shadow-card mb-6"
-    >
+    <div className="bg-white p-4 rounded-lg shadow-card mb-6">
       <div className="flex flex-wrap gap-4 items-end">
         {eduLevelsData?.length > 0 && (
-          <div className="w-full sm:w-48 flex">
+          <div className="w-full sm:w-48">
             <Select
               label="Уровни образования"
-              options={(eduLevelsData || []).map((lvl) => ({
+              options={eduLevelsData.map((lvl) => ({
                 value: lvl.id,
                 label: lvl.name,
               }))}
-              value={selectedEduLevelId || ""}
-              onChange={(value) => setSelectedEduLevelId?.(value || undefined)}
-              // hideEmptyOption
+              value={eduLevelId || ''}
+              onChange={(v) => setEduLevel(v || undefined)}
             />
           </div>
         )}
 
-        <div className="w-full sm:w-48 flex">
+        <div className="w-full sm:w-48">
           <Select
             label="Курс"
-            options={filteredCourses.map((course) => ({
-              value: String(course.id),
-              label: `${course.number} курс`,
+            options={filteredCourses.map((c) => ({
+              value: String(c.id),
+              label: `${c.number} курс`,
             }))}
-            value={isEduLevelSelected ? selectedCourseId : ""}
-            onChange={handleCourseChange}
-            // hideEmptyOption
-            disabled={!isEduLevelSelected}
+            value={courseId || ''}
+            onChange={(v) => setCourse(v || undefined)}
+            disabled={isCourseDisabled}
           />
         </div>
 
         <div className="w-full sm:w-48">
           <Select
             label="Группа"
-            options={(displayGroups || []).map((group) => ({
-              value: group.id,
-              label: group.name,
+            options={displayGroups.map((g) => ({
+              value: g.id,
+              label: g.name,
             }))}
-            value={
-              isEduLevelSelected
-                ? selectedGroupId || displayGroups[0]?.id || ""
-                : ""
-            }
-            onChange={(value) => setSelectedGroupId(value || undefined)}
-            disabled={!isEduLevelSelected}
-            // hideEmptyOption
+            value={groupId || displayGroups[0]?.id || ''}
+            onChange={(v) => setGroup(v || undefined)}
+            disabled={isGroupDisabled}
           />
         </div>
 
@@ -151,37 +111,30 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
           <Select
             label="Тип недели"
             options={[
-              { value: "Обе", label: "Все недели" },
-              { value: "Числитель", label: "Числитель" },
-              { value: "Знаменатель", label: "Знаменатель" },
+              { value: 'Обе', label: 'Все недели' },
+              { value: 'Числитель', label: 'Числитель' },
+              { value: 'Знаменатель', label: 'Знаменатель' },
             ]}
             value={weekType}
-            onChange={(value) => setWeekType((value as WeekType) || "Обе")}
-            hideEmptyOption
+            onChange={(v) => setWeekType(v as any)}
           />
         </div>
 
         <div className="w-full sm:w-64">
           <Select
             label="Преподаватель"
-            options={(teachers || []).map((teacher) => ({
-              value: teacher.id,
-              label: teacher.name,
-            }))}
-            value={selectedTeacherId || ""}
-            onChange={(value) => setSelectedTeacherId(value || undefined)}
+            options={teachers.map((t) => ({ value: t.id, label: t.name }))}
+            value={teacherId || ''}
+            onChange={(v) => setTeacher(v || undefined)}
           />
         </div>
 
         <div className="w-full sm:w-48">
           <Select
             label="Аудитория"
-            options={(classrooms || []).map((classroom) => ({
-              value: classroom.id,
-              label: classroom.name,
-            }))}
-            value={selectedClassroomId || ""}
-            onChange={(value) => setSelectedClassroomId(value || undefined)}
+            options={classrooms.map((c) => ({ value: c.id, label: c.name }))}
+            value={classroomId || ''}
+            onChange={(v) => setClassroom(v || undefined)}
           />
         </div>
 
@@ -190,9 +143,8 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={resetFilters}
+              onClick={reset}
               icon={<FilterX size={16} />}
-              className="w-full sm:w-auto"
             >
               Сбросить фильтры
             </Button>
@@ -200,5 +152,5 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
