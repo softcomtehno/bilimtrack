@@ -18,7 +18,6 @@ export function TopBar() {
     return <div>Error fetching user data.</div>;
   }
 
-
   return (
     <>
       <CardHeader className="flex justify-between items-center gap-2">
@@ -27,12 +26,8 @@ export function TopBar() {
             {userData?.data.organization?.name}
           </p>
         </div>
-        <Link className="cursor-pointer" to="/profile">
-          <Avatar
-            className="w-12 h-12"
-            src={userData?.data.organization?.logo}
-          />
-        </Link>
+
+        <Avatar className="w-12 h-12" src={userData?.data.organization?.logo} />
       </CardHeader>
       <Divider />
     </>
