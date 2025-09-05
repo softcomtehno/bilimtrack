@@ -6,10 +6,10 @@ const keys = {
   // getDocuments: () => [...keys.root(), 'documents'],
 };
 
-export function useGetSchedulesGroups() {
+export function useGetSchedulesGroups(id: number | null) {
   return useQuery({
-    queryKey: keys.root(),
-    queryFn: getSchedulesGroups,
+    queryKey: [keys.root(), id],
+    queryFn: () => getSchedulesGroups(id),
   });
 }
 

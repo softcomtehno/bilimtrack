@@ -27,6 +27,13 @@ export function useGetSchedules() {
   });
 }
 
+export function useGetEducationLevels() {
+  return useQuery({
+    queryKey: keys.getEduLevels(),
+    queryFn: getEducationLevels,
+  });
+}
+
 export function useGetSubjects() {
   return useQuery({
     queryKey: keys.getSubjects(),
@@ -48,17 +55,11 @@ export function useGetLessonTimes() {
   });
 }
 
-export function useGetCourses() {
+export function useGetCourses(id: number | null) {
   return useQuery({
-    queryKey: keys.getCourses(),
-    queryFn: getCourses,
-  });
-}
-
-export function useGetEducationLevels() {
-  return useQuery({
-    queryKey: keys.getEduLevels(),
-    queryFn: getEducationLevels,
+    queryKey: [...keys.getCourses(), id], // 👈 теперь ключ зависит от id
+    queryFn: () => getCourses(id),
+    // enabled: id !== null, // 👈 запрос будет только если выбран id
   });
 }
 

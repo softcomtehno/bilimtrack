@@ -37,8 +37,12 @@ export const getLessonTimes = async () => {
   return response.data;
 };
 
-export const getCourses = async () => {
-  const response = await $api.get("schedules/courses/");
+export const getCourses = async (id: number | null) => {
+  const response = await $api.get("schedules/courses/", {
+    params: {
+      educationLevel: id,
+    },
+  });
   return response.data;
 };
 
