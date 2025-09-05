@@ -58,19 +58,19 @@ export const SchedulePage: React.FC = () => {
   const { data: courses } = useGetCourses();
   const { data: eduLevelsData } = schedulesQueries.useGetEducationLevels();
 
-  const patchScheduleMutation = usePatchScheduleMutation();
+  const patchScheduleMutation = usePatchState<string | null>(null);
+  const [selectedEduLevelId, setSelectedEduLevelId] = React.useState<
+    string | undefined
+  >(undefined);
+
+  const getDefaultCoucheduleMutation();
   const addScheduleMutation = useAddScheduleMutation();
   const deleteScheduleMutation = useDeleteScheduleMutation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | undefined>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
-  const [selectedEduLevelId, setSelectedEduLevelId] = React.useState<
-    string | undefined
-  >(undefined);
-
-  const getDefaultCourseId = useCallback(
+  const [itemToDelete, setItemToDelete] = useSrseId = useCallback(
     () => courses?.[0]?.id?.toString() || "",
     [courses]
   );

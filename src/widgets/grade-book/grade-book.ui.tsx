@@ -7,7 +7,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { gradeApi } from '@/entities/grade'
 import { QRGenerator } from '@/features/lesson/qr-generator'
 import { topicApi } from '@/entities/topic'
-import { sessionApi } from '@/entities/session'
+import { sessionApi } from '@/entities/schedule/session'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
