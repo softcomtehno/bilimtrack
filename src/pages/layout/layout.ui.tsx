@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { getCookie } from 'typescript-cookie'
-
 import { Navigation } from '@/widgets/navigation'
 import { BottomSidebar, SidebarNav } from '@/widgets/sidebar'
 import { TopBar } from '@/widgets/top-bar'
@@ -32,9 +31,10 @@ export function MentorLayout({ children }: LayoutProps) {
         <SidebarNav />
       </div>
 
-      <main className="flex-1 p-10 overflow-y-auto pb-16 md:pb-0">
+      <Card className=" border shadow-none flex-1 m-10 overflow-y-auto pb-16 md:pb-0">
+        <TopBar/>
         {children || <Outlet />}
-      </main>
+      </Card>
 
       {/* Mobile bottom sidebar */}
       <div className="block md:hidden">

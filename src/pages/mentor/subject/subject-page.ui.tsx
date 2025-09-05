@@ -107,7 +107,7 @@ export const SubjectPage = () => {
   }
 
   return (
-    <div>
+    <div className='p-4'>
       <h1 className="text-lg font-semibold mb-4">{subject.name}</h1>
 
       {/* -------------------- темы -------------------- */}
