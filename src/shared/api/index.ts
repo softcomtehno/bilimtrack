@@ -5,7 +5,7 @@ import axios, {
 } from 'axios'
 import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
 
-const API_URL = 'https://api.bilim-track.makalabox.com/api/'
+const API_URL = 'https://bilimtrack.makalabox.com/api/'
 const ACCESS_TOKEN_KEY = 'access'
 const REFRESH_TOKEN_KEY = 'refresh'
 
