@@ -18,7 +18,7 @@ import {
   Settings,
   StickyNote,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const ListboxWrapper = ({ children }) => (
   <div className="w-full border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
@@ -44,6 +44,11 @@ export const MorePage = () => {
   }
 
   const user = userData?.data;
+  const navigate = useNavigate();
+
+  const handleSettings = () => {
+    navigate(`/mentor/settings`);
+  };
 
   return (
     <div className="p-4 flex flex-col items-center gap-4">
@@ -115,6 +120,7 @@ export const MorePage = () => {
             key="new"
             startContent={<Settings />}
             endContent={<ChevronRight />}
+            onClick={handleSettings}
           >
             Настройки
           </ListboxItem>

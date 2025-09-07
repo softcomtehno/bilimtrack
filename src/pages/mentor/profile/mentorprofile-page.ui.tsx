@@ -15,13 +15,11 @@ import {
   MessageCircle,
   Send,
   Facebook,
-  Award,
   Briefcase,
   GraduationCap,
   Bookmark,
   Pencil,
   Plus,
-  Trash2,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

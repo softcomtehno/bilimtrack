@@ -6,6 +6,9 @@ export const pathKeys = {
   more() {
     return pathKeys.root.concat('more/')
   },
+  settings(){
+    return pathKeys.root.concat('settings/')
+  },
   schedule() {
     return pathKeys.root.concat('schedule/')
   },

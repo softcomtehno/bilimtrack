@@ -1,4 +1,4 @@
-import { Card, CardBody } from '@heroui/react';
+import { Button, Card, CardBody } from '@heroui/react';
 import {
   Album,
   BookImage,
@@ -29,6 +29,7 @@ export const MentorHomePage = () => {
   if (isError) {
     return <div>Error fetching user data.</div>;
   }
+
   return (
     <div className="p-4">
           <NewsList endpoint={userData?.data?.organization?.newsApi} />
