@@ -93,7 +93,6 @@ export function MakalaboxList() {
     </SwiperSlide>
   ))}
 </Swiper>
-      {/* Свайпер для статей или сообщение */}
       {filteredMakala.length > 0 ? (
         <Swiper
           className="w-[100%] pb-[40px] default-slider"

@@ -30,6 +30,7 @@ import { subjectIDPageRoute } from "@/pages/student/subject-id";
 import { HomeRedirect } from "@/pages/home/home-redirect";
 import { mentorMorePageRoute } from "@/pages/mentor/more";
 import { subjectsPageRoute } from "@/pages/mentor/subjects";
+import { settingsPageRoute } from '@/pages/mentor/settings';
 
 function BubbleError() {
   const error = useRouteError();
@@ -77,7 +78,8 @@ const router = createBrowserRouter([
               mentorprofilePageRoute,
               timetablePageRoute,
               subjectPageRoute,
-              mentorMorePageRoute,
+              mentorMorePageRoute, 
+              settingsPageRoute,
               groupPageRoute,
               // subjectsPageRoute,
             ],
