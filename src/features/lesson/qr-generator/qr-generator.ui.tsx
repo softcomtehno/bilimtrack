@@ -17,9 +17,16 @@ export function QRGenerator({ groupId, subjectId }) {
           .toLocaleDateString('ru-RU')
           .split('.')
           .join('-')
-        const session = res.data.sessions.find((s: any) => s.date === today)
-        if (session) {
-          setSessionId(session.id)
+
+        // берём все сессии за сегодня
+        const todaySessions = res.data.sessions.filter(
+          (s: any) => s.date === today
+        )
+
+        if (todaySessions.length > 0) {
+          // выбираем последнее занятие
+          const lastSession = todaySessions[todaySessions.length - 1]
+          setSessionId(lastSession.id)
         } else {
           console.warn('Сессия на сегодня не найдена:', today)
         }
@@ -28,7 +35,7 @@ export function QRGenerator({ groupId, subjectId }) {
       }
     }
     fetchSessionId()
-  }, [])
+  }, [groupId, subjectId])
 
   // Отслеживаем ширину экрана
   useEffect(() => {

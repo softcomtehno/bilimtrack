@@ -41,22 +41,19 @@ export function GradeBook({ subjectId, groupId = null }) {
       const { sessions, grades } = res.data
 
       let dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
-      dates.sort((a, b) => b.localeCompare(a)) // от самой новой к старой
+      dates.sort((a, b) => b.localeCompare(a))
 
       const transformedData = grades.map((g: any) => {
         const scores: Record<string, number> = {}
         const scoreIds: Record<string, number> = {}
         const sessionIds: Record<string, string> = {}
 
-        dates.forEach((date) => {
-          const score = g.scores.find(
-            (s: any) => s.date.replace(/-/g, '_') === date
-          )
-          scores[date] = score ? score.grade : 0
-          scoreIds[date] = score?.id
-          sessionIds[date] =
-            score?.sessionId ||
-            sessions.find((s: any) => s.date.replace(/-/g, '_') === date)?.id
+        sessions.forEach((session: any) => {
+          const key = `${session.date.replace(/-/g, '_')}_${session.id}`
+          const score = g.scores.find((sc: any) => sc.sessionId === session.id)
+          scores[key] = score ? score.grade : 0
+          scoreIds[key] = score?.id
+          sessionIds[key] = session.id
         })
 
         return {
@@ -69,7 +66,7 @@ export function GradeBook({ subjectId, groupId = null }) {
         }
       })
 
-      setAllDates(dates)
+      setAllDates([...new Set(dates)])
       setSessions(sessions)
       setRowData(transformedData)
 
@@ -101,7 +98,7 @@ export function GradeBook({ subjectId, groupId = null }) {
   }, [subjectId])
 
   const currentSession = sessions.find(
-    (s) => s.date.replace(/-/g, '_') === selectedDate
+    (s) => `${s.date.replace(/-/g, '_')}_${s.id}` === selectedDate
   )
   const currentTopic = currentSession?.topic || null
 
@@ -128,11 +125,11 @@ export function GradeBook({ subjectId, groupId = null }) {
   async function handleCreateSession() {
     try {
       const now = new Date()
-      const date = now.toISOString().split('T')[0] // yyyy-mm-dd
-      const startTime = now.toISOString().split('T')[1] // HH:mm:ss.SSSZ
+      const date = now.toISOString().split('T')[0]
+      const startTime = now.toISOString().split('T')[1]
       const endTime = new Date(now.getTime() + 80 * 60000)
         .toISOString()
-        .split('T')[1] // HH:mm:ss.SSSZ
+        .split('T')[1]
       await sessionApi.createSession({
         subject: subjectId,
         groups: [groupId],
@@ -143,30 +140,24 @@ export function GradeBook({ subjectId, groupId = null }) {
 
       await fetchGrades()
       alert('Занятие успешно создано!')
+      window.location.reload()
     } catch (err) {
       console.error('Ошибка при создании занятия:', err)
       alert('Не удалось создать занятие.')
     }
   }
 
-  // Массив прошлых дат без сегодняшней
   const pastDates = allDates.filter((d) => d !== todaySafe)
-
-  // Для десктопа — по возрастанию
   const desktopPastDates = [...pastDates].sort((a, b) => a.localeCompare(b))
-
-  // Для мобильного — по убыванию
-  const mobilePastDates = [...pastDates].sort((a, b) => b.localeCompare(a))
-
-  const hasTodaySession = sessions.some(
+  const todaySessions = sessions.filter(
     (s) => s.date.replace(/-/g, '_') === todaySafe
   )
+  // const hasTodaySession = todaySessions.length > 0
 
-  const mobileDate = isMobile
-    ? currentPage === 1
-      ? todaySafe
-      : mobilePastDates[currentPage - 2]
-    : null
+  const orderedSessions = isMobile ? [...sessions].reverse() : sessions
+
+  // мобильный: каждая сессия = отдельная страница
+  const mobileSession = isMobile ? orderedSessions[currentPage - 1] : null
 
   const desktopDatesOnPage = !isMobile
     ? desktopPastDates.slice(
@@ -176,128 +167,110 @@ export function GradeBook({ subjectId, groupId = null }) {
     : []
 
   const columnDefs = useMemo(() => {
-    if (isMobile) {
-      if (!mobileDate) return []
+    const editableSetter = async (params: any) => {
+      let newValue = Number(params.newValue)
+      if (isNaN(newValue)) return false
+      if (newValue > 10) newValue = 10
+      if (newValue < 0) newValue = 0
+
+      const oldValue = params.data[params.colDef.field!]
+      params.data[params.colDef.field!] = newValue
+
+      try {
+        const scoreId = params.data.scoreIds[params.colDef.field!]
+        const sessionId = params.data.sessionIds[params.colDef.field!]
+
+        if (scoreId) {
+          await gradeApi.updateGradePartial(scoreId, { grade: newValue })
+        } else {
+          const res = await gradeApi.createGrade({
+            session: sessionId,
+            grade: newValue,
+            user: params.data.userId,
+          })
+          params.data.scoreIds[params.colDef.field!] = res.data.id
+        }
+        return true
+      } catch (err) {
+        console.error('Ошибка при обновлении оценки:', err)
+        params.data[params.colDef.field!] = oldValue || 0
+        return false
+      }
+    }
+
+    // мобильный: всегда 2 колонки
+    if (isMobile && mobileSession) {
+      const key = `${mobileSession.date.replace(/-/g, '_')}_${mobileSession.id}`
       return [
         {
           field: 'fullName',
           headerName: 'ФИО',
           pinned: 'left',
-          filter: true,
-          cellClass: 'hover:bg-blue-100',
           flex: 2,
         },
         {
-          field: mobileDate,
-          headerName: mobileDate.replace(/_/g, '.'),
+          field: key,
+          headerName:
+            mobileSession.date.replace(/-/g, '.') +
+            (mobileSession.topic ? ` (${mobileSession.topic.title})` : ''),
           flex: 2,
-          cellClass: 'hover:bg-blue-100',
-          editable: mobileDate === todaySafe && hasTodaySession,
-          valueSetter: async (params) => {
-            let newValue = Number(params.newValue)
-            if (isNaN(newValue)) return false
-            if (newValue > 10) newValue = 10
-            if (newValue < 0) newValue = 0
-
-            const oldValue = params.data[params.colDef.field!]
-            params.data[params.colDef.field!] = newValue
-
-            try {
-              const scoreId = params.data.scoreIds[params.colDef.field!]
-              const sessionId = params.data.sessionIds[params.colDef.field!]
-
-              if (scoreId) {
-                await gradeApi.updateGradePartial(scoreId, { grade: newValue })
-              } else {
-                const res = await gradeApi.createGrade({
-                  session: sessionId,
-                  grade: newValue,
-                  user: params.data.userId,
-                })
-                params.data.scoreIds[params.colDef.field!] = res.data.id
-              }
-
-              return true
-            } catch (err) {
-              console.error('Ошибка при обновлении оценки:', err)
-              params.data[params.colDef.field!] = oldValue || 0
-              return false
-            }
-          },
+          editable: mobileSession.date.replace(/-/g, '_') === todaySafe,
+          valueSetter: editableSetter,
         },
       ]
     }
 
-    const cols = [
+    const cols: any[] = [
       {
         field: 'fullName',
         headerName: 'ФИО',
         pinned: 'left',
         filter: true,
-        cellClass: 'hover:bg-blue-100',
         flex: 2,
       },
-      ...desktopDatesOnPage.map((d) => {
-        const session = sessions.find((s) => s.date.replace(/-/g, '_') === d)
-        return {
-          field: d,
-          headerName:
-            d.replace(/_/g, '.') +
-            (session?.topic ? ` (${session.topic.title})` : ''),
-          flex: 1,
-          editable: false,
-          cellClass: 'hover:bg-blue-100',
-        }
-      }),
     ]
 
-    if (hasTodaySession) {
-      cols.push({
-        field: todaySafe,
-        headerName: todaySafe.replace(/_/g, '.'),
-        flex: 2,
-        pinned: 'right',
-        cellClass: 'hover:bg-blue-100',
-        editable: true,
-        valueSetter: async (params) => {
-          let newValue = Number(params.newValue)
-          if (isNaN(newValue)) return false
-          if (newValue > 10) newValue = 10
-          if (newValue < 0) newValue = 0
-
-          const oldValue = params.data[params.colDef.field!]
-          params.data[params.colDef.field!] = newValue
-
-          try {
-            const scoreId = params.data.scoreIds[params.colDef.field!]
-            const sessionId = params.data.sessionIds[params.colDef.field!]
-
-            if (scoreId) {
-              await gradeApi.updateGradePartial(scoreId, { grade: newValue })
-            } else {
-              const res = await gradeApi.createGrade({
-                session: sessionId,
-                grade: newValue,
-                user: params.data.userId,
-              })
-              params.data.scoreIds[params.colDef.field!] = res.data.id
+    // прошлые даты
+    cols.push(
+      ...desktopDatesOnPage.flatMap((d) =>
+        sessions
+          .filter((s) => s.date.replace(/-/g, '_') === d)
+          .map((session) => {
+            const key = `${d}_${session.id}`
+            return {
+              field: key,
+              headerName:
+                d.replace(/_/g, '.') +
+                (session.topic ? ` (${session.topic.title})` : ''),
+              flex: 1,
+              editable: false,
             }
+          })
+      )
+    )
 
-            return true
-          } catch (err) {
-            console.error('Ошибка при обновлении оценки:', err)
-            params.data[params.colDef.field!] = oldValue || 0
-            return false
-          }
-        },
+    // сегодняшние
+    if (todaySessions.length > 0) {
+      todaySessions.forEach((session, idx) => {
+        const key = `${todaySafe}_${session.id}`
+        cols.push({
+          field: key,
+          headerName:
+            todaySafe.replace(/_/g, '.') +
+            (session.topic ? ` (${session.topic.title})` : ''),
+          flex: 2,
+          pinned: idx === todaySessions.length - 1 ? 'right' : undefined,
+          editable: true,
+          valueSetter: editableSetter,
+        })
       })
     }
 
     return cols
-  }, [isMobile, mobileDate, desktopDatesOnPage, sessions, hasTodaySession])
+  }, [isMobile, mobileSession, desktopDatesOnPage, todaySessions])
 
   const totalPages = isMobile
-    ? pastDates.length + (hasTodaySession ? 1 : 0)
+    ? sessions.length
     : Math.ceil(pastDates.length / columnsPerPage)
 
   return (
@@ -308,16 +281,7 @@ export function GradeBook({ subjectId, groupId = null }) {
           showControls
           total={totalPages}
           page={currentPage}
-          onChange={(page) => {
-            setCurrentPage(page)
-            if (isMobile) {
-              setSelectedDate(
-                page === 1 && hasTodaySession
-                  ? todaySafe
-                  : pastDates[hasTodaySession ? page - 2 : page - 1]
-              )
-            }
-          }}
+          onChange={(page) => setCurrentPage(page)}
         />
       </div>
 
@@ -339,8 +303,6 @@ export function GradeBook({ subjectId, groupId = null }) {
           <QRGenerator groupId={groupId} subjectId={subjectId} />
         </div>
 
-        {/* Кнопка для создания занятия */}
-
         <div className="flex items-start justify-between mt-5 gap-10">
           <div className="flex w-full gap-10 flex-col">
             <div className="flex w-full gap-5">
@@ -348,22 +310,30 @@ export function GradeBook({ subjectId, groupId = null }) {
                 label="Дата"
                 selectedKeys={selectedDate ? [selectedDate] : []}
                 onChange={(e) => {
-                  setSelectedDate(e.target.value)
+                  setSelectedDate(e.target.value) // selectedDate = `${date}_${id}`
                   setEditing(false)
                   setSelectedTopic('')
                 }}
-                renderValue={(items) => (
-                  <span>{items[0]?.key.replace(/_/g, '.')}</span>
-                )}
-              >
-                {allDates.map((d) => {
+                renderValue={(items) => {
                   const session = sessions.find(
-                    (s) => s.date.replace(/-/g, '_') === d
+                    (s) =>
+                      `${s.date.replace(/-/g, '_')}_${s.id}` === items[0]?.key
                   )
                   return (
-                    <SelectItem key={d} value={d}>
-                      {d.replace(/_/g, '.')} —{' '}
-                      {session?.topic?.title || 'Без темы'}
+                    <span>
+                      {session
+                        ? `${session.date.replace(/_/g, '.')} — ${session.topic?.title || 'Без темы'}`
+                        : ''}
+                    </span>
+                  )
+                }}
+              >
+                {sessions.map((s) => {
+                  const key = `${s.date.replace(/-/g, '_')}_${s.id}`
+                  return (
+                    <SelectItem key={key} value={key}>
+                      {s.date.replace(/_/g, '.')} —{' '}
+                      {s.topic?.title || 'Без темы'}
                     </SelectItem>
                   )
                 })}
