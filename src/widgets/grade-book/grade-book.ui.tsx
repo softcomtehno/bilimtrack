@@ -1,288 +1,304 @@
-import { Pagination, Select, SelectItem, Button } from "@heroui/react";
-import { useEffect, useMemo, useState } from "react";
-import { AgGridReact } from "ag-grid-react";
-import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
-import { gradeApi } from "@/entities/grade";
-import { QRGenerator } from "@/features/lesson/qr-generator";
-import { topicApi } from "@/entities/topic";
-import { sessionApi } from "@/entities/session";
+import { Pagination, Select, SelectItem, Button } from '@heroui/react'
+import { useEffect, useMemo, useState } from 'react'
+import { AgGridReact } from 'ag-grid-react'
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
+import { gradeApi } from '@/entities/grade'
+import { QRGenerator } from '@/features/lesson/qr-generator'
+import { topicApi } from '@/entities/topic'
+import { sessionApi } from '@/entities/session'
 
-ModuleRegistry.registerModules([AllCommunityModule]);
+ModuleRegistry.registerModules([AllCommunityModule])
 
 export function GradeBook({ subjectId, groupId = null }) {
-  const [rowData, setRowData] = useState<any[]>([]);
-  const [allDates, setAllDates] = useState<string[]>([]);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [topics, setTopics] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedTopic, setSelectedTopic] = useState<string>("");
-  const [editing, setEditing] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [rowData, setRowData] = useState<any[]>([])
+  const [allDates, setAllDates] = useState<string[]>([])
+  const [sessions, setSessions] = useState<any[]>([])
+  const [topics, setTopics] = useState<any[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [selectedTopic, setSelectedTopic] = useState<string>('')
+  const [editing, setEditing] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  const todayDate = new Date().toLocaleDateString("ru-RU");
-  const todaySafe = todayDate.replace(/\./g, "_");
-  const columnsPerPage = 9;
+  const todayDate = new Date().toLocaleDateString('ru-RU')
+  const todaySafe = todayDate.replace(/\./g, '_')
+  const columnsPerPage = 9
 
   useEffect(() => {
     function handleResize() {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 768)
     }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  async function fetchGrades() {
+    try {
+      const res = await gradeApi.getGrades(groupId, subjectId)
+      const { sessions, grades } = res.data
+
+      let dates = sessions.map((s: any) => s.date.replace(/-/g, '_'))
+      dates.sort((a, b) => b.localeCompare(a)) // от самой новой к старой
+
+      const transformedData = grades.map((g: any) => {
+        const scores: Record<string, number> = {}
+        const scoreIds: Record<string, number> = {}
+        const sessionIds: Record<string, string> = {}
+
+        dates.forEach((date) => {
+          const score = g.scores.find(
+            (s: any) => s.date.replace(/-/g, '_') === date
+          )
+          scores[date] = score ? score.grade : 0
+          scoreIds[date] = score?.id
+          sessionIds[date] =
+            score?.sessionId ||
+            sessions.find((s: any) => s.date.replace(/-/g, '_') === date)?.id
+        })
+
+        return {
+          fullName: g.user.fullName,
+          userId: g.user.id,
+          scores,
+          scoreIds,
+          sessionIds,
+          ...scores,
+        }
+      })
+
+      setAllDates(dates)
+      setSessions(sessions)
+      setRowData(transformedData)
+
+      const hasTodaySession = sessions.some(
+        (s) => s.date.replace(/-/g, '_') === todaySafe
+      )
+
+      setCurrentPage(1)
+      setSelectedDate(hasTodaySession ? todaySafe : dates[0])
+    } catch (error) {
+      console.error('Ошибка при загрузке оценок:', error)
+    }
+  }
 
   useEffect(() => {
-    async function fetchGrades() {
-      try {
-        const res = await gradeApi.getGrades(groupId, subjectId);
-        const { sessions, grades } = res.data;
-
-        let dates = sessions.map((s: any) => s.date.replace(/-/g, "_"));
-        dates.sort((a, b) => b.localeCompare(a)); // от самой новой к старой
-
-        const transformedData = grades.map((g: any) => {
-          const scores: Record<string, number> = {};
-          const scoreIds: Record<string, number> = {};
-          const sessionIds: Record<string, string> = {};
-
-          dates.forEach((date) => {
-            const score = g.scores.find(
-              (s: any) => s.date.replace(/-/g, "_") === date
-            );
-            scores[date] = score ? score.grade : 0;
-            scoreIds[date] = score?.id;
-            sessionIds[date] =
-              score?.sessionId ||
-              sessions.find((s: any) => s.date.replace(/-/g, "_") === date)?.id;
-          });
-
-          return {
-            fullName: g.user.fullName,
-            userId: g.user.id,
-            scores,
-            scoreIds,
-            sessionIds,
-            ...scores,
-          };
-        });
-
-        setAllDates(dates);
-        setSessions(sessions);
-        setRowData(transformedData);
-
-        const hasTodaySession = sessions.some(
-          (s) => s.date.replace(/-/g, "_") === todaySafe
-        );
-
-        setCurrentPage(1);
-        setSelectedDate(hasTodaySession ? todaySafe : dates[0]);
-      } catch (error) {
-        console.error("Ошибка при загрузке оценок:", error);
-      }
-    }
-    fetchGrades();
-  }, [groupId, subjectId]);
+    fetchGrades()
+  }, [groupId, subjectId])
 
   useEffect(() => {
     async function fetchTopics() {
       try {
-        const res = await topicApi.getTopics(subjectId);
-        setTopics(res.data);
+        const res = await topicApi.getTopics(subjectId)
+        setTopics(res.data)
       } catch (err) {
-        console.error("Ошибка при загрузке тем:", err);
+        console.error('Ошибка при загрузке тем:', err)
       }
     }
-    fetchTopics();
-  }, [subjectId]);
+    fetchTopics()
+  }, [subjectId])
 
   const currentSession = sessions.find(
-    (s) => s.date.replace(/-/g, "_") === selectedDate
-  );
-  const currentTopic = currentSession?.topic || null;
+    (s) => s.date.replace(/-/g, '_') === selectedDate
+  )
+  const currentTopic = currentSession?.topic || null
 
   async function handleSave() {
-    if (!selectedDate || !selectedTopic) return;
+    if (!selectedDate || !selectedTopic) return
     try {
-      const session = currentSession;
-      if (!session) return;
-      await sessionApi.updateSessionTopic(session.id, Number(selectedTopic));
+      const session = currentSession
+      if (!session) return
+      await sessionApi.updateSessionTopic(session.id, Number(selectedTopic))
       const topicObj =
-        topics.find((t) => String(t.id) === String(selectedTopic)) || null;
+        topics.find((t) => String(t.id) === String(selectedTopic)) || null
       setSessions((prev) =>
         prev.map((s) => (s.id === session.id ? { ...s, topic: topicObj } : s))
-      );
-      setEditing(false);
-      setSelectedTopic("");
-      alert("Тема успешно сохранена!");
+      )
+      setEditing(false)
+      setSelectedTopic('')
+      alert('Тема успешно сохранена!')
     } catch (err) {
-      console.error("Ошибка при обновлении темы:", err);
-      alert("Ошибка при сохранении темы.");
+      console.error('Ошибка при обновлении темы:', err)
+      alert('Ошибка при сохранении темы.')
+    }
+  }
+
+  async function handleCreateSession() {
+    try {
+      const now = new Date()
+      const date = now.toISOString().split('T')[0] // yyyy-mm-dd
+      const startTime = now.toISOString().split('T')[1] // HH:mm:ss.SSSZ
+      const endTime = new Date(now.getTime() + 80 * 60000)
+        .toISOString()
+        .split('T')[1] // HH:mm:ss.SSSZ
+      await sessionApi.createSession({
+        subject: subjectId,
+        groups: [groupId],
+        date,
+        startTime,
+        endTime,
+      })
+
+      await fetchGrades()
+      alert('Занятие успешно создано!')
+    } catch (err) {
+      console.error('Ошибка при создании занятия:', err)
+      alert('Не удалось создать занятие.')
     }
   }
 
   // Массив прошлых дат без сегодняшней
-  // Массив прошлых дат без сегодняшней
-  const pastDates = allDates.filter((d) => d !== todaySafe);
+  const pastDates = allDates.filter((d) => d !== todaySafe)
 
   // Для десктопа — по возрастанию
-  const desktopPastDates = [...pastDates].sort((a, b) => a.localeCompare(b));
+  const desktopPastDates = [...pastDates].sort((a, b) => a.localeCompare(b))
 
-  // Для мобильного — по убыванию (чтобы первая страница была самой свежей)
-  const mobilePastDates = [...pastDates].sort((a, b) => b.localeCompare(a));
+  // Для мобильного — по убыванию
+  const mobilePastDates = [...pastDates].sort((a, b) => b.localeCompare(a))
 
   const hasTodaySession = sessions.some(
-    (s) => s.date.replace(/-/g, "_") === todaySafe
-  );
+    (s) => s.date.replace(/-/g, '_') === todaySafe
+  )
 
   const mobileDate = isMobile
     ? currentPage === 1
       ? todaySafe
       : mobilePastDates[currentPage - 2]
-    : null;
+    : null
 
   const desktopDatesOnPage = !isMobile
     ? desktopPastDates.slice(
         (currentPage - 1) * columnsPerPage,
         currentPage * columnsPerPage
       )
-    : [];
+    : []
 
   const columnDefs = useMemo(() => {
     if (isMobile) {
-      if (!mobileDate) return [];
+      if (!mobileDate) return []
       return [
         {
-          field: "fullName",
-          headerName: "ФИО",
-          pinned: "left",
+          field: 'fullName',
+          headerName: 'ФИО',
+          pinned: 'left',
           filter: true,
-          cellClass: "hover:bg-blue-100",
+          cellClass: 'hover:bg-blue-100',
           flex: 2,
         },
         {
           field: mobileDate,
-          headerName: mobileDate.replace(/_/g, "."),
+          headerName: mobileDate.replace(/_/g, '.'),
           flex: 2,
-          cellClass: "hover:bg-blue-100",
+          cellClass: 'hover:bg-blue-100',
           editable: mobileDate === todaySafe && hasTodaySession,
           valueSetter: async (params) => {
-            let newValue = Number(params.newValue);
-            if (isNaN(newValue)) return false;
-            if (newValue > 10) newValue = 10;
-            if (newValue < 0) newValue = 0;
+            let newValue = Number(params.newValue)
+            if (isNaN(newValue)) return false
+            if (newValue > 10) newValue = 10
+            if (newValue < 0) newValue = 0
 
-            // сохраняем старое значение на случай ошибки
-            const oldValue = params.data[params.colDef.field!];
-            params.data[params.colDef.field!] = newValue;
+            const oldValue = params.data[params.colDef.field!]
+            params.data[params.colDef.field!] = newValue
 
             try {
-              const scoreId = params.data.scoreIds[params.colDef.field!];
-              const sessionId = params.data.sessionIds[params.colDef.field!];
+              const scoreId = params.data.scoreIds[params.colDef.field!]
+              const sessionId = params.data.sessionIds[params.colDef.field!]
 
               if (scoreId) {
-                // обновляем существующую оценку
-                await gradeApi.updateGradePartial(scoreId, { grade: newValue });
+                await gradeApi.updateGradePartial(scoreId, { grade: newValue })
               } else {
-                // создаём новую оценку
                 const res = await gradeApi.createGrade({
                   session: sessionId,
                   grade: newValue,
                   user: params.data.userId,
-                });
-                // сохраняем id созданной оценки
-                params.data.scoreIds[params.colDef.field!] = res.data.id;
+                })
+                params.data.scoreIds[params.colDef.field!] = res.data.id
               }
 
-              return true;
+              return true
             } catch (err) {
-              console.error("Ошибка при обновлении оценки:", err);
-              params.data[params.colDef.field!] = oldValue || 0;
-              return false;
+              console.error('Ошибка при обновлении оценки:', err)
+              params.data[params.colDef.field!] = oldValue || 0
+              return false
             }
           },
         },
-      ];
+      ]
     }
 
     const cols = [
       {
-        field: "fullName",
-        headerName: "ФИО",
-        pinned: "left",
+        field: 'fullName',
+        headerName: 'ФИО',
+        pinned: 'left',
         filter: true,
-        cellClass: "hover:bg-blue-100",
+        cellClass: 'hover:bg-blue-100',
         flex: 2,
       },
       ...desktopDatesOnPage.map((d) => {
-        const session = sessions.find((s) => s.date.replace(/-/g, "_") === d);
+        const session = sessions.find((s) => s.date.replace(/-/g, '_') === d)
         return {
           field: d,
           headerName:
-            d.replace(/_/g, ".") +
-            (session?.topic ? ` (${session.topic.title})` : ""),
+            d.replace(/_/g, '.') +
+            (session?.topic ? ` (${session.topic.title})` : ''),
           flex: 1,
           editable: false,
-          cellClass: "hover:bg-blue-100",
-        };
+          cellClass: 'hover:bg-blue-100',
+        }
       }),
-    ];
+    ]
 
     if (hasTodaySession) {
       cols.push({
         field: todaySafe,
-        headerName: todaySafe.replace(/_/g, "."),
+        headerName: todaySafe.replace(/_/g, '.'),
         flex: 2,
-        pinned: "right",
-        cellClass: "hover:bg-blue-100",
+        pinned: 'right',
+        cellClass: 'hover:bg-blue-100',
         editable: true,
         valueSetter: async (params) => {
-          let newValue = Number(params.newValue);
-          if (isNaN(newValue)) return false;
-          if (newValue > 10) newValue = 10;
-          if (newValue < 0) newValue = 0;
+          let newValue = Number(params.newValue)
+          if (isNaN(newValue)) return false
+          if (newValue > 10) newValue = 10
+          if (newValue < 0) newValue = 0
 
-          // сохраняем старое значение на случай ошибки
-          const oldValue = params.data[params.colDef.field!];
-          params.data[params.colDef.field!] = newValue;
+          const oldValue = params.data[params.colDef.field!]
+          params.data[params.colDef.field!] = newValue
 
           try {
-            const scoreId = params.data.scoreIds[params.colDef.field!];
-            const sessionId = params.data.sessionIds[params.colDef.field!];
+            const scoreId = params.data.scoreIds[params.colDef.field!]
+            const sessionId = params.data.sessionIds[params.colDef.field!]
 
             if (scoreId) {
-              // обновляем существующую оценку
-              await gradeApi.updateGradePartial(scoreId, { grade: newValue });
+              await gradeApi.updateGradePartial(scoreId, { grade: newValue })
             } else {
-              // создаём новую оценку
               const res = await gradeApi.createGrade({
                 session: sessionId,
                 grade: newValue,
                 user: params.data.userId,
-              });
-              // сохраняем id созданной оценки
-              params.data.scoreIds[params.colDef.field!] = res.data.id;
+              })
+              params.data.scoreIds[params.colDef.field!] = res.data.id
             }
 
-            return true;
+            return true
           } catch (err) {
-            console.error("Ошибка при обновлении оценки:", err);
-            params.data[params.colDef.field!] = oldValue || 0;
-            return false;
+            console.error('Ошибка при обновлении оценки:', err)
+            params.data[params.colDef.field!] = oldValue || 0
+            return false
           }
         },
-      });
+      })
     }
 
-    return cols;
-  }, [isMobile, mobileDate, desktopDatesOnPage, sessions, hasTodaySession]);
+    return cols
+  }, [isMobile, mobileDate, desktopDatesOnPage, sessions, hasTodaySession])
 
   const totalPages = isMobile
     ? pastDates.length + (hasTodaySession ? 1 : 0)
-    : Math.ceil(pastDates.length / columnsPerPage);
+    : Math.ceil(pastDates.length / columnsPerPage)
 
   return (
     <div>
@@ -293,19 +309,19 @@ export function GradeBook({ subjectId, groupId = null }) {
           total={totalPages}
           page={currentPage}
           onChange={(page) => {
-            setCurrentPage(page);
+            setCurrentPage(page)
             if (isMobile) {
               setSelectedDate(
                 page === 1 && hasTodaySession
                   ? todaySafe
                   : pastDates[hasTodaySession ? page - 2 : page - 1]
-              );
+              )
             }
           }}
         />
       </div>
 
-      <div className="ag-theme-alpine" style={{ width: "100%" }}>
+      <div className="ag-theme-alpine" style={{ width: '100%' }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columnDefs}
@@ -316,9 +332,14 @@ export function GradeBook({ subjectId, groupId = null }) {
           rowHoverHighlight={true}
           getRowHeight={() => (isMobile ? 50 : 30)}
         />
-        <div className="mt-10">
+        <div className="mt-10 flex justify-between">
+          <Button onClick={handleCreateSession} appearance="primary">
+            Создать занятие
+          </Button>
           <QRGenerator groupId={groupId} subjectId={subjectId} />
         </div>
+
+        {/* Кнопка для создания занятия */}
 
         <div className="flex items-start justify-between mt-5 gap-10">
           <div className="flex w-full gap-10 flex-col">
@@ -327,24 +348,24 @@ export function GradeBook({ subjectId, groupId = null }) {
                 label="Дата"
                 selectedKeys={selectedDate ? [selectedDate] : []}
                 onChange={(e) => {
-                  setSelectedDate(e.target.value);
-                  setEditing(false);
-                  setSelectedTopic("");
+                  setSelectedDate(e.target.value)
+                  setEditing(false)
+                  setSelectedTopic('')
                 }}
                 renderValue={(items) => (
-                  <span>{items[0]?.key.replace(/_/g, ".")}</span>
+                  <span>{items[0]?.key.replace(/_/g, '.')}</span>
                 )}
               >
                 {allDates.map((d) => {
                   const session = sessions.find(
-                    (s) => s.date.replace(/-/g, "_") === d
-                  );
+                    (s) => s.date.replace(/-/g, '_') === d
+                  )
                   return (
                     <SelectItem key={d} value={d}>
-                      {d.replace(/_/g, ".")} —{" "}
-                      {session?.topic?.title || "Без темы"}
+                      {d.replace(/_/g, '.')} —{' '}
+                      {session?.topic?.title || 'Без темы'}
                     </SelectItem>
-                  );
+                  )
                 })}
               </Select>
 
@@ -379,5 +400,5 @@ export function GradeBook({ subjectId, groupId = null }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

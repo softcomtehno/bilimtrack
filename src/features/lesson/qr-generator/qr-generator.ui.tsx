@@ -47,15 +47,13 @@ export function QRGenerator({ groupId, subjectId }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button
-          color="primary"
-          onClick={() => setIsOpen(true)}
-          disabled={!sessionId}
-        >
-          Показать QR-код
-        </Button>
-      </div>
+      <Button
+        color="primary"
+        onClick={() => setIsOpen(true)}
+        disabled={!sessionId}
+      >
+        Показать QR-код
+      </Button>
 
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog
