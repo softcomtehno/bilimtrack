@@ -79,7 +79,6 @@ export const Timetablepage: React.FC = () => {
 
   return (
     <div className="bg-white">
-      {/* Header */}
       <div className="bg-gradient-to-r from-sky-500 to-blue-700 px-6 py-6">
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -91,8 +90,6 @@ export const Timetablepage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Stats */}
       <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-4 border-b border-slate-200">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
@@ -113,8 +110,6 @@ export const Timetablepage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Tabs */}
       <div className="p-4 sm:p-6">
         <Tabs defaultValue={defaultTab} color="primary" variant="underlined">
           {days.map(({ key, label }) => (
