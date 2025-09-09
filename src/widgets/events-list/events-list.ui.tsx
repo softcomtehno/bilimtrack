@@ -26,12 +26,13 @@ export function EventsList({ endpoint }: EventsListProps) {
     queryKey: ['events', endpoint],
     queryFn: async () => {
       const res = await axios.get(endpoint)
-      return res.data
+      return Array.isArray(res.data) ? res.data : []
     },
   })
 
   if (isLoading) return <Loading />
   if (isError) return <div>Ошибка при загрузке мероприятий</div>
+  if (!data || data.length === 0) return null // 🔹 ничего не выводим, если нет данных
 
   return (
     <div className="flex flex-col">
@@ -50,7 +51,7 @@ export function EventsList({ endpoint }: EventsListProps) {
           },
         }}
       >
-        {data?.map((event) => (
+        {data.map((event) => (
           <SwiperSlide key={event.id}>
             <EventCard event={event} />
           </SwiperSlide>
