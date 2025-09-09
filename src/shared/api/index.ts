@@ -33,15 +33,15 @@ const processQueue = (error: AxiosError | null, token: string | null) => {
 
 const getAccessToken = (): string | null => {
   const token: string | undefined = getCookie(ACCESS_TOKEN_KEY)
-  if (token) console.log('[Tokens] Access Token:', token)
-  else console.log('[Tokens] Access Token: null')
+  // if (token) console.log('[Tokens] Access Token:', token)
+  // else console.log('[Tokens] Access Token: null')
   return token ?? null
 }
 
 const getRefreshToken = (): string | null => {
   const token = localStorage.getItem(REFRESH_TOKEN_KEY)
-  if (token) console.log('[Tokens] Refresh Token:', token)
-  else console.log('[Tokens] Refresh Token: null')
+  // if (token) console.log('[Tokens] Refresh Token:', token)
+  // else console.log('[Tokens] Refresh Token: null')
   return token
 }
 
@@ -56,7 +56,7 @@ $api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 $api.interceptors.response.use(
   (response) => {
     // При успешном ответе можно вывести токены тоже, если хочешь
-    console.log('[Tokens] Response received')
+    // console.log('[Tokens] Response received')
     getAccessToken()
     getRefreshToken()
     return response
@@ -95,7 +95,7 @@ $api.interceptors.response.use(
           { withCredentials: true }
         )
 
-        console.log('[Tokens] Refreshed Access Token:', data.access)
+        // console.log('[Tokens] Refreshed Access Token:', data.access)
 
         setCookie(ACCESS_TOKEN_KEY, data.access, {
           sameSite: 'Strict',
@@ -113,7 +113,7 @@ $api.interceptors.response.use(
         processQueue(refreshError as AxiosError, null)
         localStorage.removeItem(REFRESH_TOKEN_KEY)
         removeCookie(ACCESS_TOKEN_KEY)
-        console.log('[Tokens] Refresh failed, tokens cleared')
+        // console.log('[Tokens] Refresh failed, tokens cleared')
         window.location.href = '/auth'
         return Promise.reject(refreshError)
       } finally {
