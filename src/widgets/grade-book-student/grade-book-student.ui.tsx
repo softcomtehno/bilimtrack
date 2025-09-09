@@ -25,7 +25,6 @@ export function GradeBookStudent({
   const [error, setError] = useState<string | null>(null)
   const [linkUrl, setLinkUrl] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  console.log(subjectId)
 
   useEffect(() => {
     async function fetchGrades() {
@@ -93,7 +92,7 @@ export function GradeBookStudent({
     if (!activeDate) return
 
     try {
-      console.log('Материалы сохранены:', { linkUrl, file: selectedFile?.name })
+      // console.log('Материалы сохранены:', { linkUrl, file: selectedFile?.name })
       setShowModal(false)
       setLinkUrl('')
       setSelectedFile(null)
@@ -107,8 +106,7 @@ export function GradeBookStudent({
       setSelectedFile(e.target.files[0])
     }
   }
-  console.log(gradesByDate);
-  
+
   if (isLoading) {
     return (
       <div className={`p-6 rounded-lg border shadow-sm ${className}`}>
