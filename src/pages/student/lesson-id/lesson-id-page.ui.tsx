@@ -12,7 +12,7 @@ export function LessonIDPage() {
     async function markAttendance() {
       try {
         await $api.post(
-          'https://api.bilim-track.makalabox.com/api/attendance/mark/',
+          'https://bilimtrack.makalabox.com/api/attendance/mark/',
           {
             sessionId: lessonId,
           }
