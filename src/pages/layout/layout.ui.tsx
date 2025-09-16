@@ -6,6 +6,7 @@ import { BottomSidebar, SidebarNav } from '@/widgets/sidebar'
 import { TopBar } from '@/widgets/top-bar'
 import { Card } from '@heroui/card'
 import { userQueries } from '@/entities/user'
+import { AdminSidebarNav } from '@/widgets/admin-sidebar'
 
 interface LayoutProps {
   children?: ReactNode
@@ -26,17 +27,13 @@ export function GenericLayout({ children }: LayoutProps) {
 export function MentorLayout({ children }: LayoutProps) {
   return (
     <div className="flex h-screen">
-      {/* Desktop sidebar */}
       <div className="hidden md:block">
         <SidebarNav />
       </div>
-
       <Card className=" border shadow-none flex-1 m-10 overflow-y-auto pb-16 md:pb-0">
         <TopBar/>
         {children || <Outlet />}
       </Card>
-
-      {/* Mobile bottom sidebar */}
       <div className="block md:hidden">
         <BottomSidebar />
       </div>
@@ -52,6 +49,18 @@ export function IntroLayout() {
   )
 }
 
+export function AdminLayout() {
+  return (
+    <div className="flex h-screen">
+      <div>
+        <AdminSidebarNav/>
+      </div>
+      <Card className="border shadow-none flex-1 m-10 overflow-y-auto pb-16 md:pb-0">
+        <Outlet />
+      </Card>
+    </div>
+  );
+}
 interface ProtectedRouteProps {
   isAuthenticated: boolean
   redirectPath?: string

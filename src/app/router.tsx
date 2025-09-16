@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import {
+  AdminLayout,
   GenericLayout,
   IntroLayout,
   MentorLayout,
@@ -92,7 +93,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin",
-        element: <IntroLayout />,
+        element: <AdminLayout />,
         children: [schedulePageRoute],
       },
     ],
