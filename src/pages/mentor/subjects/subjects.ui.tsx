@@ -10,7 +10,7 @@ export const SubjectsPage = () => {
     isError: isSubjectsError,
     isSuccess: isSubjectSuccess,
   } = subjectQueries.useGetSubjectsMentor()
-  console.log(subjectsData)
+
 
   if (isSubjectsLoading) {
     return (
