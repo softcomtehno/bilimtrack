@@ -1,4 +1,10 @@
-import { Pagination, Select, SelectItem, Button } from '@heroui/react'
+import {
+  Pagination,
+  Select,
+  SelectItem,
+  Button,
+  DatePicker,
+} from '@heroui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
@@ -21,6 +27,9 @@ export function GradeBook({ subjectId, groupId = null }) {
   const [selectedTopic, setSelectedTopic] = useState<string>('')
   const [editing, setEditing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [selectedCustomDate, setSelectedCustomDate] = useState<Date | null>(
+    null
+  )
 
   const todayDate = new Date().toLocaleDateString('ru-RU')
   const todaySafe = todayDate.replace(/\./g, '_')
@@ -141,6 +150,27 @@ export function GradeBook({ subjectId, groupId = null }) {
       await fetchGrades()
       alert('Занятие успешно создано!')
       window.location.reload()
+    } catch (err) {
+      console.error('Ошибка при создании занятия:', err)
+      alert('Не удалось создать занятие.')
+    }
+  }
+
+  async function handleCreateSessionWithDate() {
+    if (!selectedCustomDate) return
+    try {
+      const startTime = '09:00:00' // можно поменять по умолчанию
+      const endTime = '10:20:00' // например, 80 минут
+      await sessionApi.createSession({
+        subject: subjectId,
+        groups: [groupId],
+        date: selectedCustomDate,
+        startTime,
+        endTime,
+      })
+      await fetchGrades()
+      alert('Занятие успешно создано!')
+      setSelectedCustomDate('')
     } catch (err) {
       console.error('Ошибка при создании занятия:', err)
       alert('Не удалось создать занятие.')
@@ -300,6 +330,20 @@ export function GradeBook({ subjectId, groupId = null }) {
           <Button onClick={handleCreateSession} appearance="primary">
             Создать занятие
           </Button>
+          <div className="flex gap-2 items-center">
+            <DatePicker
+              placeholder="Выберите дату"
+              value={selectedCustomDate}
+              onChange={(date) => setSelectedCustomDate(date)}
+            />
+            <Button
+              appearance="primary"
+              onClick={handleCreateSessionWithDate}
+              disabled={!selectedCustomDate}
+            >
+              Создать занятие с датой
+            </Button>
+          </div>
           <QRGenerator groupId={groupId} subjectId={subjectId} />
         </div>
 
