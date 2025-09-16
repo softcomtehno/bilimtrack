@@ -107,10 +107,49 @@ export const SubjectPage = () => {
   }
 
   return (
-    <div className='p-4'>
+    <div className="p-4">
       <h1 className="text-lg font-semibold mb-4">{subject.name}</h1>
 
       {/* -------------------- темы -------------------- */}
+      {/* ------------------------------------------------ */}
+
+      <Title Icon={Album} title="Группы" />
+      <Swiper
+        className="w-[100%] pb-[40px] default-slider"
+        modules={[Pagination]}
+        pagination={{ clickable: true }}
+        spaceBetween={20}
+        // slidesPerView={4}
+        breakpoints={{
+          2500: {
+            slidesPerView: 6,
+          },
+          2000: {
+            slidesPerView: 6,
+          },
+          1400: {
+            slidesPerView: 5,
+          },
+          1024: {
+            slidesPerView: 4,
+          },
+          768: {
+            slidesPerView: 2.5,
+          },
+          480: {
+            slidesPerView: 2,
+          },
+          320: {
+            slidesPerView: 1.5,
+          },
+        }}
+      >
+        {groupData?.data.map((group: Group) => (
+          <SwiperSlide key={group.id}>
+            <CourseCard name={group.name} id={group.id} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
       <Title Icon={Album} title="Темы уроков" />
       <div className="flex gap-2 items-center mb-4">
         <Input
@@ -124,9 +163,12 @@ export const SubjectPage = () => {
         </Button>
       </div>
 
-      <div className="space-y-2 mb-8">
+      <div className="mb-8 max-w-[420px]">
         {topics.map((t) => (
-          <div key={t.id} className="flex items-center gap-2">
+          <div
+            key={t.id}
+            className="mt-2 flex items-center  gap-2 justify-between"
+          >
             {editMode === t.id ? (
               <>
                 <Input
@@ -151,60 +193,29 @@ export const SubjectPage = () => {
               </>
             ) : (
               <>
-                <span className="flex-1">{t.title}</span>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  onPress={() => handleStartEdit(t)}
-                >
-                  Изменить
-                </Button>
-                <Button
-                  size="sm"
-                  color="danger"
-                  variant="flat"
-                  onPress={() => handleDeleteTopic(t.id)}
-                >
-                  Удалить
-                </Button>
+                <span className="">{t.title}</span>
+                <div className="flex gap-3">
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    onPress={() => handleStartEdit(t)}
+                  >
+                    Изменить
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="danger"
+                    variant="flat"
+                    onPress={() => handleDeleteTopic(t.id)}
+                  >
+                    Удалить
+                  </Button>
+                </div>
               </>
             )}
           </div>
         ))}
       </div>
-      {/* ------------------------------------------------ */}
-
-      <Title Icon={Album} title="Группы" />
-      <Swiper
-        className="w-[100%] pb-[40px] default-slider"
-        modules={[Pagination]}
-        pagination={{ clickable: true }}
-        spaceBetween={20}
-        // slidesPerView={4}
-        breakpoints={{
-          2500: {
-            slidesPerView: 6,
-          },
-          2000: {
-            slidesPerView: 4,
-          },
-          1024: {
-            slidesPerView: 3,
-          },
-          768: {
-            slidesPerView: 2,
-          },
-          480: {
-            slidesPerView: 1,
-          },
-        }}
-      >
-        {groupData?.data.map((group: Group) => (
-          <SwiperSlide key={group.id}>
-            <CourseCard name={group.name} id={group.id} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
     </div>
   )
 }
