@@ -378,23 +378,25 @@ export function GradeBook({ subjectId, groupId = null }) {
           getRowHeight={() => (isMobile ? 50 : 30)}
         />
         <div className="mt-10 flex justify-between">
-          <Button onClick={handleCreateSession} appearance="primary">
-            Создать занятие
-          </Button>
-          <div className="flex gap-2 items-center">
-            <input
-              type="date"
-              value={selectedCustomDate}
-              onChange={(e) => setSelectedCustomDate(e.target.value)}
-              className="border rounded px-2 py-1"
-            />
-            <Button
-              appearance="primary"
-              onClick={handleCreateSessionWithDate}
-              disabled={!selectedCustomDate}
-            >
-              Создать занятие с датой
+          <div className='flex gap-3'>
+            <Button onClick={handleCreateSession} appearance="primary">
+              Создать занятие
             </Button>
+            <div className="flex flex-row-reverse gap-2 items-center">
+              <input
+                type="date"
+                value={selectedCustomDate}
+                onChange={(e) => setSelectedCustomDate(e.target.value)}
+                className="border rounded px-2 py-1"
+              />
+              <Button
+                appearance="primary"
+                onClick={handleCreateSessionWithDate}
+                disabled={!selectedCustomDate}
+              >
+                Создать занятие с датой
+              </Button>
+            </div>
           </div>
           <QRGenerator groupId={groupId} subjectId={subjectId} />
         </div>
