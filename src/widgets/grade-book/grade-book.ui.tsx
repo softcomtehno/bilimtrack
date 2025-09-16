@@ -21,6 +21,9 @@ export function GradeBook({ subjectId, groupId = null }) {
   const [selectedTopic, setSelectedTopic] = useState<string>('')
   const [editing, setEditing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [selectedCustomDate, setSelectedCustomDate] = useState<Date | null>(
+    null
+  )
 
   const todayDate = new Date().toLocaleDateString('ru-RU')
   const todaySafe = todayDate.replace(/\./g, '_')
@@ -147,6 +150,27 @@ export function GradeBook({ subjectId, groupId = null }) {
     }
   }
 
+  async function handleCreateSessionWithDate() {
+    if (!selectedCustomDate) return
+    try {
+      const startTime = '09:00:00' // можно поменять по умолчанию
+      const endTime = '10:20:00' // например, 80 минут
+      await sessionApi.createSession({
+        subject: subjectId,
+        groups: [groupId],
+        date: selectedCustomDate,
+        startTime,
+        endTime,
+      })
+      await fetchGrades()
+      alert('Занятие успешно создано!')
+      setSelectedCustomDate('')
+    } catch (err) {
+      console.error('Ошибка при создании занятия:', err)
+      alert('Не удалось создать занятие.')
+    }
+  }
+
   const pastDates = allDates.filter((d) => d !== todaySafe)
   const desktopPastDates = [...pastDates].sort((a, b) => a.localeCompare(b))
   const todaySessions = sessions.filter(
@@ -166,6 +190,108 @@ export function GradeBook({ subjectId, groupId = null }) {
       )
     : []
 
+  // const columnDefs = useMemo(() => {
+  //   const editableSetter = async (params: any) => {
+  //     let newValue = Number(params.newValue)
+  //     if (isNaN(newValue)) return false
+  //     if (newValue > 10) newValue = 10
+  //     if (newValue < 0) newValue = 0
+
+  //     const oldValue = params.data[params.colDef.field!]
+  //     params.data[params.colDef.field!] = newValue
+
+  //     try {
+  //       const scoreId = params.data.scoreIds[params.colDef.field!]
+  //       const sessionId = params.data.sessionIds[params.colDef.field!]
+
+  //       if (scoreId) {
+  //         await gradeApi.updateGradePartial(scoreId, { grade: newValue })
+  //       } else {
+  //         const res = await gradeApi.createGrade({
+  //           session: sessionId,
+  //           grade: newValue,
+  //           user: params.data.userId,
+  //         })
+  //         params.data.scoreIds[params.colDef.field!] = res.data.id
+  //       }
+  //       return true
+  //     } catch (err) {
+  //       console.error('Ошибка при обновлении оценки:', err)
+  //       params.data[params.colDef.field!] = oldValue || 0
+  //       return false
+  //     }
+  //   }
+
+  //   // мобильный: всегда 2 колонки
+  //   if (isMobile && mobileSession) {
+  //     const key = `${mobileSession.date.replace(/-/g, '_')}_${mobileSession.id}`
+  //     return [
+  //       {
+  //         field: 'fullName',
+  //         headerName: 'ФИО',
+  //         pinned: 'left',
+  //         flex: 2,
+  //       },
+  //       {
+  //         field: key,
+  //         headerName:
+  //           mobileSession.date.replace(/-/g, '.') +
+  //           (mobileSession.topic ? ` (${mobileSession.topic.title})` : ''),
+  //         flex: 2,
+  //         editable: mobileSession.date.replace(/-/g, '_') === todaySafe,
+  //         valueSetter: editableSetter,
+  //       },
+  //     ]
+  //   }
+
+  //   const cols: any[] = [
+  //     {
+  //       field: 'fullName',
+  //       headerName: 'ФИО',
+  //       pinned: 'left',
+  //       filter: true,
+  //       flex: 2,
+  //     },
+  //   ]
+
+  //   // прошлые даты
+  //   cols.push(
+  //     ...desktopDatesOnPage.flatMap((d) =>
+  //       sessions
+  //         .filter((s) => s.date.replace(/-/g, '_') === d)
+  //         .map((session) => {
+  //           const key = `${d}_${session.id}`
+  //           return {
+  //             field: key,
+  //             headerName:
+  //               d.replace(/_/g, '.') +
+  //               (session.topic ? ` (${session.topic.title})` : ''),
+  //             flex: 1,
+  //             editable: false,
+  //           }
+  //         })
+  //     )
+  //   )
+
+  //   // сегодняшние
+  //   if (todaySessions.length > 0) {
+  //     todaySessions.forEach((session, idx) => {
+  //       const key = `${todaySafe}_${session.id}`
+  //       cols.push({
+  //         field: key,
+  //         headerName:
+  //           todaySafe.replace(/_/g, '.') +
+  //           (session.topic ? ` (${session.topic.title})` : ''),
+  //         flex: 2,
+  //         pinned: idx === todaySessions.length - 1 ? 'right' : undefined,
+  //         editable: true,
+  //         valueSetter: editableSetter,
+  //       })
+  //     })
+  //   }
+
+  //   return cols
+  // }, [isMobile, mobileSession, desktopDatesOnPage, todaySessions])
   const columnDefs = useMemo(() => {
     const editableSetter = async (params: any) => {
       let newValue = Number(params.newValue)
@@ -198,28 +324,6 @@ export function GradeBook({ subjectId, groupId = null }) {
       }
     }
 
-    // мобильный: всегда 2 колонки
-    if (isMobile && mobileSession) {
-      const key = `${mobileSession.date.replace(/-/g, '_')}_${mobileSession.id}`
-      return [
-        {
-          field: 'fullName',
-          headerName: 'ФИО',
-          pinned: 'left',
-          flex: 2,
-        },
-        {
-          field: key,
-          headerName:
-            mobileSession.date.replace(/-/g, '.') +
-            (mobileSession.topic ? ` (${mobileSession.topic.title})` : ''),
-          flex: 2,
-          editable: mobileSession.date.replace(/-/g, '_') === todaySafe,
-          valueSetter: editableSetter,
-        },
-      ]
-    }
-
     const cols: any[] = [
       {
         field: 'fullName',
@@ -230,44 +334,21 @@ export function GradeBook({ subjectId, groupId = null }) {
       },
     ]
 
-    // прошлые даты
-    cols.push(
-      ...desktopDatesOnPage.flatMap((d) =>
-        sessions
-          .filter((s) => s.date.replace(/-/g, '_') === d)
-          .map((session) => {
-            const key = `${d}_${session.id}`
-            return {
-              field: key,
-              headerName:
-                d.replace(/_/g, '.') +
-                (session.topic ? ` (${session.topic.title})` : ''),
-              flex: 1,
-              editable: false,
-            }
-          })
-      )
-    )
-
-    // сегодняшние
-    if (todaySessions.length > 0) {
-      todaySessions.forEach((session, idx) => {
-        const key = `${todaySafe}_${session.id}`
-        cols.push({
-          field: key,
-          headerName:
-            todaySafe.replace(/_/g, '.') +
-            (session.topic ? ` (${session.topic.title})` : ''),
-          flex: 2,
-          pinned: idx === todaySessions.length - 1 ? 'right' : undefined,
-          editable: true,
-          valueSetter: editableSetter,
-        })
+    sessions.forEach((session) => {
+      const key = `${session.date.replace(/-/g, '_')}_${session.id}`
+      cols.push({
+        field: key,
+        headerName:
+          session.date.replace(/_/g, '.') +
+          (session.topic ? ` (${session.topic.title})` : ''),
+        flex: 2,
+        editable: true, // ВСЕ оценки редактируемы
+        valueSetter: editableSetter,
       })
-    }
+    })
 
     return cols
-  }, [isMobile, mobileSession, desktopDatesOnPage, todaySessions])
+  }, [sessions])
 
   const totalPages = isMobile
     ? sessions.length
@@ -300,6 +381,21 @@ export function GradeBook({ subjectId, groupId = null }) {
           <Button onClick={handleCreateSession} appearance="primary">
             Создать занятие
           </Button>
+          <div className="flex gap-2 items-center">
+            <input
+              type="date"
+              value={selectedCustomDate}
+              onChange={(e) => setSelectedCustomDate(e.target.value)}
+              className="border rounded px-2 py-1"
+            />
+            <Button
+              appearance="primary"
+              onClick={handleCreateSessionWithDate}
+              disabled={!selectedCustomDate}
+            >
+              Создать занятие с датой
+            </Button>
+          </div>
           <QRGenerator groupId={groupId} subjectId={subjectId} />
         </div>
 
