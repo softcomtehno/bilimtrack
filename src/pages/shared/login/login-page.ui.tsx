@@ -1,5 +1,13 @@
 import { userQueries, userTypes } from '@/entities/user';
-import { Card, CardBody, Input, Button, InputOtp } from '@heroui/react';
+import {
+  Card,
+  CardBody,
+  Input,
+  Button,
+  InputOtp,
+  Tabs,
+  Tab,
+} from '@heroui/react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -33,57 +41,111 @@ export function LoginPage() {
           <h2 className="text-2xl font-bold text-center mb-6">
             Вход в BilimTrack
           </h2>
-          <img src="/images/girl.svg" alt="Login illustration" className="max-w-xs" />
+          <img
+            src="/images/girl.svg"
+            alt="Login illustration"
+            className="max-w-xs"
+          />
         </div>
 
-        <Card className="shadow-none p-4 w-full md:max-w-sm overflow-x-hidden">
-          <CardBody className='overflow-x-hidden'>
-            <form onSubmit={handleSubmit} className='flex flex-col items-center'>
-              <div className="mb-4">
+        <div>
+          <Tabs aria-label="Login options" fullWidth>
+            <Tab key="student" title="Студент">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col items-center gap-4"
+              >
                 <Input
-                className='max-w-[200px] min-w-[200px]'
+                  className="max-w-[220px] min-w-[200px]"
                   placeholder="Логин"
                   value={form.username}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, username: e.target.value }))
                   }
                 />
-              </div>
 
-              <div className="mb-4 flex justify-center">
                 <InputOtp
                   placeholder="Пароль"
-                  className="max-w-[200px] min-w-[200px]"
+                  className="max-w-[220px] min-w-[200px]"
                   length={4}
                   value={form.password}
                   onValueChange={(value) =>
                     setForm((prev) => ({ ...prev, password: value }))
                   }
                 />
-              </div>
 
-              <Button
-                type="submit"
-                className="bg-sky-500 max-w-[200px] min-w-[200px] font-medium text-white w-full mb-4"
-                disabled={isPending}
-              >
-                {isPending ? 'Входим...' : 'Войти в систему'}
-              </Button>
+                <Button
+                  type="submit"
+                  className="bg-sky-500 max-w-[220px] min-w-[200px] font-medium text-white w-full"
+                  disabled={isPending}
+                >
+                  {isPending ? 'Входим...' : 'Войти'}
+                </Button>
 
-              <div className="text-center">
-                <a target='_blank' href="https://t.me/kuma_original" className="text-sm text-blue-600 hover:underline">
+                <a
+                  target="_blank"
+                  href="https://t.me/kuma_original"
+                  className="text-sm text-blue-600 hover:underline"
+                >
                   Забыли пароль?
                 </a>
-              </div>
 
-              {isError && (
-                <p className="text-red-500 text-sm mt-2">
-                  Ошибка авторизации. Проверьте данные.
-                </p>
-              )}
-            </form>
-          </CardBody>
-        </Card>
+                {isError && (
+                  <p className="text-red-500 text-sm mt-2">
+                    Ошибка авторизации. Проверьте данные.
+                  </p>
+                )}
+              </form>
+            </Tab>
+            <Tab key="mentor" title="Ментор">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col items-center gap-4"
+              >
+                <Input
+                  className="max-w-[220px] min-w-[200px]"
+                  placeholder="Логин"
+                  value={form.username}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, username: e.target.value }))
+                  }
+                />
+
+                <Input
+                  type="password"
+                  className="max-w-[220px] min-w-[200px]"
+                  placeholder="Пароль"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, password: e.target.value }))
+                  }
+                />
+
+                <Button
+                  type="submit"
+                  className="bg-emerald-500 max-w-[220px] min-w-[200px] font-medium text-white w-full"
+                  disabled={isPending}
+                >
+                  {isPending ? 'Входим...' : 'Войти'}
+                </Button>
+
+                <a
+                  target="_blank"
+                  href="https://t.me/kuma_original"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Забыли пароль?
+                </a>
+
+                {isError && (
+                  <p className="text-red-500 text-sm mt-2">
+                    Ошибка авторизации. Проверьте данные.
+                  </p>
+                )}
+              </form>
+            </Tab>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
