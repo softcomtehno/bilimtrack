@@ -29,7 +29,7 @@ export function MentorLayout({ children }: LayoutProps) {
       <div className="hidden md:block">
         <SidebarNav />
       </div>
-      <Card className=" border shadow-none flex-1 m-10 overflow-y-auto pb-16 md:pb-0">
+      <Card className=" border shadow-none flex-1 rounded-none  m-0 overflow-y-auto pb-16 md:pb-0">
         <TopBar/>
         {children || <Outlet />}
       </Card>
@@ -54,7 +54,7 @@ export function AdminLayout() {
       <div>
         <AdminSidebarNav/>
       </div>
-      <Card className="border shadow-none flex-1 m-10 overflow-y-auto pb-16 md:pb-0">
+      <Card className="border shadow-none flex-1 m-10  overflow-y-auto pb-16 md:pb-0">
         <Outlet />
       </Card>
     </div>
