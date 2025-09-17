@@ -70,7 +70,6 @@ export function SidebarNav() {
                   Еще
                 </MenuItem>
     
-                {/* Предметы рендерим только если есть данные */}
                 {isSubjectSuccess && subjectsData?.data?.length > 0 && (
                   <Menu
                     renderExpandIcon={({ open }) => (

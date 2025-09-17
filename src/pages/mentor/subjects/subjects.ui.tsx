@@ -28,30 +28,49 @@ export const SubjectsPage = () => {
     );
   }
 
+  // Группируем предметы по курсам
+  const groupedSubjects = subjectsData?.data?.reduce((acc, subject) => {
+    const courseNumber = subject.course.number;
+    if (!acc[courseNumber]) acc[courseNumber] = [];
+    acc[courseNumber].push(subject);
+    return acc;
+  }, {} as Record<number, typeof subjectsData.data[0][]>);
+
+  // Сортируем номера курсов по возрастанию
+  const sortedCourseNumbers = Object.keys(groupedSubjects || {})
+    .map(Number)
+    .sort((a, b) => a - b);
+
   return (
-    <div>
+    <div className="p-4">
       <h2 className="px-5 flex items-center gap-2 py-4 font-bold text-2xl">
         <LibraryBig />
         Дисциплины:
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-        {subjectsData?.data?.map((subject) => (
-          <Link to={`/mentor/subjects/${subject.id}`} key={subject.id}>
-            <Card
-              isHoverable
-              isPressable
-              className="w-full border  rounded-2xl shadow-md hover:shadow-xl p-3 py-8 transition-all duration-300"
-            >
-              <p className="text-lg flex text-left items-center  gap-2 font-semibold whitespace-normal break-words">
-                <div className="border border-slate-200 rounded-md p-2">
-                  <Book />
-                </div>
-                {subject.name}
-              </p>
-            </Card>
-          </Link>
-        ))}
-      </div>
+
+      {sortedCourseNumbers.map((courseNumber) => (
+        <div key={courseNumber} className="mb-8">
+          <h3 className="px-5 font-semibold text-lg mb-4">{courseNumber} курс</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {groupedSubjects[courseNumber].map((subject) => (
+              <Link to={`/mentor/subjects/${subject.id}`} key={subject.id}>
+                <Card
+                  isHoverable
+                  isPressable
+                  className="w-full border rounded-2xl shadow-md hover:shadow-xl p-3 py-8 transition-all duration-300"
+                >
+                  <p className="text-lg flex items-center gap-2 font-semibold break-words">
+                    <div className="border border-slate-200 rounded-md p-2">
+                      <Book />
+                    </div>
+                    {subject.name}
+                  </p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
