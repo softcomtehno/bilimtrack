@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
-import { getCookie } from 'typescript-cookie'
 import { Navigation } from '@/widgets/navigation'
 import { BottomSidebar, SidebarNav } from '@/widgets/sidebar'
 import { TopBar } from '@/widgets/top-bar'
@@ -61,6 +60,7 @@ export function AdminLayout() {
     </div>
   );
 }
+
 interface ProtectedRouteProps {
   isAuthenticated: boolean
   redirectPath?: string
