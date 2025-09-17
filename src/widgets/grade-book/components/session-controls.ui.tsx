@@ -1,4 +1,5 @@
-import { Button } from '@heroui/react'
+import { Button, DatePicker } from '@heroui/react'
+import { parseDate } from '@internationalized/date'
 
 export function SessionControls({
   selectedCustomDate,
@@ -10,18 +11,30 @@ export function SessionControls({
   QRGenerator,
 }) {
   return (
-    <div className="mt-10 flex justify-between r-lg:flex-col">
-      <div className="flex gap-3 r-lg:flex-col r-lg:mb-5">
-        <Button onClick={handleCreateSession} appearance="primary">
+    <div className="mt-10 flex justify-between items-center r-lg:flex-col  gap-3">
+      <div className="flex gap-3 r-lg:flex-col r-lg:mb-5 items-center w-full ">
+        <Button
+          onClick={handleCreateSession}
+          appearance="primary"
+          className="r-lg:w-full"
+        >
           Создать занятие
         </Button>
-        <div className="flex flex-row-reverse gap-2 items-center">
-          <input
-            type="date"
-            value={selectedCustomDate || ''}
-            onChange={(e) => setSelectedCustomDate(e.target.value)}
-            className="border rounded px-2 py-1"
+
+        <div className="flex flex-row-reverse gap-2 items-center w-full">
+          <DatePicker
+            label="Выберите дату"
+            value={
+              selectedCustomDate
+                ? parseDate(selectedCustomDate) // строку -> DateValue
+                : null
+            }
+            onChange={(date) => {
+              setSelectedCustomDate(date ? date.toString() : '')
+            }}
+            className="w-48 r-lg:w-full"
           />
+
           <Button
             appearance="primary"
             onClick={handleCreateSessionWithDate}
@@ -32,6 +45,7 @@ export function SessionControls({
           </Button>
         </div>
       </div>
+
       <QRGenerator groupId={groupId} subjectId={subjectId} />
     </div>
   )

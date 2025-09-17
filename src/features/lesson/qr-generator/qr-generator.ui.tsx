@@ -58,6 +58,7 @@ export function QRGenerator({ groupId, subjectId }) {
         color="primary"
         onClick={() => setIsOpen(true)}
         disabled={!sessionId}
+        className="r-lg:w-full"
       >
         Показать QR-код
       </Button>
