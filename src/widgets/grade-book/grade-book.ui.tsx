@@ -1,6 +1,4 @@
-import { Pagination, Select, SelectItem, Button } from '@heroui/react'
 import { useEffect, useMemo, useState } from 'react'
-import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
@@ -8,6 +6,10 @@ import { gradeApi } from '@/entities/grade'
 import { QRGenerator } from '@/features/lesson/qr-generator'
 import { topicApi } from '@/entities/topic'
 import { sessionApi } from '@/entities/session'
+import { GradePagination } from './components/grade-pagination.ui'
+import { GradeTable } from './components/grade-table.ui'
+import { TopicSelector } from './components/topic-selector.ui'
+import { SessionControls } from './components/session-controls.ui'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
@@ -168,6 +170,19 @@ export function GradeBook({ subjectId, groupId = null }) {
     } catch (err) {
       console.error('Ошибка при создании занятия:', err)
       alert('Не удалось создать занятие.')
+    }
+  }
+
+  async function handleDeleteSession(sessionId: string) {
+    if (!window.confirm('Вы уверены, что хотите удалить это занятие?')) return
+    try {
+      await sessionApi.deleteSession(sessionId)
+      // Обновляем данные
+      await fetchGrades()
+      alert('Занятие успешно удалено!')
+    } catch (err) {
+      console.error('Ошибка при удалении занятия:', err)
+      alert('Не удалось удалить занятие.')
     }
   }
 
@@ -356,116 +371,38 @@ export function GradeBook({ subjectId, groupId = null }) {
 
   return (
     <div>
-      <div className="flex justify-left my-4">
-        <Pagination
-          isCompact
-          showControls
-          total={totalPages}
-          page={currentPage}
-          onChange={(page) => setCurrentPage(page)}
+      <SessionControls
+        {...{
+          selectedCustomDate,
+          setSelectedCustomDate,
+          handleCreateSession,
+          handleCreateSessionWithDate,
+          groupId,
+          subjectId,
+          QRGenerator,
+        }}
+      />
+
+      <GradePagination {...{ totalPages, currentPage, setCurrentPage }} />
+
+      <GradeTable {...{ rowData, columnDefs, isMobile }} />
+
+      <div className="flex items-start justify-between mt-5 gap-10">
+        <TopicSelector
+          {...{
+            sessions,
+            selectedDate,
+            setSelectedDate,
+            currentTopic,
+            editing,
+            setEditing,
+            topics,
+            selectedTopic,
+            setSelectedTopic,
+            handleSave,
+            onDelete: handleDeleteSession, // 🔥 новое
+          }}
         />
-      </div>
-
-      <div className="ag-theme-alpine" style={{ width: '100%' }}>
-        <AgGridReact
-          rowData={rowData}
-          columnDefs={columnDefs}
-          domLayout="autoHeight"
-          pagination={true}
-          paginationPageSize={30}
-          paginationPageSizeSelector={[5, 10, 15, 20, 25, 30, 40]}
-          rowHoverHighlight={true}
-          getRowHeight={() => (isMobile ? 50 : 30)}
-        />
-        <div className="mt-10 flex justify-between">
-          <div className='flex gap-3'>
-            <Button onClick={handleCreateSession} appearance="primary">
-              Создать занятие
-            </Button>
-            <div className="flex flex-row-reverse gap-2 items-center">
-              <input
-                type="date"
-                value={selectedCustomDate}
-                onChange={(e) => setSelectedCustomDate(e.target.value)}
-                className="border rounded px-2 py-1"
-              />
-              <Button
-                appearance="primary"
-                onClick={handleCreateSessionWithDate}
-                disabled={!selectedCustomDate}
-              >
-                Создать занятие с датой
-              </Button>
-            </div>
-          </div>
-          <QRGenerator groupId={groupId} subjectId={subjectId} />
-        </div>
-
-        <div className="flex items-start justify-between mt-5 gap-10">
-          <div className="flex w-full gap-10 flex-col">
-            <div className="flex w-full gap-5">
-              <Select
-                label="Дата"
-                selectedKeys={selectedDate ? [selectedDate] : []}
-                onChange={(e) => {
-                  setSelectedDate(e.target.value) // selectedDate = `${date}_${id}`
-                  setEditing(false)
-                  setSelectedTopic('')
-                }}
-                renderValue={(items) => {
-                  const session = sessions.find(
-                    (s) =>
-                      `${s.date.replace(/-/g, '_')}_${s.id}` === items[0]?.key
-                  )
-                  return (
-                    <span>
-                      {session
-                        ? `${session.date.replace(/_/g, '.')} — ${session.topic?.title || 'Без темы'}`
-                        : ''}
-                    </span>
-                  )
-                }}
-              >
-                {sessions.map((s) => {
-                  const key = `${s.date.replace(/-/g, '_')}_${s.id}`
-                  return (
-                    <SelectItem key={key} value={key}>
-                      {s.date.replace(/_/g, '.')} —{' '}
-                      {s.topic?.title || 'Без темы'}
-                    </SelectItem>
-                  )
-                })}
-              </Select>
-
-              {currentTopic && !editing && (
-                <div className="px-4 py-2 border rounded bg-gray-100 w-full flex justify-between items-center">
-                  <span>Текущая тема: {currentTopic.title}</span>
-                  <Button onClick={() => setEditing(true)}>Изменить</Button>
-                </div>
-              )}
-
-              {(!currentTopic || editing) && (
-                <Select
-                  label="Тема"
-                  selectedKeys={selectedTopic ? [selectedTopic] : []}
-                  onChange={(e) => setSelectedTopic(e.target.value)}
-                >
-                  {topics.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.title}
-                    </SelectItem>
-                  ))}
-                </Select>
-              )}
-            </div>
-
-            {(!currentTopic || editing) && (
-              <Button onClick={handleSave} appearance="primary">
-                Сохранить
-              </Button>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   )
