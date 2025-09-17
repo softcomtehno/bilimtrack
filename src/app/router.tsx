@@ -82,7 +82,7 @@ const router = createBrowserRouter([
               mentorMorePageRoute, 
               settingsPageRoute,
               groupPageRoute,
-              // subjectsPageRoute,
+              subjectsPageRoute,
             ],
           },
         ],

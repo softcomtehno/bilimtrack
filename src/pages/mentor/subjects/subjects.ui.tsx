@@ -1,7 +1,8 @@
-import { subjectQueries } from '@/entities/subject'
-import { Link } from 'react-router-dom'
-import { Card, CardBody } from '@heroui/react'
-import { Skeleton } from '@heroui/react'
+import { subjectQueries } from '@/entities/subject';
+import { Link } from 'react-router-dom';
+import { Card, CardBody } from '@heroui/react';
+import { Skeleton } from '@heroui/react';
+import { Book, LibraryBig } from 'lucide-react';
 
 export const SubjectsPage = () => {
   const {
@@ -9,8 +10,7 @@ export const SubjectsPage = () => {
     isLoading: isSubjectsLoading,
     isError: isSubjectsError,
     isSuccess: isSubjectSuccess,
-  } = subjectQueries.useGetSubjectsMentor()
-
+  } = subjectQueries.useGetSubjectsMentor();
 
   if (isSubjectsLoading) {
     return (
@@ -19,30 +19,39 @@ export const SubjectsPage = () => {
           <Skeleton key={i} className="rounded-xl h-20 w-full" />
         ))}
       </div>
-    )
+    );
   }
 
   if (isSubjectsError) {
-    return <div className="p-4 text-red-500">Ошибка при загрузке предметов</div>
+    return (
+      <div className="p-4 text-red-500">Ошибка при загрузке предметов</div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-      {subjectsData?.data?.map((subject) => (
-        <Link to={`/mentor/subjects/${subject.id}`} key={subject.id}>
-          <Card
-            isHoverable
-            isPressable
-            className="w-full  h-52 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
-          >
-            <CardBody className="flex items-center justify-center text-center">
-              <p className="text-base font-semibold whitespace-normal break-words">
+    <div>
+      <h2 className="px-5 flex items-center gap-2 py-4 font-bold text-2xl">
+        <LibraryBig />
+        Дисциплины:
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
+        {subjectsData?.data?.map((subject) => (
+          <Link to={`/mentor/subjects/${subject.id}`} key={subject.id}>
+            <Card
+              isHoverable
+              isPressable
+              className="w-full border  rounded-2xl shadow-md hover:shadow-xl p-3 py-8 transition-all duration-300"
+            >
+              <p className="text-lg flex text-left items-center  gap-2 font-semibold whitespace-normal break-words">
+                <div className="border border-slate-200 rounded-md p-2">
+                  <Book />
+                </div>
                 {subject.name}
               </p>
-            </CardBody>
-          </Card>
-        </Link>
-      ))}
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
