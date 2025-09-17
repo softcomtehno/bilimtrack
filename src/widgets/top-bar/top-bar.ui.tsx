@@ -22,12 +22,12 @@ export function TopBar() {
     <>
       <CardHeader className="flex justify-between items-center gap-2">
         <div className="flex flex-col">
-          <p className="text-sm font-bold text-default-500">
+          <p className="md:text-md text-xs font-bold text-default-500">
             {userData?.data.organization?.name}
           </p>
         </div>
 
-        <Avatar className="w-12 h-12" src={userData?.data.organization?.logo} />
+        <img className="md:w-10 md:h-10 w-7 h-7 rounded-full" src={userData?.data.organization?.logo} />
       </CardHeader>
       <Divider />
     </>
