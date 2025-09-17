@@ -10,7 +10,6 @@ export const updateSessionTopic = (
   })
 }
 
-
 export const createSession = (data: {
   subject: number
   groups: number[]
@@ -19,4 +18,7 @@ export const createSession = (data: {
   endTime: string
 }) => {
   return $api.post('/mentor/sessions/', data)
+}
+export const deleteSession = (id: string) => {
+  return $api.delete(`/mentor/sessions/${id}`)
 }
