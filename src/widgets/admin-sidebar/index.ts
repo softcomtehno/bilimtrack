@@ -1,2 +1,2 @@
-export { AdminSidebarNav } from './adminsidebar.ui'
+export { AdminSidebarNav } from './adminSidebar.ui.tsx'
 
