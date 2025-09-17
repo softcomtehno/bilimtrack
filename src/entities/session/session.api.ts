@@ -9,3 +9,14 @@ export const updateSessionTopic = (
     topic: topicId,
   })
 }
+
+
+export const createSession = (data: {
+  subject: number
+  groups: number[]
+  date: string
+  startTime: string
+  endTime: string
+}) => {
+  return $api.post('/mentor/sessions/', data)
+}

@@ -13,13 +13,13 @@ export const DAYS_OF_WEEK = [
 ];
 
 export const DEFAULT_TIME_SLOTS = [
-  { id: 0, label: "07:30 - 08:50" },
-  { id: 1, label: "09:00 - 10:20" },
-  { id: 2, label: "10:30 - 11:50" },
-  { id: 3, label: "12:10 - 13:30" },
-  { id: 4, label: "13:40 - 15:00" },
-  { id: 5, label: "15:10 - 16:30" },
-  { id: 6, label: "16:40 - 18:00" },
+  { id: 0, label: "08:00 - 09:20" },
+  { id: 1, label: "09:30 - 10:50" },
+  { id: 2, label: "11:00 - 12:20" },
+  { id: 3, label: "12:40 - 14:00" },
+  { id: 4, label: "14:10 - 15:30" },
+  { id: 5, label: "15:40 - 17:00" },
+  { id: 6, label: "17:10 - 18:30" },
 ];
 
 interface ScheduleGridProps {
