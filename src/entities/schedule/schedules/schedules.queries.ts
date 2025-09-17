@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   getLessonTimes,
   getLessonTypes,
@@ -9,21 +9,29 @@ import {
   deleteSchedule,
   getCourses,
   getEducationLevels,
-} from "./schedules.api";
+  getMentorSchedule,
+} from './schedules.api';
 
 const keys = {
-  root: () => ["schedules"],
-  getSubjects: () => [...keys.root(), "subjects"],
-  getLessonTypes: () => [...keys.root(), "lessonTypes"],
-  getLessonTimes: () => [...keys.root(), "lessonTimes"],
-  getCourses: () => [...keys.root(), "courses"],
-  getEduLevels: () => [...keys.root(), "eduLevels"],
+  root: () => ['schedules'],
+  getSubjects: () => [...keys.root(), 'subjects'],
+  getLessonTypes: () => [...keys.root(), 'lessonTypes'],
+  getLessonTimes: () => [...keys.root(), 'lessonTimes'],
+  getCourses: () => [...keys.root(), 'courses'],
+  getEduLevels: () => [...keys.root(), 'eduLevels'],
 };
 
 export function useGetSchedules() {
   return useQuery({
     queryKey: keys.root(),
     queryFn: getSchedules,
+  });
+}
+
+export function useGetMentorSchedule() {
+  return useQuery({
+    queryKey: [...keys.root(), 'mentor'],
+    queryFn: getMentorSchedule,
   });
 }
 

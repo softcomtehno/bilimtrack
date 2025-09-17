@@ -120,7 +120,6 @@ export function LoginPage() {
                     setForm((prev) => ({ ...prev, password: e.target.value }))
                   }
                 />
-
                 <Button
                   type="submit"
                   className="bg-emerald-500 max-w-[220px] min-w-[200px] font-medium text-white w-full"
