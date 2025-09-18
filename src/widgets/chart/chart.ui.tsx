@@ -19,7 +19,7 @@ export const Chart: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
 
-  // Загружаем список предметов
+
   useEffect(() => {
     getSubjectsStudent().then((res) => {
       const list = Array.isArray(res) ? res : res.data;
@@ -30,7 +30,7 @@ export const Chart: React.FC = () => {
     });
   }, []);
 
-  // Загружаем данные по выбранному предмету
+
   const { data, isLoading } = useGetPerformanceBySubject(
     selectedSubject?.id ?? 0,
     {

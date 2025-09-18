@@ -27,8 +27,8 @@ export const StudentHomePage = () => {
   return (
     <>
       <CardBody>
-        <Title Icon={CalendarCheck2} title="Расписание" />
-        <Schedule />
+        {/* <Title Icon={CalendarCheck2} title="Расписание" /> */}
+        {/* <Schedule /> */}
         <NewsList endpoint={userData?.data?.organization?.newsApi} />
         <EventsList endpoint={userData?.data?.organization?.eventsApi} />
         <MakalaboxList />
