@@ -1,17 +1,11 @@
-import { useNavigate, useParams } from 'react-router-dom'; 
-import { Card, CardHeader, Listbox, ListboxItem, Image } from "@heroui/react";
+import { useNavigate, useParams } from 'react-router-dom';
+import { Card, CardHeader, Tabs, Tab } from '@heroui/react';
 import { BookCopy, NotebookText } from 'lucide-react';
 
-export const ListboxWrapper = ({ children }) => (
-  <div className="w-full border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
-    {children}
-  </div>
-);
-
 export const SubjectIDPage = () => {
-  const iconClasses = "text-xl text-default-500 pointer-events-none shrink-0";
+  const iconClasses = 'text-xl text-default-500 pointer-events-none shrink-0';
   const { subjectID } = useParams();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleClickJournal = () => {
     navigate(`/student/student-grade/${subjectID}/`);
@@ -22,41 +16,48 @@ export const SubjectIDPage = () => {
       <Card className="w-full shadow-none border mb-3">
         <CardHeader className="flex justify-between items-center">
           <div className="flex gap-3 items-start">
-            {/* <Image
-              alt="heroui logo"
-              height={40}
-              radius="full"
-              src="/default-avatar.png"
-              width={40}
-            /> */}
             <div className="flex flex-col">
               <p className="text-md">Backend</p>
-              <p className="text-xs text-default-500">Разработка серверной части</p>
+              <p className="text-xs text-default-500">
+                Разработка серверной части
+              </p>
             </div>
           </div>
         </CardHeader>
       </Card>
 
-      <ListboxWrapper>
-        <Listbox variant="faded">
-          <ListboxItem
-            key="new"
-            className="h-[50px]"
-            startContent={<BookCopy className={iconClasses} />}
-          >
-            Темы
-          </ListboxItem>
+      <Tabs
+        defaultValue="topics"
+        className="w-full flex justify-between"
+        orientation="horizontal"
+      >
+        <Tab
+          value="topics"
+          className="flex-1 text-center"
+          title={
+            <div className="flex justify-center items-center gap-2 w-full">
+              <BookCopy className={iconClasses} />
+              Темы
+            </div>
+          }
+        >
+          <div className="p-4">Здесь будет список тем.</div>
+        </Tab>
 
-          <ListboxItem
-            key="copy"
-            className="h-[50px]"
-            startContent={<NotebookText className={iconClasses} />}
-            onClick={handleClickJournal} 
-          >
-            Журнал успеваемости
-          </ListboxItem>
-        </Listbox>
-      </ListboxWrapper>
+        <Tab
+          value="journal"
+          className="flex-1 text-center"
+          title={
+            <div className="flex justify-center items-center gap-2 w-full">
+              <NotebookText className={iconClasses} />
+              Журнал
+            </div>
+          }
+          onClick={handleClickJournal} // если нужно редиректить
+        >
+          <div className="p-4">Журнал успеваемости открывается по клику.</div>
+        </Tab>
+      </Tabs>
     </div>
   );
 };
