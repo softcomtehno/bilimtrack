@@ -3,8 +3,10 @@ import ReactApexChart from 'react-apexcharts';
 import Select from 'react-select';
 import { getSubjectsStudent } from '@/entities/subject/subject.api';
 import { useGetPerformanceBySubject } from '@/entities/subject/subject.queries';
-import { Loader2, Inbox } from 'lucide-react';
-
+import { Loader2, Inbox , CheckCircle, ThumbsUp, Sparkles, Star, BookOpen } from 'lucide-react';
+import { Card, CardHeader ,  CardBody} from '@heroui/card';
+import ScoreMemo from './ScoreMemo.ui';
+// import { Card, CardHeader, CardContent } from "@/components/ui/card";
 interface Subject {
   id: number;
   name: string;
@@ -61,6 +63,7 @@ export const Chart: React.FC = () => {
   const series = [{ name: 'Score', data: chartData.map((d) => d.score) }];
 
   return (
+    <>
     <div className="w-full shadow-none rounded-lg border border-alto relative">
       <Select
         options={subjects.map((s) => ({ value: s.id, label: s.name }))}
@@ -104,5 +107,7 @@ export const Chart: React.FC = () => {
         )}
       </div>
     </div>
+    <ScoreMemo/>
+    </>
   );
 };
