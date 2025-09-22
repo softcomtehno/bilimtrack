@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Table,
   TableHeader,
@@ -11,7 +11,11 @@ import {
   Chip,
   Select,
   SelectItem,
+  Button,
 } from "@heroui/react";
+import { userQueries } from "@/entities/user";
+import { getSubjectsStudent } from "@/entities/subject/subject.api";
+import { ratingQueries } from "@/entities/rating";
 
 export const columns = [
   { name: "Рейтинг", uid: "rating" },
@@ -19,43 +23,18 @@ export const columns = [
   { name: "Баллы", uid: "points" },
 ];
 
-// База студентов (20 человек)
-// ⚡ вместо rating в students оставляем только fio, group, direction, subject, points
-export const students = [
-  { id: 1, fio: "Tony Reichert", points: 95, group: "1A", direction: "Программирование", subject: "Математика" },
-  { id: 2, fio: "Zoey Lang", points: 92, group: "1A", direction: "Программирование", subject: "Информатика" },
-  { id: 3, fio: "Jane Fisher", points: 90, group: "1B", direction: "Программирование", subject: "Информатика" },
-  { id: 4, fio: "William Howard", points: 89, group: "1B", direction: "Программирование", subject: "Математика" },
-  { id: 5, fio: "Kristen Copper", points: 87, group: "2A", direction: "Дизайн", subject: "История" },
-  { id: 6, fio: "Michael Green", points: 86, group: "2A", direction: "Дизайн", subject: "Философия" },
-  { id: 7, fio: "Sophia Turner", points: 85, group: "2B", direction: "Дизайн", subject: "История" },
-  { id: 8, fio: "James Lee", points: 83, group: "2B", direction: "Дизайн", subject: "Философия" },
-  { id: 9, fio: "Emma Davis", points: 82, group: "3A", direction: "Экономика", subject: "Физика" },
-  { id: 10, fio: "Liam Carter", points: 81, group: "3A", direction: "Экономика", subject: "Математика" },
-  { id: 11, fio: "Olivia Brown", points: 80, group: "3B", direction: "Экономика", subject: "История" },
-  { id: 12, fio: "Noah Wilson", points: 79, group: "3B", direction: "Экономика", subject: "Философия" },
-  { id: 13, fio: "Ava Johnson", points: 77, group: "1A", direction: "Программирование", subject: "Физика" },
-  { id: 14, fio: "Ethan Miller", points: 75, group: "1B", direction: "Программирование", subject: "Информатика" },
-  { id: 15, fio: "Isabella White", points: 74, group: "2A", direction: "Дизайн", subject: "История" },
-  { id: 16, fio: "Mason Harris", points: 73, group: "2B", direction: "Дизайн", subject: "Философия" },
-  { id: 17, fio: "Mia Clark", points: 71, group: "3A", direction: "Экономика", subject: "Физика" },
-  { id: 18, fio: "Lucas Walker", points: 70, group: "3B", direction: "Экономика", subject: "История" },
-  { id: 19, fio: "Charlotte Hall", points: 69, group: "1A", direction: "Программирование", subject: "Математика" },
-  { id: 20, fio: "Benjamin Allen", points: 67, group: "1B", direction: "Программирование", subject: "Информатика" },
-];
-
-
-// Универсальная таблица
-export function Groups({ items }) {
-  const renderCell = React.useCallback((user, columnKey) => {
+export function Groups({ items }: { items: any[] }) {
+  const renderCell = useCallback((user: any, columnKey: string) => {
     const cellValue = user[columnKey];
 
     switch (columnKey) {
       case "fio":
         return (
           <div className="flex flex-col">
-            <p className="text-bold text-sm">{user.fio}</p>
-            <p className="text-xs text-gray-500">Группа: {user.group}</p>
+            <p className="text-bold text-sm">
+              {user.firstName} {user.lastName}
+            </p>
+            <p className="text-xs text-gray-500">Группа: {user.group?.name}</p>
           </div>
         );
       case "rating":
@@ -80,85 +59,122 @@ export function Groups({ items }) {
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody items={items}>
-        {(item) => (
-          <TableRow key={item.id} className="cursor-pointer">
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
+<TableBody items={items}>
+  {(item) => (
+    <TableRow key={item.username} className="cursor-pointer">
+      {(columnKey) => (
+        <TableCell>{renderCell(item, columnKey)}</TableCell>
+      )}
+    </TableRow>
+  )}
+</TableBody>
     </Table>
   );
 }
 
 export function Dashboard() {
-  const [category, setCategory] = React.useState("groups");
-  const [subject, setSubject] = React.useState("");
-  const [direction, setDirection] = React.useState("");
+  const { data: userData, isLoading, isError } =
+    userQueries.useLoginUserQuery();
 
-  // уникальные значения
-  const subjects = [...new Set(students.map((s) => s.subject))];
-  const directions = [...new Set(students.map((s) => s.direction))];
+  const [subjects, setSubjects] = useState<any[]>([]);
+  useEffect(() => {
+    getSubjectsStudent().then((res) => setSubjects(res.data || res));
+  }, []);
 
-  // допустим, текущий студент = Tony Reichert (группа 1A)
-  const currentUserGroup = "1A";
+  // локальные выбранные значения
+  const [selectedCategory, setSelectedCategory] = useState<
+    "groups" | "group" | "subject"
+  >("groups");
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
-// фильтрация + сортировка + рейтинг
-const getFilteredData = () => {
-  let filtered: typeof students = [];
+  // применённые значения (по ним делаем запрос)
+  const [category, setCategory] = useState<"groups" | "group" | "subject">(
+    "groups"
+  );
+  const [subject, setSubject] = useState<string | null>(null);
 
-  switch (category) {
-    case "group":
-      filtered = students.filter((s) => s.group === currentUserGroup);
-      break;
-    case "subject":
-      filtered = subject ? students.filter((s) => s.subject === subject) : students;
-      break;
-    case "direction":
-      filtered = direction ? students.filter((s) => s.direction === direction) : students;
-      break;
-    case "groups":
-    default:
-      filtered = students;
-      break;
-  }
+  // вычисляем параметры для API
+  const groupId = category === "group" ? userData?.group?.id || null : null;
+  const subjectId = category === "subject" && subject ? Number(subject) : null;
 
+  const {
+    data: ratingsResponse,
+    isLoading: ratingLoading,
+    refetch,
+  } = ratingQueries.useGetRatingByUsers({ subjectId, groupId });
 
-  return filtered
-    .sort((a, b) => b.points - a.points)
-    .map((s, index) => ({ ...s, rating: index + 1 }));
-};
+  if (isLoading) return <div>Loading user...</div>;
+  if (isError) return <div>Error fetching user data.</div>;
+  if (ratingLoading) return <div>Loading rating...</div>;
 
+  // ✅ получаем массив из response
+  const ratingsData = ratingsResponse?.data || ratingsResponse || [];
+
+  // сортируем и добавляем id
+  const sortedItems = ratingsData
+    .sort((a: any, b: any) => b.points - a.points)
+    .map((s: any, index: number) => ({
+      ...s,
+      id: s.username, // уникальный ключ для TableRow
+      fio: `${s.firstName} ${s.lastName}`,
+      rating: index + 1,
+    }));
 
   return (
     <div className="flex w-full flex-col gap-4">
+      {/* выбор категории */}
       <Select
         aria-label="Выбор категории рейтинга"
-        selectedKeys={[category]}
-        onSelectionChange={(keys) => setCategory(Array.from(keys)[0] as string)}
+        selectedKeys={new Set([selectedCategory])}
+        onSelectionChange={(keys) =>
+          setSelectedCategory(Array.from(keys)[0] as any)
+        }
       >
         <SelectItem key="group">В группе</SelectItem>
         <SelectItem key="groups">Среди всех групп</SelectItem>
         <SelectItem key="subject">По предмету</SelectItem>
       </Select>
-      {category === "subject" && (
+
+      {/* выбор предмета */}
+      {selectedCategory === "subject" && (
         <Select
           aria-label="Выбор предмета"
-          selectedKeys={subject ? [subject] : []}
-          onSelectionChange={(keys) => setSubject(Array.from(keys)[0] as string)}
+          selectedKeys={selectedSubject ? new Set([selectedSubject]) : new Set()}
+          onSelectionChange={(keys) =>
+            setSelectedSubject(Array.from(keys)[0] as string)
+          }
         >
           {subjects.map((subj) => (
-            <SelectItem key={subj}>{subj}</SelectItem>
+            <SelectItem key={subj.id}>{subj.name}</SelectItem>
           ))}
         </Select>
       )}
+
+      {/* применить фильтр */}
+      <Button
+        color="primary"
+        onPress={() => {
+          setCategory(selectedCategory);
+          setSubject(selectedSubject);
+          refetch();
+        }}
+      >
+        Применить фильтр
+      </Button>
+
+      {/* таблица */}
       <Card className="w-full shadow-none border">
         <CardBody className="p-0">
-          <Groups items={getFilteredData()} />
+          {sortedItems.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              Нет данных для отображения
+            </div>
+          ) : (
+            <Groups items={sortedItems} />
+          )}
         </CardBody>
       </Card>
     </div>
   );
 }
+

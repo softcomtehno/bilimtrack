@@ -12,7 +12,6 @@ export const GroupPage = () => {
     <div>
       <ScoreMemo/>
       <GradeBook groupId={groupId} subjectId={subjectId} />
-      
     </div>
   );
 };

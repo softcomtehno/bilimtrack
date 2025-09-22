@@ -3,6 +3,9 @@ export const pathKeys = {
   home() {
     return ''
   },
+  about() {
+    return pathKeys.root.concat('about/')
+  },
   more() {
     return pathKeys.root.concat('more/')
   },
