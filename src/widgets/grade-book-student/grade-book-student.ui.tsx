@@ -148,7 +148,7 @@ export function GradeBookStudent({
 
       {gradesByDate.length > 0 ? (
         <ul className="space-y-3 p-4">
-          {gradesByDate.map((entry) => (
+          {[...gradesByDate].reverse().map((entry) => (
             <li
               key={entry.sessionId}
               className={`p-4 rounded-xl shadow-sm border transition-colors ${
@@ -171,9 +171,7 @@ export function GradeBookStudent({
                       {entry.topicTitle}
                     </p>
                   ) : (
-                    <p className="text-red-600 font-medium">
-                      Тема отсутствует
-                    </p>
+                    <p className="text-red-600 font-medium">Тема отсутствует</p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">{entry.date}</p>
                 </div>
