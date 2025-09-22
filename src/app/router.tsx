@@ -2,7 +2,7 @@ import {
   RouterProvider,
   createBrowserRouter,
   useRouteError,
-} from "react-router-dom";
+} from 'react-router-dom';
 
 import {
   AdminLayout,
@@ -10,28 +10,29 @@ import {
   IntroLayout,
   MentorLayout,
   RoleBasedLayout,
-} from "@/pages/layout/layout.ui";
+} from '@/pages/layout/layout.ui';
 
-import { loginPageRoute } from "@/pages/shared/login";
-import { scannerPageRoute } from "@/pages/student/scanner/scanner-page.route";
-import { lessonIDPageRoute } from "@/pages/student/lesson-id";
-import { subjectPageRoute } from "@/pages/mentor/subject";
-import { groupPageRoute } from "@/pages/mentor/group";
-import { studentGradePageRoute } from "@/pages/student/student-grade";
-import { ratingPageRoute } from "@/pages/student/rating";
-import { studentHomePageRoute } from "@/pages/student/home";
-import { mentorHomePageRoute } from "@/pages/mentor/home";
-import { morePageRoute } from "@/pages/student/more";
-import { learnPageRoute } from "@/pages/student/learn";
-import { studentprofilePageRoute } from "@/pages/student/profile";
-import { mentorprofilePageRoute } from "@/pages/mentor/profile";
-import { timetablePageRoute } from "@/pages/mentor/timetable";
-import { schedulePageRoute } from "@/pages/admin/schedule";
-import { subjectIDPageRoute } from "@/pages/student/subject-id";
-import { HomeRedirect } from "@/pages/home/home-redirect";
-import { mentorMorePageRoute } from "@/pages/mentor/more";
-import { subjectsPageRoute } from "@/pages/mentor/subjects";
+import { loginPageRoute } from '@/pages/shared/login';
+import { scannerPageRoute } from '@/pages/student/scanner/scanner-page.route';
+import { lessonIDPageRoute } from '@/pages/student/lesson-id';
+import { subjectPageRoute } from '@/pages/mentor/subject';
+import { groupPageRoute } from '@/pages/mentor/group';
+import { studentGradePageRoute } from '@/pages/student/student-grade';
+import { ratingPageRoute } from '@/pages/student/rating';
+import { studentHomePageRoute } from '@/pages/student/home';
+import { mentorHomePageRoute } from '@/pages/mentor/home';
+import { morePageRoute } from '@/pages/student/more';
+import { learnPageRoute } from '@/pages/student/learn';
+import { studentprofilePageRoute } from '@/pages/student/profile';
+import { mentorprofilePageRoute } from '@/pages/mentor/profile';
+import { timetablePageRoute } from '@/pages/mentor/timetable';
+import { schedulePageRoute } from '@/pages/admin/schedule';
+import { subjectIDPageRoute } from '@/pages/student/subject-id';
+import { HomeRedirect } from '@/pages/home/home-redirect';
+import { mentorMorePageRoute } from '@/pages/mentor/more';
+import { subjectsPageRoute } from '@/pages/mentor/subjects';
 import { settingsPageRoute } from '@/pages/mentor/settings';
+import { aboutPageRoute } from '@/pages/shared/about/about-page.route';
 
 function BubbleError() {
   const error = useRouteError();
@@ -50,15 +51,18 @@ const router = createBrowserRouter([
     errorElement: <BubbleError />,
     children: [
       {
-        path: "/",
-
+        path: '/',
         element: <HomeRedirect />,
+      },
+      {
+        path: '/',
+        children: [aboutPageRoute ],
       },
       {
         element: <RoleBasedLayout />,
         children: [
           {
-            path: "/student",
+            path: '/student',
             children: [
               studentHomePageRoute,
               morePageRoute,
@@ -73,13 +77,13 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "/mentor",
+            path: '/mentor',
             children: [
               mentorHomePageRoute,
               mentorprofilePageRoute,
               timetablePageRoute,
               subjectPageRoute,
-              mentorMorePageRoute, 
+              mentorMorePageRoute,
               settingsPageRoute,
               groupPageRoute,
               subjectsPageRoute,
@@ -92,7 +96,7 @@ const router = createBrowserRouter([
         children: [loginPageRoute],
       },
       {
-        path: "/admin",
+        path: '/admin',
         element: <AdminLayout />,
         children: [schedulePageRoute],
       },
