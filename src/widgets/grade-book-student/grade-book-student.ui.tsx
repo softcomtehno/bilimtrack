@@ -6,6 +6,7 @@ interface GradeEntry {
   grade: number
   isPaid?: boolean
   sessionId?: string
+  topicTitle?: string | null // 🔥 новое поле
 }
 
 interface GradeBookStudentProps {
@@ -34,20 +35,20 @@ export function GradeBookStudent({
       try {
         const res = await gradeApi.getStudentGrades(subjectId)
         const { sessions, grades } = res.data
+        console.log(res)
 
         const user = grades[0]?.user?.fullName || 'Неизвестный студент'
         const scores = grades[0]?.scores || []
 
         const gradesData = sessions.map((session: any) => {
-          const dateParts = session.date.split('-')
-          const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`
           const foundScore = scores.find((s: any) => s.date === session.date)
           return {
-            date: formattedDate,
+            date: session.date,
             originalDate: session.date,
             grade: foundScore ? foundScore.grade : 0,
             isPaid: foundScore?.isPaid || false,
             sessionId: session.id,
+            topicTitle: session.topic?.title || null, // 🔥 добавляем тему
           }
         })
 
@@ -146,16 +147,16 @@ export function GradeBookStudent({
       </div>
 
       {gradesByDate.length > 0 ? (
-        <ul className="divide-y">
+        <ul className="space-y-3 p-4">
           {gradesByDate.map((entry) => (
             <li
-              key={entry.date}
-              className={`px-4 py-3 flex justify-between items-center transition-colors ${
+              key={entry.sessionId}
+              className={`p-4 rounded-xl shadow-sm border transition-colors ${
                 entry.grade === 0
                   ? entry.isPaid
-                    ? 'bg-green-50 hover:bg-green-100'
-                    : 'bg-red-50 hover:bg-red-100 cursor-pointer'
-                  : 'bg-white hover:bg-gray-50'
+                    ? 'bg-green-50 hover:bg-green-100 border-green-200'
+                    : 'bg-red-50 hover:bg-red-100 border-red-200 cursor-pointer'
+                  : 'bg-white hover:bg-gray-50 border-gray-200'
               }`}
               onClick={() =>
                 entry.grade === 0 &&
@@ -163,38 +164,51 @@ export function GradeBookStudent({
                 handlePayClick(entry.date, entry.sessionId)
               }
             >
-              <span className="text-gray-700 font-medium">{entry.date}</span>
+              <div className="flex justify-between items-center">
+                <div>
+                  {entry.topicTitle ? (
+                    <p className="text-gray-800 font-medium">
+                      {entry.topicTitle}
+                    </p>
+                  ) : (
+                    <p className="text-red-600 font-medium">
+                      Тема отсутствует
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">{entry.date}</p>
+                </div>
 
-              <div className="flex items-center gap-2">
-                {entry.grade > 0 ? (
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-medium">
-                    {entry.grade}
-                  </span>
-                ) : entry.isPaid ? (
-                  <>
+                <div className="flex items-center gap-2">
+                  {entry.grade > 0 ? (
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-100 text-blue-800 font-semibold">
+                      {entry.grade}
+                    </span>
+                  ) : entry.isPaid ? (
+                    <>
+                      <button
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveDate(entry.date)
+                          setShowModal(true)
+                        }}
+                      >
+                        +
+                      </button>
+                      <span className="text-green-600 font-bold">✓</span>
+                    </>
+                  ) : (
                     <button
-                      className="text-green-600 hover:text-green-700 text-xl"
+                      className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 font-medium hover:bg-red-200 transition"
                       onClick={(e) => {
                         e.stopPropagation()
-                        setActiveDate(entry.date)
-                        setShowModal(true)
+                        handlePayClick(entry.date, entry.sessionId)
                       }}
                     >
-                      +
+                      Оплатить
                     </button>
-                    <span className="text-green-500">✓</span>
-                  </>
-                ) : (
-                  <button
-                    className="text-red-600 hover:text-red-700 font-medium"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handlePayClick(entry.date, entry.sessionId)
-                    }}
-                  >
-                    Оплатить
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
             </li>
           ))}
@@ -204,7 +218,6 @@ export function GradeBookStudent({
           Нет данных об оценках
         </div>
       )}
-
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 w-[90%] max-w-sm">
