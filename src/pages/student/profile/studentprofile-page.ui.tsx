@@ -42,7 +42,7 @@ export const StudentProfilePage = () => {
             {user?.group && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <UsersRound size={16} />
-                <span>Группа: {user.group}</span>
+                <span>Группа: {user.group.name}</span>
               </div>
             )}
             {user?.email && (

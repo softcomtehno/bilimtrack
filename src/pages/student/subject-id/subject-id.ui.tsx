@@ -25,7 +25,6 @@ export const SubjectIDPage = () => {
           </div>
         </CardHeader>
       </Card>
-
       <Tabs
         defaultValue="topics"
         className="w-full flex justify-between"
@@ -53,7 +52,7 @@ export const SubjectIDPage = () => {
               Журнал
             </div>
           }
-          onClick={handleClickJournal} // если нужно редиректить
+          onClick={handleClickJournal} 
         >
           <div className="p-4">Журнал успеваемости открывается по клику.</div>
         </Tab>
