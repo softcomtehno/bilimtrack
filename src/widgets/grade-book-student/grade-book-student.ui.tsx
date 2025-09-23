@@ -1,47 +1,53 @@
-import { useEffect, useState } from 'react'
-import { gradeApi } from '@/entities/grade'
+import { useEffect, useState } from 'react';
+import { gradeApi } from '@/entities/grade';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import 'dayjs/locale/ru';
+
+dayjs.extend(customParseFormat);
+dayjs.locale('ru');
 
 interface GradeEntry {
-  date: string
-  grade: number
-  isPaid?: boolean
-  sessionId?: string
-  topicTitle?: string | null // 🔥 новое поле
+  date: string;
+  grade: number;
+  isPaid?: boolean;
+  sessionId?: string;
+  topicTitle?: string | null; // 🔥 новое поле
 }
 
 interface GradeBookStudentProps {
-  subjectId: string
-  className?: string
+  subjectId: string;
+  className?: string;
 }
 
 export function GradeBookStudent({
   subjectId,
   className = '',
 }: GradeBookStudentProps) {
-  const [studentName, setStudentName] = useState('')
-  const [gradesByDate, setGradesByDate] = useState<GradeEntry[]>([])
-  const [activeDate, setActiveDate] = useState<string | null>(null)
-  const [showModal, setShowModal] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [linkUrl, setLinkUrl] = useState('')
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [studentName, setStudentName] = useState('');
+  const [gradesByDate, setGradesByDate] = useState<GradeEntry[]>([]);
+  const [activeDate, setActiveDate] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     async function fetchGrades() {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
       try {
-        const res = await gradeApi.getStudentGrades(subjectId)
-        const { sessions, grades } = res.data
-        console.log(res)
+        const res = await gradeApi.getStudentGrades(subjectId);
+        const { sessions, grades } = res.data;
+        console.log(res);
 
-        const user = grades[0]?.user?.fullName || 'Неизвестный студент'
-        const scores = grades[0]?.scores || []
+        const user = grades[0]?.user?.fullName || 'Неизвестный студент';
+        const scores = grades[0]?.scores || [];
 
         const gradesData = sessions.map((session: any) => {
-          const foundScore = scores.find((s: any) => s.date === session.date)
+          const foundScore = scores.find((s: any) => s.date === session.date);
           return {
             date: session.date,
             originalDate: session.date,
@@ -49,32 +55,32 @@ export function GradeBookStudent({
             isPaid: foundScore?.isPaid || false,
             sessionId: session.id,
             topicTitle: session.topic?.title || null, // 🔥 добавляем тему
-          }
-        })
+          };
+        });
 
-        setStudentName(user)
-        setGradesByDate(gradesData)
+        setStudentName(user);
+        setGradesByDate(gradesData);
       } catch (err) {
-        console.error('Ошибка при загрузке оценок:', err)
-        setError('Не удалось загрузить данные. Пожалуйста, попробуйте позже.')
+        console.error('Ошибка при загрузке оценок:', err);
+        setError('Не удалось загрузить данные. Пожалуйста, попробуйте позже.');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchGrades()
-  }, [subjectId])
+    fetchGrades();
+  }, [subjectId]);
 
   const handlePayClick = async (date: string, sessionId?: string) => {
-    if (!sessionId) return
+    if (!sessionId) return;
     try {
-      const res = await gradeApi.createAbsencePayment(sessionId)
+      const res = await gradeApi.createAbsencePayment(sessionId);
 
-      const data = res.data
+      const data = res.data;
 
       if (data.paymentLink) {
         // Открываем ссылку в новой вкладке
-        window.open(data.paymentLink, '_blank')
+        window.open(data.paymentLink, '_blank');
       }
 
       // Обновляем состояние, что "ожидается оплата"
@@ -82,31 +88,31 @@ export function GradeBookStudent({
         prev.map((g) =>
           g.sessionId === sessionId ? { ...g, isPaid: false } : g
         )
-      )
+      );
     } catch (err) {
-      console.error('Ошибка при обработке оплаты:', err)
-      alert('Не удалось создать платёж. Попробуйте позже.')
+      console.error('Ошибка при обработке оплаты:', err);
+      alert('Не удалось создать платёж. Попробуйте позже.');
     }
-  }
+  };
 
   const handleAddMaterial = async () => {
-    if (!activeDate) return
+    if (!activeDate) return;
 
     try {
       // console.log('Материалы сохранены:', { linkUrl, file: selectedFile?.name })
-      setShowModal(false)
-      setLinkUrl('')
-      setSelectedFile(null)
+      setShowModal(false);
+      setLinkUrl('');
+      setSelectedFile(null);
     } catch (err) {
-      console.error('Ошибка при сохранении материалов:', err)
+      console.error('Ошибка при сохранении материалов:', err);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
+      setSelectedFile(e.target.files[0]);
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -120,7 +126,7 @@ export function GradeBookStudent({
             ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -130,7 +136,7 @@ export function GradeBookStudent({
       >
         {error}
       </div>
-    )
+    );
   }
 
   return (
@@ -173,7 +179,9 @@ export function GradeBookStudent({
                   ) : (
                     <p className="text-red-600 font-medium">Тема отсутствует</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">{entry.date}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {dayjs(entry.date, 'DD-MM-YYYY').format('D MMMM YYYY')}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -186,9 +194,9 @@ export function GradeBookStudent({
                       <button
                         className="w-9 h-9 flex items-center justify-center rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          setActiveDate(entry.date)
-                          setShowModal(true)
+                          e.stopPropagation();
+                          setActiveDate(entry.date);
+                          setShowModal(true);
                         }}
                       >
                         +
@@ -199,8 +207,8 @@ export function GradeBookStudent({
                     <button
                       className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 font-medium hover:bg-red-200 transition"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        handlePayClick(entry.date, entry.sessionId)
+                        e.stopPropagation();
+                        handlePayClick(entry.date, entry.sessionId);
                       }}
                     >
                       Оплатить
@@ -264,9 +272,9 @@ export function GradeBookStudent({
               <button
                 className="px-4 py-2 border rounded-md font-medium"
                 onClick={() => {
-                  setShowModal(false)
-                  setLinkUrl('')
-                  setSelectedFile(null)
+                  setShowModal(false);
+                  setLinkUrl('');
+                  setSelectedFile(null);
                 }}
               >
                 Отмена
@@ -285,5 +293,5 @@ export function GradeBookStudent({
         </div>
       )}
     </div>
-  )
+  );
 }

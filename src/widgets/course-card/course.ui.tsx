@@ -16,7 +16,7 @@ export function CourseCard({ id, name, }) {
       <div className=' mt-3'>
         <Link
           className="bg-sky-500 flex items-center justify-center rounded-md my-2 text-white py-1"
-          to={`/student/subject/${id}`}
+          to={`/student/student-grade/${id}`}
         >
           Перейти
         </Link>
