@@ -1,4 +1,4 @@
-export { Button, Card, Badge, Dialog, Input, Select } from "./ui";
+export { Button, Card, Badge, Dialog, Input, CustomSelect } from "./ui";
 export {
   ScheduleExport,
   ScheduleFilters,

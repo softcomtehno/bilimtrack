@@ -52,12 +52,11 @@ export const SchedulePage: React.FC = () => {
     isLoading: schedulesLoading,
     refetch: refetchSchedules,
   } = schedulesQueries.useGetSchedules();
-  const { data: schedulesTeachers, isLoading: teachersLoading } =
+  const { data: schedulesTeachers } =
     schedulesTeachersQueries.useGetSchedulesTeachers();
   const { data: eduLvl } = schedulesQueries.useGetEducationLevels();
 
-  const { data: schedulesRooms, isLoading: classroomsLoading } =
-    schedulesRoomsQueryes.useGetSchedulesRooms();
+  const { data: schedulesRooms } = schedulesRoomsQueryes.useGetSchedulesRooms();
   const { data: lessonTimes } = useGetLessonTimes();
   const { data: lessonTypes } = useGetLessonTypes();
 

@@ -1,8 +1,8 @@
 import React from "react";
 import { WeekType, Teacher, Group, Classroom } from "@/shared/types";
-import { Select } from "../ui/Select";
 import { Button } from "../ui/Button";
 import { FilterX } from "lucide-react";
+import { CustomSelect } from "../ui";
 
 interface ScheduleFiltersProps {
   weekType: WeekType | "Обе";
@@ -70,7 +70,7 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         <div className="flex gap-4 items-end">
           {eduLvl?.length > 0 && (
             <div className="w-full sm:w-48 flex">
-              <Select
+              <CustomSelect
                 label="Уровни образования"
                 options={(eduLvl || []).map((lvl) => ({
                   value: lvl.id,
@@ -85,7 +85,7 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
             </div>
           )}
 
-          <Select
+          <CustomSelect
             label="Курс"
             options={courses.map((course) => ({
               value: String(course.id),
@@ -102,7 +102,7 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         </div>
 
         <div className="w-full sm:w-48">
-          <Select
+          <CustomSelect
             label="Группа"
             options={displayGroups.map((group) => ({
               value: group.id,
@@ -115,7 +115,7 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         </div>
 
         <div className="w-full sm:w-48">
-          <Select
+          <CustomSelect
             label="Тип недели"
             options={[
               { value: "Обе", label: "Все недели" },
@@ -129,7 +129,7 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         </div>
 
         <div className="w-full sm:w-64">
-          <Select
+          <CustomSelect
             label="Преподаватель"
             options={teachers.map((teacher) => ({
               value: teacher.id,
@@ -142,7 +142,7 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
         </div>
 
         <div className="w-full sm:w-48">
-          <Select
+          <CustomSelect
             label="Аудитория"
             options={classrooms.map((classroom) => ({
               value: classroom.id,
