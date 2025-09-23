@@ -6,40 +6,40 @@ const Contact: React.FC = () => {
     {
       icon: <MapPin className="w-5 h-5" />,
       title: "Адрес",
-      info: "г. Бишкек, ул. Учебная 1, УК МУИТ"
+      info: "г. Бишкек, ул. Анкара 1/17, УК МУИТ"
     },
     {
       icon: <Phone className="w-5 h-5" />,
-      title: "Телефон",
-      info: "+996 (312) 12-34-56"
+      title: "Telegram",
+      info: "@maksat_kanybekov"
     },
-    {
-      icon: <Mail className="w-5 h-5" />,
-      title: "Email",
-      info: "innovation@muit.kg"
-    },
-    {
-      icon: <Globe className="w-5 h-5" />,
-      title: "Веб-сайт",
-      info: "www.muit.kg"
-    }
+    // {
+    //   icon: <Mail className="w-5 h-5" />,
+    //   title: "Email",
+    //   info: "innovation@muit.kg"
+    // },
+    // {
+    //   icon: <Globe className="w-5 h-5" />,
+    //   title: "Веб-сайт",
+    //   info: "www.muit.kg"
+    // }
   ];
 
-  const socialLinks = [
-    { icon: <Github className="w-5 h-5" />, url: "#", label: "GitHub" },
-    { icon: <Linkedin className="w-5 h-5" />, url: "#", label: "LinkedIn" },
-    { icon: <Twitter className="w-5 h-5" />, url: "#", label: "Twitter" },
-    { icon: <Globe className="w-5 h-5" />, url: "#", label: "Website" }
-  ];
+  // const socialLinks = [
+  //   { icon: <Github className="w-5 h-5" />, url: "#", label: "GitHub" },
+  //   { icon: <Linkedin className="w-5 h-5" />, url: "#", label: "LinkedIn" },
+  //   { icon: <Twitter className="w-5 h-5" />, url: "#", label: "Twitter" },
+  //   { icon: <Globe className="w-5 h-5" />, url: "#", label: "Website" }
+  // ];
 
   return (
     <footer className="py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23ffffff%22 fill-opacity=%220.05%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-16 mb-16">
-          <div>
-            <div className="mb-8">
+        <div className=" ">
+          <div className='flex gap-10 items-center'>
+            <div className="mb-8 w-[500px]">
               <h3 className="text-3xl font-bold text-white mb-4">
                 Свяжитесь с нами
               </h3>
@@ -49,14 +49,14 @@ const Contact: React.FC = () => {
               </p>
             </div>
             
-            <div className="space-y-6">
+            <div className="flex flex-col gap-5">
               {contactInfo.map((item, index) => (
                 <div key={index} className="flex items-start space-x-4">
                   <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-blue-400">
                     {item.icon}
                   </div>
                   <div>
-                    <h4 className="text-white font-medium mb-1">{item.title}</h4>
+                    <h4 className="text-white font-medium">{item.title}</h4>
                     <p className="text-slate-300">{item.info}</p>
                   </div>
                 </div>
@@ -64,7 +64,7 @@ const Contact: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+          {/* <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
             <h4 className="text-xl font-semibold text-white mb-6">Отправить сообщение</h4>
             
             <form className="space-y-6">
@@ -109,19 +109,19 @@ const Contact: React.FC = () => {
                 <span>Отправить сообщение</span>
               </button>
             </form>
-          </div>
+          </div> */}
         </div>
         
         <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <div className="flex items-center space-x-6">
               <div>
-                <h4 className="text-white font-semibold mb-1">Центр инноваций УК МУИТ</h4>
+                <h4 className="text-white font-semibold mb-1">Центр инноваций   УК МУИТ</h4>
                 <p className="text-slate-300 text-sm">Powered by OurEra Soft</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
@@ -134,11 +134,11 @@ const Contact: React.FC = () => {
                   {social.icon}
                 </a>
               ))}
-            </div>
+            </div> */}
           </div>
           
           <div className="mt-8 text-center text-slate-400 text-sm">
-            <p>&copy; 2024 Центр инноваций и программных разработок УК МУИТ. Все права защищены.</p>
+            <p>&copy; 2025 Центр инноваций и программных разработок УК МУИТ. Все права защищены.</p>
           </div>
         </div>
       </div>

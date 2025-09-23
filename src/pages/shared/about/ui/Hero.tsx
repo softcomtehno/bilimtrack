@@ -35,10 +35,13 @@ const Hero: React.FC = () => {
           <span className="text-4xl md:text-5xl font-semibold text-slate-700">УК МУИТ</span>
         </h1>
         
-        <p className="text-xl md:text-2xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-          Создаем образовательные технологии будущего. Разрабатываем инновационные решения 
-          для цифровой трансформации университетского образования.
-        </p>
+        <div className="flex justify-center items-center gap-1 my-7 ">
+          <img src="images/soft.png" className='h-10 w-10 rounded-full' alt="" />
+          <p className='font-medium leading-5'>
+          Powered by <br />
+          OurEra Soft
+          </p>
+        </div>
         
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-16">
           <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
