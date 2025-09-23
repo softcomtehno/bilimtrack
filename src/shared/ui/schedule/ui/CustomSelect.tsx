@@ -15,7 +15,7 @@ interface SelectProps
   hideEmptyOption?: boolean;
 }
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+export const CustomSelect = forwardRef<HTMLSelectElement, SelectProps>(
   (
     { className, label, error, options, onChange, hideEmptyOption, ...props },
     ref
@@ -65,4 +65,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   }
 );
 
-Select.displayName = "Select";
+CustomSelect.displayName = "CustomSelect";

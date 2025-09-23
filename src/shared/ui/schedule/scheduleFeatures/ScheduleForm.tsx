@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   LessonType,
-  WeekType,
   ScheduleItem,
   Teacher,
   Group,
@@ -14,13 +13,15 @@ import {
   DEFAULT_TIME_SLOTS,
   checkScheduleConflicts,
 } from "@/shared/lib/utils";
-import { Select } from "../ui/Select";
+import { CustomSelect } from "../ui/CustomSelect";
 import { Button } from "../ui/Button";
 import { Dialog } from "../ui/Dialog";
 import {
   useGetSubjects,
   useGetLessonTypes,
 } from "@/entities/schedule/schedules/schedules.queries";
+
+import Select from "react-select";
 
 interface ScheduleFormProps {
   isOpen: boolean;
@@ -257,27 +258,9 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className="grid grid-cols-2 gap-4">
-          {/* <div>
-            <Controller
-              name="educationLevelId"
-              control={control}
-              rules={{ required: "Обязательное поле" }}
-              render={({ field }) => (
-                <Select
-                  label="Уровень образования"
-                  options={eduLevels?.map((lvl) => ({
-                    value: String(lvl.id),
-                    label: lvl.name,
-                  }))}
-                  error={errors.educationLevelId?.message}
-                  {...field}
-                />
-              )}
-            />
-          </div> */}
           {eduLevels?.length > 0 && (
             <div className="w-full sm:w-48 flex">
-              <Select
+              <CustomSelect
                 label="Уровни образования"
                 options={(eduLevels || []).map((lvl) => ({
                   value: lvl.id,
@@ -287,7 +270,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
                 onChange={(value) =>
                   setSelectedEduLevelId?.(value || undefined)
                 }
-                // hideEmptyOption
               />
             </div>
           )}
@@ -298,7 +280,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
-                <Select
+                <CustomSelect
                   label="Курс"
                   options={filteredCourses.map((course) => ({
                     value: String(course.id),
@@ -312,61 +294,131 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           </div>
 
           <div>
+            <span>Преподаватель</span>
             <Controller
               name="teacherId"
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
                 <Select
-                  label="Преподаватель"
+                  {...field}
                   options={teachers.map((teacher) => ({
                     value: teacher.id,
                     label: teacher.name,
                   }))}
-                  error={errors.teacherId?.message}
-                  {...field}
+                  isSearchable
+                  isClearable
+                  placeholder="Выберите преподавателя..."
+                  className="basic-single-select"
+                  classNamePrefix="select"
+                  onChange={(selectedOption) => {
+                    field.onChange(selectedOption ? selectedOption.value : "");
+                  }}
+                  value={
+                    field.value
+                      ? teachers.find((t) => t.id === field.value)
+                        ? {
+                            value: field.value,
+                            label:
+                              teachers.find((t) => t.id === field.value)
+                                ?.name || "",
+                          }
+                        : null
+                      : null
+                  }
                 />
               )}
             />
+            {errors.teacherId && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.teacherId.message}
+              </p>
+            )}
           </div>
 
           <div>
+            <span>Предмет</span>
             <Controller
               name="subjectId"
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
                 <Select
-                  label="Предмет"
-                  options={availableSubjects.map((subject, idx) => ({
+                  {...field}
+                  options={availableSubjects.map((subject) => ({
                     value: subject.id,
                     label: subject.name,
-                    key: subject.id || String(idx),
                   }))}
-                  error={errors.subjectId?.message}
-                  {...field}
+                  isSearchable
+                  isClearable
+                  placeholder="Выберите предмет..."
+                  className="basic-single-select"
+                  classNamePrefix="select"
+                  onChange={(selectedOption) => {
+                    field.onChange(selectedOption ? selectedOption.value : "");
+                  }}
+                  value={
+                    field.value
+                      ? availableSubjects.find((s) => s.id === field.value)
+                        ? {
+                            value: field.value,
+                            label:
+                              availableSubjects.find(
+                                (s) => s.id === field.value
+                              )?.name || "",
+                          }
+                        : null
+                      : null
+                  }
                 />
               )}
             />
+            {errors.subjectId && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.subjectId.message}
+              </p>
+            )}
           </div>
 
           <div>
+            <span>Аудитория</span>
             <Controller
               name="classroomId"
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
                 <Select
-                  label="Аудитория"
+                  {...field}
                   options={classrooms.map((classroom) => ({
                     value: classroom.id,
                     label: `${classroom.name} (${classroom.type}, ${classroom.capacity} мест)`,
                   }))}
-                  error={errors.classroomId?.message}
-                  {...field}
+                  isSearchable
+                  isClearable
+                  placeholder="Выберите аудиторию..."
+                  className="basic-single-select"
+                  classNamePrefix="select"
+                  onChange={(selectedOption) => {
+                    field.onChange(selectedOption ? selectedOption.value : "");
+                  }}
+                  value={
+                    field.value
+                      ? classrooms.find((c) => c.id === field.value)
+                        ? {
+                            value: field.value,
+                            label: `${classrooms.find((c) => c.id === field.value)?.name} (${classrooms.find((c) => c.id === field.value)?.type}, ${classrooms.find((c) => c.id === field.value)?.capacity} мест)`,
+                          }
+                        : null
+                      : null
+                  }
                 />
               )}
             />
+            {errors.classroomId && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.classroomId.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -375,7 +427,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
-                <Select
+                <CustomSelect
                   label="Тип занятия"
                   options={(availableLessonTypes as any[]).map((type, idx) =>
                     typeof type === "string"
@@ -399,7 +451,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
-                <Select
+                <CustomSelect
                   label="День недели"
                   options={DAYS_OF_WEEK.map((day) => ({
                     value: day,
@@ -417,7 +469,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
-                <Select
+                <CustomSelect
                   label="Время"
                   options={DEFAULT_TIME_SLOTS.map((slot) => ({
                     value: slot,
@@ -435,7 +487,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
               control={control}
               rules={{ required: "Обязательное поле" }}
               render={({ field }) => (
-                <Select
+                <CustomSelect
                   label="Тип недели"
                   options={[
                     { value: "Числитель", label: "Числитель" },
@@ -450,34 +502,50 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           </div>
         </div>
 
-        <div className="col-span-2 mt-4">
+        <div className="col-span-2 mt-4 h-44">
           <label
             className="block text-sm font-medium text-gray-700 mb-1"
-            htmlFor="group-checkbox-list"
+            htmlFor="group-select"
           >
             Группы
           </label>
-          <div
-            className="grid grid-cols-3 gap-2 border border-gray-300 rounded-md p-3"
-            id="group-checkbox-list"
-          >
-            {filteredGroups.map((group) => (
-              <div key={group.id} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={`group-${group.id}`}
-                  value={group.id}
-                  className="checkbox"
-                  {...register("groupIds", {
-                    required: "Выберите хотя бы одну группу",
-                  })}
-                />
-                <label htmlFor={`group-${group.id}`} className="ml-2 text-sm">
-                  {group.name} ({group.students} чел.)
-                </label>
-              </div>
-            ))}
-          </div>
+          <Controller
+            name="groupIds"
+            control={control}
+            rules={{
+              required: "Выберите хотя бы одну группу",
+            }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={filteredGroups.map((group) => ({
+                  value: group.id,
+                  label: `${group.name} (${group.students} чел.)`,
+                }))}
+                isMulti
+                isClearable
+                placeholder="Выберите группы..."
+                className="basic-multi-select"
+                classNamePrefix="select"
+                onChange={(selectedOptions) => {
+                  const ids = selectedOptions
+                    ? selectedOptions.map((option: any) => option.value)
+                    : [];
+                  field.onChange(ids); // 👈 СИНХРОНИЗИРУЕМ С react-hook-form
+                }}
+                value={
+                  field.value
+                    ? filteredGroups
+                        .filter((g) => field.value.includes(g.id))
+                        .map((g) => ({
+                          value: g.id,
+                          label: `${g.name} (${g.students} чел.)`,
+                        }))
+                    : []
+                }
+              />
+            )}
+          />
           {errors.groupIds && (
             <p className="mt-1 text-sm text-red-500">
               {errors.groupIds.message}
@@ -502,9 +570,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           <Button variant="outline" onClick={onClose}>
             Отмена
           </Button>
-          <Button type="submit" disabled={conflicts.length > 0}>
-            {editItem ? "Сохранить" : "Добавить"}
-          </Button>
+          <Button type="submit">{editItem ? "Сохранить" : "Добавить"}</Button>
         </div>
       </form>
     </Dialog>

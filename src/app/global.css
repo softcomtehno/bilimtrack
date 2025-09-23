@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 * {
-  font-family: 'Jost';
+  font-family: "Jost";
 }
 
 .default-slider .swiper-pagination-bullet {
@@ -61,4 +61,62 @@
 
 .ag-theme-alpine .ag-row-hover {
   background-color: #ebf8ff !important; /* Tailwind: blue-100 */
+}
+
+/* globals.css */
+.select {
+  font-size: 14px;
+}
+
+.select__control {
+  border-color: #d1d5db !important;
+  box-shadow: none !important;
+  min-height: 40px !important;
+  cursor: pointer;
+}
+
+.select__single-value {
+  color: #1f2937 !important;
+  font-size: 14px !important;
+}
+
+.select__input {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #1f2937 !important;
+}
+
+.select__placeholder {
+  color: #9ca3af !important;
+  font-size: 14px !important;
+}
+
+.select__menu-list {
+  max-height: 200px !important;
+}
+
+.select__option {
+  cursor: pointer;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  color: #1f2937 !important;
+}
+
+.select__option--is-focused {
+  background-color: #f9fafb !important;
+}
+
+.select__option--is-selected {
+  background-color: #e0e7ff !important;
+  color: #4f46e5 !important;
+}
+
+.select__clear-indicator,
+.select__dropdown-indicator {
+  color: #6b7280 !important;
+}
+
+.select__clear-indicator:hover,
+.select__dropdown-indicator:hover {
+  color: #374151 !important;
 }
