@@ -9,14 +9,14 @@ import {
 
 export default function ScoreMemo() {
   return (
-    <Accordion  className="w-full shadow-none border" >
+    <Accordion  className="w-full shadow-none rounded" >
       <AccordionItem
-      className="w-full p-2 border rounded-lg "
+      className="w-full p-2 rounded  "
         key="memo"
         aria-label="Памятка"
         title="📌 Памятка по системе оценивания"
       >
-        <div className="flex flex-col gap-4 text-slate-700">
+        <div className="flex flex-col rounded gap-4 text-slate-700">
           <div className="flex items-start gap-3">
             <CheckCircle className="w-6 h-6 text-green-600 shrink-0" />
             <p>
