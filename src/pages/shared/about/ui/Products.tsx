@@ -39,7 +39,7 @@ const Products: React.FC = () => {
         'BilimTrack - это комплексная система управления образовательным процессом, которая позволяет отслеживать успеваемость студентов, их активность и мотивировать к обучению.',
       icon: <Monitor className="w-10 h-10" />,
       color: 'from-blue-500 to-blue-600',
-      url: 'https://bilimtrack.example.com',
+      url: 'https://bilimtrack.makalabox.com',
       features: [
         'Учет успеваемости',
         'Система мотивации',
@@ -113,7 +113,6 @@ const Products: React.FC = () => {
     },
   ];
 
-  // вычисляем линии при изменении размеров
   useEffect(() => {
     const updateLines = () => {
       if (!bilimRef.current || !containerRef.current) return;
@@ -198,13 +197,12 @@ const Products: React.FC = () => {
               {products[0].name}
             </h3>
             <p className="text-slate-200 mb-4">{products[0].description}</p>
-            <a
-              href={products[0].url}
-              target="_blank"
+            <button onClick={() => setSelectedProduct(products[0])}
+              
               className="inline-flex items-center px-4 py-2 bg-white/20 rounded-lg text-white hover:bg-white/30"
             >
               Подробнее <ExternalLink className="w-4 h-4 ml-2" />
-            </a>
+            </button>
           </div>
         </div>
 
@@ -228,7 +226,7 @@ const Products: React.FC = () => {
                 onClick={() => setSelectedProduct(product)}
                 className="inline-flex items-center px-3 py-1 bg-white/20 rounded-lg text-white hover:bg-white/30 text-sm"
               >
-                Перейти <ExternalLink className="w-4 h-4 ml-1" />
+                Подробнее  <ExternalLink className="w-4 h-4 ml-1" />
               </button>
             </div>
           ))}

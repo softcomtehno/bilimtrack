@@ -1,5 +1,5 @@
-import { Button, DatePicker } from '@heroui/react'
-import { parseDate } from '@internationalized/date'
+import { Button, DatePicker } from '@heroui/react';
+import { parseDate } from '@internationalized/date';
 
 export function SessionControls({
   selectedCustomDate,
@@ -24,13 +24,9 @@ export function SessionControls({
         <div className="flex flex-row-reverse gap-2 items-center w-full">
           <DatePicker
             label="Выберите дату"
-            value={
-              selectedCustomDate
-                ? parseDate(selectedCustomDate) // строку -> DateValue
-                : null
-            }
+            value={selectedCustomDate ? parseDate(selectedCustomDate) : null}
             onChange={(date) => {
-              setSelectedCustomDate(date ? date.toString() : '')
+              setSelectedCustomDate(date ? date.toString() : '');
             }}
             className="w-48 r-lg:w-full"
           />
@@ -48,5 +44,5 @@ export function SessionControls({
 
       <QRGenerator groupId={groupId} subjectId={subjectId} />
     </div>
-  )
+  );
 }

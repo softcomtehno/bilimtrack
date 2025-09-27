@@ -1,29 +1,29 @@
 import React from 'react';
-import { BookOpen, Users, Zap, Target, Award, Rocket } from 'lucide-react';
+import { BookOpen, Users, Zap, Target, Award, Rocket, Lightbulb } from 'lucide-react';
 
 const About: React.FC = () => {
-  const features = [
-    {
-      icon: <BookOpen className="w-8 h-8 text-blue-600" />,
-      title: "Образовательные технологии",
-      description: "Создаем инновационные решения для современного образования"
-    },
-    {
-      icon: <Users className="w-8 h-8 text-purple-600" />,
-      title: "Командная работа",
-      description: "Объединяем лучших специалистов для достижения общих целей"
-    },
-    {
-      icon: <Zap className="w-8 h-8 text-cyan-600" />,
-      title: "Инновационный подход",
-      description: "Применяем передовые технологии в разработке продуктов"
-    }
-  ];
+const features = [
+  {
+    icon: <BookOpen className="w-8 h-8 text-blue-600" />,
+    title: "Образовательные технологии",
+    description: "Создаем инновационные решения для современного образования"
+  },
+  {
+    icon: <Lightbulb className="w-8 h-8 text-yellow-600" />,
+    title: "Креативные идеи",
+    description: "Генерируем уникальные идеи для реализации сложных проектов"
+  },
+  {
+    icon: <Zap className="w-8 h-8 text-cyan-600" />,
+    title: "Инновационный подход",
+    description: "Применяем передовые технологии в разработке продуктов"
+  }
+];
 
   const stats = [
     { number: "5+", label: "Активных проектов" },
-    { number: "10+", label: "Участников команды" },
-    { number: "3", label: "Года развития" },
+    { number: "5", label: "Участников команды" },
+
     { number: "1000+", label: "Пользователей" }
   ];
 
@@ -65,7 +65,7 @@ const About: React.FC = () => {
             </div>
           ))}
         </div>
-        
+{/*         
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 rounded-3xl p-8 md:p-12 text-white">
           <div className="text-center mb-8">
             <Award className="w-12 h-12 mx-auto mb-4 opacity-90" />
@@ -85,7 +85,7 @@ const About: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );
